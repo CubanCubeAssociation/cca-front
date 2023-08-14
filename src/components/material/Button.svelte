@@ -9,10 +9,13 @@
   export let file: boolean = false;
   export let tabindex = 0;
   export let ariaLabel = '';
+  export let disabled = false;
   let cl = "";
   export { cl as class };
 
   function handleClick(e: MouseEvent) {
+    if ( disabled ) return;
+
     dispatch('click', e);
 
     if ( file ) {
@@ -36,12 +39,17 @@
 
     hover:shadow-lg
   ` + (flat ? ' shadow-none px-2 py-1 ' : '') + (cl || ' hover:bg-blue-400 hover:bg-opacity-90 ')}
+  aria-disabled={ disabled } {disabled}
 >
   <slot />
 </button>
 
-<style>
+<style lang="postcss">
   button {
-    outline-color: transparent;
+    @apply outline-transparent
+  }
+
+  button[disabled] {
+    @apply bg-gray-200 text-gray-400 pointer-events-none;
   }
 </style>

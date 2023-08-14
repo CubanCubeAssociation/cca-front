@@ -21,6 +21,11 @@
   function mouseenter() { resize(); isVisible = true; }
   function mouseleave() { isVisible = false; }
 
+  function isRoot(e: HTMLElement) {
+    return e == document.getRootNode().childNodes[1]
+      || e.hasAttribute('data-modal');
+  }
+
   function resize() {
     let ce = elem.getBoundingClientRect();
     let ct = tt.getBoundingClientRect();
@@ -28,10 +33,10 @@
     let _x = ce.x;
     let _y = ce.y;
 
-    let e1: HTMLElement | null | undefined = getStackingContext(elem);
+    let e1: HTMLElement = getStackingContext(elem);
     let cp = e1.getBoundingClientRect();
-    
-    if ( e1 != document.getRootNode().childNodes[1] ) {
+
+    if ( !isRoot(e1) ) {
       _x -= cp.x;
       _y -= cp.y;
     }
@@ -96,7 +101,7 @@
 
   .tooltip {
     @apply fixed bg-neutral-600 px-3 py-2 rounded-sm flex
-      transition-all text-neutral-200 items-center justify-center text-center;
+      transition-opacity text-neutral-200 items-center justify-center text-center;
     width: max-content;
     max-width: 35ch;
     transition-duration: var(--duration);

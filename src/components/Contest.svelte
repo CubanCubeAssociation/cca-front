@@ -81,9 +81,13 @@
       //   { icon: '/WCA/sqrs.svg', name: 'sqrs', scrambler: 'sqrs' },
       // ]
 
-      // console.log(c.solves);
-      
-      results = getStatsCFromContest(c.solves);
+      let solves = [1, 2, 3].map(n => {
+        let sv = { ...c.solves[0] };
+        sv.solve = n;
+        return sv;
+      });
+
+      results = getStatsCFromContest( solves );
       console.log("RESULTS: ", results);
 
     }).catch((e) => {
@@ -96,11 +100,9 @@
 {#if show404}
   ERROR
 {:else if contest}
-  <div class="card h-4 overflow-hidden">
+  <div class="card bg-white mt-20">
     <h1 class="text-2xl text-center">{ contest.name }</h1>
     
-    <Button>hola</Button>
-
     <ul class="action-container">
       <li class="action bg-green-600">
         <button on:click={ () => showSection(0) }>Información</button>
@@ -117,54 +119,40 @@
     </ul>
 
     <ul class="grid gap-4 info-list">
+      <!-- Lugar -->
       <li>
-        <span class="info-header">
-          <HomeIcon {size}/> Lugar:
-        </span>
+        <span class="info-header"> <HomeIcon {size}/> Lugar: </span>
         <span class="info-content">{ contest.place }</span>
       </li>
 
+      <!-- Fecha -->
       <li>
-        <span class="info-header">
-          <DateIcon {size}/>Fecha:
-        </span>
-        <span class="info-content">{
-          moment(contest.date).format('DD/MM/YYYY')
-        }</span>
+        <span class="info-header"> <DateIcon {size}/>Fecha: </span>
+        <span class="info-content">{ moment(contest.date).format('DD/MM/YYYY') }</span>
       </li>
 
+      <!-- Hora -->
       <li>
-        <span class="info-header">
-          <ClockIcon {size}/>Hora:
-        </span>
-        <span class="info-content">{
-          moment(contest.date).format('hh:mm a')
-        }</span>
+        <span class="info-header"> <ClockIcon {size}/>Hora: </span>
+        <span class="info-content">{ moment(contest.date).format('hh:mm a') }</span>
       </li>
 
       {#if before('running')}
+        <!-- Inscripcion (inicio) -->
         <li>
-          <span class="info-header">
-            <DateIcon {size}/>Inicio de inscripción:
-          </span>
-          <span class="info-content">{
-            moment(contest.inscriptionStart).format('DD/MM/YYYY')
-          }</span>
+          <span class="info-header"> <DateIcon {size}/>Inicio de inscripción: </span>
+          <span class="info-content">{ moment(contest.inscriptionStart).format('DD/MM/YYYY') }</span>
         </li>
       
+        <!-- Inscripcion (fin) -->
         <li>
-          <span class="info-header">
-            <DateIcon {size}/>Fin de inscripción:
-          </span>
-          <span class="info-content">{
-            moment(contest.inscriptionEnd).format('DD/MM/YYYY')
-          }</span>
+          <span class="info-header"> <DateIcon {size}/>Fin de inscripción: </span>
+          <span class="info-content">{ moment(contest.inscriptionEnd).format('DD/MM/YYYY') }</span>
         </li>
 
+        <!-- Costo -->
         <li>
-          <span class="info-header">
-            <CurrencyIcon {size}/>Costo de inscripción:
-          </span>
+          <span class="info-header"> <CurrencyIcon {size}/>Costo de inscripción: </span>
           <span class="info-content">{
             new Intl.NumberFormat('es-ES', {
               style: 'currency',
@@ -175,10 +163,9 @@
         </li>
       {/if}
 
+      <!-- Categorias -->
       <li class="flex-col w-full">
-        <span class="info-header">
-          <PuzzleIcon {size}/>Categorías:
-        </span>
+        <span class="info-header"> <PuzzleIcon {size}/>Categorías: </span>
         <span class="info-content category-container">
           {#each contest.categories as ct }
             <Tooltip position="top" text={ ct.name }>
@@ -188,76 +175,65 @@
         </span>
       </li>
 
+      <!-- Estado -->
       <li>
-        <span class="info-header">
-          <StateIcon {size}/>Estado:
-        </span>
+        <span class="info-header"> <StateIcon {size}/>Estado: </span>
         <span class="info-content">{ getStatus() }</span>
       </li>
 
+      <!-- Visible -->
       {#if checkProperty('visible')}
         <li>
-          <span class="info-header">
-            <EyeIcon {size}/>Visible:
-          </span>
-          <span class="info-content">
-            { contest.visible ? 'Si' : 'No' }
-          </span>
+          <span class="info-header"> <EyeIcon {size}/>Visible: </span>
+          <span class="info-content"> { contest.visible ? 'Si' : 'No' } </span>
         </li>
       {/if}
     </ul>
   </div>
 
-  <div class="card h-52 mb-6">
+  <div class="card bg-white mt-5 mb-20">
     <h1 class="text-2xl text-center">Resultados</h1>
 
-    {#each results as res}
-      <h2 class="text-xl text-center">{ res[0] }</h2>
+    {#each results as category}
+      <h2 class="text-xl text-center">{ category[0] }</h2>
 
-      <table class="table-auto w-full">
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Nombre</th>
-            <th>Ao5</th>
-            <th>Mejor</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each res[1] as users, p}
-            <tr>
-              <td>{ p + 1 }</td>
-              <td>{ users[0] }</td>
-              <td>
-                {
-                  timer(
-                    getAverageS(5, users[1])[4] || 0, true
-                  )
-                }
-              </td>
-              <td>
-                {
-                  timer(
-                    users[1].map(actualTime).sort()[0], true
-                  )
-                }
-              </td>
-            </tr>
-            <tr>
-              <td class="flex gap-2" colspan="4">
-                {#each users[1] as sv}
-                  <div class="solve"
-                    class:extra={ !sv.isExtra}
-                    data-extra={ -sv.extra }
-                  >
-                    { sTimer(sv, true) }
-                  </div>
-                {/each}
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
+      {#each category[1] as rounds}
+        <h3 class="text-xl text-center">Ronda { rounds[0] }</h3>
+        
+        <div class="table-wrapper rounded-md overflow-x-auto shadow-md">
+          <table class="table-auto text-center w-full stripped overflow-hidden">
+            <thead>
+              <tr>
+                <th>No.</th>
+                <th>Nombre</th>
+                <th>Ao5</th>
+                <th>Mejor</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each rounds[1] as users, p}
+                <tr>
+                  <td>{ p + 1 }</td>
+                  <td>{ users[0] }</td>
+                  <td> { timer( getAverageS(5, users[1])[4] || 0, true ) } </td>
+                  <td> { timer( users[1].map(actualTime).sort()[0], true ) } </td>
+                </tr>
+                <tr>
+                  <td colspan="4">
+                    <div class="flex gap-2 justify-center">
+                      {#each users[1] as sv}
+                        <div class="solve" class:extra={ sv.isExtra } data-number={ sv.isExtra ? -sv.extra : sv.solve }>
+                          { sTimer(sv, true) }
+                        </div>
+                      {/each}
+                    </div>
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/each}
     {/each}
   </div>
 
@@ -298,18 +274,22 @@
   }
 
   .solve {
-    @apply w-max p-1 rounded-md border-2 border-green-500
+    @apply relative w-max p-1 rounded-md border-2 border-green-500
       cursor-pointer hover:shadow-md transition-all duration-200;
   }
 
   .solve.extra {
-    @apply border-blue-500 relative;
+    @apply border-blue-500;
+  }
+
+  .solve::before {
+    @apply absolute -top-2 -right-2 bg-green-800 w-5 h-5
+      text-xs text-white grid place-items-center
+      rounded-full;
+    content: attr(data-number);
   }
 
   .solve.extra::before {
-    @apply absolute -top-2 -right-2 bg-blue-800 w-5 h-5
-      text-xs text-white grid place-items-center
-      rounded-full;
-    content: attr(data-extra);
+    @apply bg-blue-800;
   }
 </style>

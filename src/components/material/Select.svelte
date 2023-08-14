@@ -94,10 +94,6 @@
 </main>
 
 <style lang="postcss">
-  .select-container {
-    max-width: 13rem;
-  }
-
   .options.visible {
     opacity: 1;
     visibility: visible;

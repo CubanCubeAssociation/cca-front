@@ -10,17 +10,21 @@
   
   const dispatch = createEventDispatcher();
 
+  function checkReact(ch: Boolean) {
+    ch && dispatch('checked');
+    !ch && dispatch('unchecked');
+    dispatch('change', { value: ch });
+  }
+
   function toggle() {
     checked = !checked;
-    checked && dispatch('checked');
-    !checked && dispatch('unchecked');
-    dispatch('change', { value: checked });
   }
   
   onMount(() => {
     dispatch('change', { value: checked });
   });
 
+  $: checkReact(checked);
 </script>
 
 <div class="wrapper flex items-center" class:disabled={ disabled }>

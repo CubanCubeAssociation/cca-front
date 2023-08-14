@@ -7,7 +7,7 @@ export interface USER {
   email: string;
   password: string;
   ci: string;
-  sex: 'M' | 'F';
+  sex: SEX;
   username: string;
   province: string;
   municipality: string;
@@ -35,7 +35,7 @@ export interface LOGIN_DATA {
 }
 
 export interface CATEGORY {
-  id?: string;
+  id: string;
   name: string;
   icon: string;
   scrambler: string;
@@ -71,36 +71,26 @@ export const STATUS_ORDER: CONTEST_STATUS[] = [
   'pending', 'inscription', 'running', 'results', 'finished'
 ];
 
+export interface CONTESTANT {
+  user: USER;
+  categories: CATEGORY[];
+}
+
 export interface CONTEST {
   id: string;
   name: string;
   place: string;
-  date: Date;
-  inscriptionStart: Date;
-  inscriptionEnd: Date;
+  date: string;
+  inscriptionStart: string;
+  inscriptionEnd: string;
   inscriptionCost: number;
   categories: CATEGORY[];
-  contestants: USER[];
+  contestants: CONTESTANT[];
   visible: boolean;
   status: CONTEST_STATUS;
-  inscribedUsers: USER[];
   paidUsers: USER[];
   solves: SOLVE[];
-}
-
-export interface USER {
-  name: string;
-  email: string;
-  password: string;
-  ci: string;
-  sex: SEX;
-  username: string;
-  province: string;
-  municipality: string;
-  credit: number;
-  avatar: string;
-  role: ROLE;
-  isEmailVerified: boolean;
+  [key: string]: any;
 }
 
 export interface CONTEST_RESULT {

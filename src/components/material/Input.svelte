@@ -3,7 +3,7 @@
 
   const dispatch = createEventDispatcher();
  
-  type InputType = 'text' | 'number' | 'date';
+  type InputType = 'text' | 'number' | 'date' | 'datetime';
 
   export let placeholder = '';
   export let value: Date | string | number = '';
@@ -21,7 +21,7 @@
   
   let ref: HTMLInputElement;
 
-  $: type = ['text', 'number', 'date'].indexOf(type) === -1 ? 'text' : type;
+  $: type = ['text', 'number', 'date', 'datetime'].indexOf(type) === -1 ? 'text' : type;
   $: focus ? ref && tick().then(() => ref.focus()) : ref && tick().then(() => ref.blur());
   
   function keyup(e: KeyboardEvent) {
@@ -53,12 +53,17 @@
   {/if}
   
   {#if type === 'number'}
-  <input class={ inpClass || '' } {min} {max} {disabled} {step} type="number"
+  <input class={ inpClass || '' } {min} {max} {disabled} {step} type="number" bind:this={ref} 
     on:keydown={keydown} on:keyup={keyup} on:input={ input } on:change={ change } bind:value placeholder="">
   {/if}
 
   {#if type === 'date'}
-  <input class={ inpClass || '' } {disabled} type="date"
+  <input class={ inpClass || '' } {disabled} type="date" bind:this={ref}
+    on:keydown={keydown} on:keyup={keyup} on:input={ input } on:change={ change } bind:value placeholder="">
+  {/if}
+
+  {#if type === 'datetime'}
+  <input class={ inpClass || '' } {disabled} type="datetime-local" bind:this={ref}
     on:keydown={keydown} on:keyup={keyup} on:input={ input } on:change={ change } bind:value placeholder="">
   {/if}
   <span class="placeholder absolute top-0 mt-2 origin-left transition-all duration-200
@@ -75,16 +80,21 @@
   }
 
   input:not(:placeholder-shown) + .placeholder {
-    @apply -my-5 scale-75 text-gray-200;
+    @apply -my-5 scale-75 text-gray-400;
   }
 
   input:focus + .placeholder {
-    @apply -my-5 scale-75 text-white;
+    @apply -my-5 scale-75 text-gray-800;
   }
 
   .hidden-markers input::-webkit-outer-spin-button,
   .hidden-markers input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+  }
+
+  input[type^="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.8);
   }
 </style>

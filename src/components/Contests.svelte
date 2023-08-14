@@ -16,42 +16,44 @@
   onMount(() => {
     getContests().then(c => {
       contestResults = c;
-      contestResults.results = [
-        ...contestResults.results,
-        ...contestResults.results,
-        ...contestResults.results,
-      ]
+      // contestResults.results = [
+      //   ...contestResults.results,
+      //   ...contestResults.results,
+      //   ...contestResults.results,
+      // ]
     });
   });
 </script>
 
-<div class="card">
+<div class="card bg-white mt-20">
   <h1 class="text-center text-3xl">Competencias</h1>
 
-  <table class="table-auto text-center w-full mt-4">
-    <thead class="border-b border-black">
-      <tr>
-        <th>#</th>
-        <th>Nombre</th>
-        <th>Fecha</th>
-        <th>Hora</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each contestResults.results as r, pos}
-        <tr class="hover:bg-gray-200 cursor-pointer transition-all duration-100"
-          on:click={ () => navigate('/contests/' + r.name) }
-        >
-          <td class="text-black">{pos + 1}</td>
-          <td class="text-blue-600">{r.name}</td>
-          <td class="text-orange-600">
-            { moment( r.date ).format('DD/MM/YYYY') }
-          </td>
-          <td class="text-green-600">
-            { moment( r.date ).format('hh:mm a') }
-          </td>
+  <div class="table-wrapper rounded-md overflow-x-auto shadow-md">
+    <table class="table-auto text-center w-full stripped overflow-hidden">
+      <thead class="border-b border-black">
+        <tr>
+          <th>#</th>
+          <th>Nombre</th>
+          <th>Fecha</th>
+          <th>Hora</th>
         </tr>
-      {/each}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {#each contestResults.results as r, pos}
+          <tr class="hover:bg-gray-200 cursor-pointer transition-all duration-100"
+            on:click={ () => navigate('/contests/' + r.name) }
+          >
+            <td>{pos + 1}</td>
+            <td>{r.name}</td>
+            <td>
+              { moment( r.date ).format('DD/MM/YYYY') }
+            </td>
+            <td>
+              { moment( r.date ).format('hh:mm a') }
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
 </div>

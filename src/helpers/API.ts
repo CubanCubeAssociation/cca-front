@@ -51,6 +51,22 @@ export async function getContest(name: string): Promise<CONTEST> {
   return await ky.get(API + '/contests/' + name, commonAuth()).json();
 }
 
+export async function createContest(c: CONTEST): Promise<any> {
+  return await ky.post(API + '/contests', {
+    json: withoutID(c), ...commonAuth()
+  }).json();
+}
+
+export async function updateContest(c: CONTEST): Promise<any> {
+  return await ky.patch(API + '/contests/' + c.id, {
+    json: withoutID(c), ...commonAuth()
+  });
+}
+
+export async function removeContest(c: CONTEST): Promise<any> {
+  return await ky.delete(API + '/contests/' + c.id, commonAuth());
+}
+
 // USER
 export async function getUsers(): Promise<USER_RESULT> {
   return await ky.get(API + '/users', commonAuth()).json();
@@ -58,6 +74,10 @@ export async function getUsers(): Promise<USER_RESULT> {
 
 export async function getUser(id: string): Promise<USER> {
   return await ky.get(API + '/users/' + id, commonAuth()).json();
+}
+
+export async function searchUser(text: string, signal?: AbortSignal): Promise<USER[]> {
+  return await ky.get(API + '/users/search/' + text, { signal }).json();
 }
 
 export async function createUser(u: USER) {

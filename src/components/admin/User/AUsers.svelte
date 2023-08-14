@@ -86,26 +86,8 @@
     </Button>
   </div>
 
-  <!-- 
-    name: string;
-      avatar: string;
-      role: ROLE;
-    username: string;
-    ci: string;
-      sex: 'M' | 'F';
-      age: number;
-    email: string;
-      isEmailVerified: boolean;
-    province: string;
-    municipality: string;
-    credit: number;
-    
-    id: string;
-    password: string;
-  -->
-
   {#if users.length > 0}
-    <div class="table-wrapper rounded-md overflow-x-auto">
+    <div class="table-wrapper rounded-md overflow-x-auto shadow-md">
       <table class="table-auto stripped w-full overflow-hidden">
         <thead>
           <tr>

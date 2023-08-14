@@ -6,12 +6,12 @@
   import Navbar from "./components/Navbar.svelte";
   import ACategories from './components/admin/Category/ACategories.svelte';
   import ACategory from './components/admin/Category/ACategory.svelte';
-    import AUser from './components/admin/User/AUser.svelte';
-    import AUsers from './components/admin/User/AUsers.svelte';
-    import AContests from './components/admin/Contest/AContests.svelte';
-    import AContest from './components/admin/Contest/AContest.svelte';
-    import ASolve from './components/admin/Solve/ASolve.svelte';
-    import ASolves from './components/admin/Solve/ASolves.svelte';
+  import AUser from './components/admin/User/AUser.svelte';
+  import AUsers from './components/admin/User/AUsers.svelte';
+  import AContests from './components/admin/Contest/AContests.svelte';
+  import AContest from './components/admin/Contest/AContest.svelte';
+  import ASolve from './components/admin/Solve/ASolve.svelte';
+  import ASolves from './components/admin/Solve/ASolves.svelte';
 </script>
 
 <Router>
@@ -27,7 +27,7 @@
     <Route path="/admin/category/new" component={ ACategory }/>
     <Route path="/admin/category/:id" component={ ACategory }/>
     
-    <!-- Todo -->
+    <!-- Done -->
     <Route path="/admin/user" component={ AUsers }/>
     <Route path="/admin/user/new" component={ AUser }/>
     <Route path="/admin/user/:id" component={ AUser }/>
@@ -35,7 +35,7 @@
     <!-- Todo -->
     <Route path="/admin/contest" component={ AContests }/>
     <Route path="/admin/contest/new" component={ AContest }/>
-    <Route path="/admin/contest/:id" component={ AContest }/>
+    <Route path="/admin/contest/:name" component={ AContest }/>
     
     <!-- Todo -->
     <Route path="/admin/solve" component={ ASolves }/>
