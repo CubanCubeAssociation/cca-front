@@ -1,18 +1,21 @@
 <script lang="ts">
-  import Button from '@material/Button.svelte';
-  import Input from '@material/Input.svelte';
+  import { Label, Input, A, Button, Card } from 'flowbite-svelte';
   import { login } from '@helpers/API';
+  import { navigate, useLocation } from 'svelte-routing';
+    import { onMount } from 'svelte';
+    import { userStore } from '@stores/user';
+    import { tokenStore } from '@stores/token';
 
-  // let email = 'isaacvega1996@gmail.com';
-  // let password = 'Jamonada2015..';
   let email = 'krra@gmail.com';
   let password = 'Leonard123';
   let error = '';
+  let location = useLocation();
 
   async function _login() {
     try {
       await login(email, password);
-      console.log("LOGGED IN");
+      let ret = new URL(($location as any).href).searchParams.get('returnTo');
+      navigate(ret || '/');
     } catch(e) {
       error = 'Email o contraseña inválidos.'
     }
@@ -21,35 +24,36 @@
   function clearError() {
     error = '';
   }
+
+  onMount(() => {
+    if ( $userStore ) {
+      navigate('/');
+    }
+  });
 </script>
 
-<div class="card mt-0 w-full max-w-xs shadow-md grid
-  place-items-center bg-green-600 bg-opacity-70 text-white
-  rounded-md p-2 gap-6">
-  <h2 class="text-2xl">Iniciar sesión</h2>
+<Card class="mt-4 max-w-sm w-[calc(100%-2rem)] mx-auto mb-8">
+  <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+    Iniciar sesión
+  </h1>
   
   {#if error}
     <h3 class="text-lg my-0 text-red-700">{ error }</h3>
   {/if}
 
-  <Input
-    bind:value={email}
-    on:UENTER={ _login } on:input={ clearError }
-    placeholder="Email"/>
-
-  <Input
-    bind:value={password}
-    on:UENTER={ _login } on:input={ clearError }
-    placeholder="Contraseña"/>
-
-  <Button class="bg-white text-black" on:click={ _login }>Entrar</Button>
-</div>
-
-<style>
-  .card {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-</style>
+  <form class="mt-8 space-y-6" on:submit|preventDefault={ _login }>
+    <div>
+      <Label for="email" class="mb-2">Email</Label>
+      <Input on:input={ clearError } bind:value={ email } type="email" name="email" id="email" placeholder="name@company.com" required />
+    </div>
+    <div>
+      <Label for="password" class="mb-2">Contraseña</Label>
+      <Input on:input={ clearError } bind:value={ password } type="password" name="password" id="password" placeholder="••••••••" required />
+    </div>
+  
+    <div class="flex items-start">
+      <A href="/" aClass="ml-auto text-sm">Olvidó su contraseña?</A>
+    </div>
+    <Button type="submit">Entrar</Button>
+  </form>
+</Card>

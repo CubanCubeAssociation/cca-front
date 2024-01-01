@@ -1,15 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { navigate } from "svelte-routing";
+  import { Button, Card, Heading, Input, Label, Modal, Radio, Select } from 'flowbite-svelte';
   import { createUser, getUser, removeUser, updateUser } from "@helpers/API";
   import type { USER } from "@interfaces";
   import { PROVINCIAS, ROLES } from "@constants";
-  import Input from "@components/material/Input.svelte";
-  import Select from "@components/material/Select.svelte";
-  import Button from "@components/material/Button.svelte";
   import DeleteIcon from "@icons/Delete.svelte";
   import SaveIcon from "@icons/Send.svelte";
-  import UserIcon from '@icons/Account.svelte';
+  import ExclamationIcon from '@icons/Exclamation.svelte';
 
   export let id = 'new';
 
@@ -31,11 +29,7 @@
   };
 
   let municipios: string[] = [];
-  let dialog: HTMLDialogElement;
-
-  function closeModal() {
-    dialog.close();
-  }
+  let showModal = false;
 
   function exit() {
     navigate('/admin/user');
@@ -54,11 +48,15 @@
   }
 
   function deleteUser() {
-    closeModal();
-    
+    showModal = false;
+
     removeUser(user)
       .then(exit)
       .catch(err => console.log("ERROR: ", err));
+  }
+
+  function updateMunicipalities(province: string) {
+    municipios = (PROVINCIAS.filter(p => p.nombre === province)[0] || {}).municipios || [];
   }
 
   onMount(() => {
@@ -69,114 +67,97 @@
     if ( id != 'new' ) {
       getUser(id)
         .then((u) => {
+          if ( !u ) {
+            return navigate('/login');
+          }
           user = u;
-          console.log("USER: ", user);
           municipios = PROVINCIAS.find(p => p.nombre === u.province)?.municipios || [];
         })
         .catch(err => console.log("ERROR: ", err));
     }
   });
+
+  $: updateMunicipalities(user.province);
 </script>
 
-<div class="card bg-white mt-20">
-  <h1 class="text-3xl text-center">
-    { id === 'new' ? 'Crear' : 'Editar'} usuario
-  </h1>
+<Card class="mt-4 min-w-[calc(100%-2rem)] mx-auto">
+  <Heading class="text-3xl text-center">{ id === 'new' ? 'Crear' : 'Editar'} usuario</Heading>
 
-  <div class="grid gap-4">
-    <div class="field flex items-center justify-between">
-      {#if user.avatar}
-        <img src={ user.avatar } alt={ user.name } class="avatar">
-      {:else}
-        <div class="avatar">
-          <UserIcon size="100%"/>
-        </div>
-      {/if}
+  <form class="mt-8 grid gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2" on:submit|preventDefault={ save }>
+    <div>
+      <Label for="name" class="mb-2">Nombre</Label>
+      <Input bind:value={ user.name } type="text" id="name" placeholder="Nombre..." required />
     </div>
 
-    <div class="field flex items-center justify-between">
-      <span class="font-bold text-xl">Nombre: </span>
-      <Input bind:value={ user.name }/>
+    <div>
+      <Label for="email" class="mb-2">Email</Label>
+      <Input bind:value={ user.email } type="email" id="email" placeholder="email@email.com" required />
     </div>
 
-    <div class="field flex items-center justify-between">
-      <span class="font-bold text-xl">Email: </span>
-      <Input bind:value={ user.email }/>
-    </div>
-
-    <div class="field flex items-center justify-between">
-      <span class="font-bold text-xl">CI: </span>
-      <Input bind:value={ user.ci }/>
-    </div>
-
-    <div class="field flex items-center justify-between">
-      <span class="font-bold text-xl">Sexo: </span>
-      <Input bind:value={ user.sex }/>
-    </div>
-
-    <div class="field flex items-center justify-between">
-      <span class="font-bold text-xl">Usuario: </span>
-      <Input bind:value={ user.username }/>
-    </div>
-
-    <div class="field flex items-center justify-between">
-      <span class="font-bold text-xl">Provincia: </span>
-      <Select class="w-full"
-        bind:value={ user.province }
-        items={ PROVINCIAS }
-        label={ p => p.nombre }
-        transform={ p => p.nombre }
-        onChange={ p => municipios = p.municipios }/>
-    </div>
-
-    <div class="field flex items-center justify-between">
-      <span class="font-bold text-xl">Municipio: </span>
-      <Select class="w-full"
-        bind:value={ user.municipality }
-        items={ municipios }
-        label={ p => p }
-        transform={ p => p }/>
-    </div>
-
-    <div class="field flex items-center justify-between">
-      <span class="font-bold text-xl">Crédito: </span>
-      <Input bind:value={ user.credit }/>
-    </div>
-
-    <div class="field flex items-center justify-between">
-      <span class="font-bold text-xl">Rol: </span>
-      <Select class="w-full"
-        bind:value={ user.role }
-        items={ ROLES } label={ r => r.name }/>
-    </div>
-  </div>
-
-  <div class="flex justify-center gap-2 mt-4">
-    {#if id != 'new' }
-      <Button class="text-white bg-red-500" on:click={ () => dialog.showModal() }>
-        <DeleteIcon size="1.2rem"/> Eliminar
-      </Button>
+    {#if id === 'new'}
+      <div>
+        <Label for="password" class="mb-2">Contraseña</Label>
+        <Input bind:value={ user.password } type="password" name="password" id="password" placeholder="••••••••" required />
+      </div>
     {/if}
-    
-    <Button class="text-white" on:click={ save }>
-      <SaveIcon size="1.2rem"/> { id === 'new' ? 'Crear' : 'Guardar' }
-    </Button>
-  </div>
-</div>
 
+    <div>
+      <Label for="ci" class="mb-2">CI</Label>
+      <Input bind:value={ user.ci } type="text" id="ci" placeholder="########" required />
+    </div>
 
-<dialog
-  bind:this={ dialog }
-  class="bg-white text-current shadow-md rounded-md"
-  >
-  <h3 class="text-lg mb-4">¿Desea eliminar esta categoría?</h3>
-  <div class="flex gap-2 justify-center">
-    <Button class="text-white"
-      on:click={ closeModal }
-    >Cancelar</Button>
-    
-    <Button class="text-white bg-red-500" on:click={ deleteUser }>
-      <DeleteIcon size="1.2rem"/> Eliminar
-    </Button>
+    <div>
+      <Label for="sex" class="mb-2">Sexo</Label>
+      <div class="flex flex-wrap">
+        <Radio class="p-2 gap-1" bind:group={ user.sex } value="M">Masculino</Radio>
+        <Radio class="p-2 gap-1" bind:group={ user.sex } value="F">Femenino</Radio>
+      </div>
+    </div>
+
+    <div>
+      <Label for="username" class="mb-2">Usuario</Label>
+      <Input bind:value={ user.username } type="text" id="username" required />
+    </div>
+
+    <div>
+      <Label class="mb-2">Provincia</Label>
+      <Select items={ PROVINCIAS.map(p => ({ name: p.nombre, value: p.nombre })) } bind:value={ user.province }/>
+    </div>
+
+    <div>
+      <Label class="mb-2">Municipio</Label>
+      <Select items={ municipios.map(p => ({ name: p, value: p })) } bind:value={ user.municipality }/>
+    </div>
+
+    <div>
+      <Label for="credit" class="mb-2">Crédito</Label>
+      <Input bind:value={ user.credit } type="number" min={ 0 } id="credit" required />
+    </div>
+
+    <div>
+      <Label class="mb-2">Rol</Label>
+      <Select items={ ROLES } bind:value={ user.role }/>
+    </div>
+  
+    <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
+      {#if id != 'new' }
+        <Button color="red" class="gap-2" on:click={ () => showModal = true }> <DeleteIcon size="1.2rem"/> Eliminar </Button>
+      {/if}
+
+      <Button type="submit" class="gap-2"><SaveIcon size="1.2rem"/> { id === 'new' ? 'Crear' : 'Guardar' }</Button>
+    </div>
+  </form>
+</Card>
+
+<Modal bind:open={ showModal } autoclose outsideclose size="xs">
+  <div class="flex flex-col items-center justify-center">
+    <div class="icon-circle border-[.3rem] border-gray-400 dark:border-gray-200 w-[4rem] h-[4rem] rounded-full grid">
+      <ExclamationIcon class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
+    </div>
+    <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400 mt-2">¿Desea eliminar este usuario?</h3>
+    <div class="flex gap-2">
+      <Button on:click={ deleteUser } color="red"><DeleteIcon size="1.2rem"/> Eliminar</Button>
+      <Button color="alternative">Cancelar</Button>
+    </div>
   </div>
-</dialog>
+</Modal>

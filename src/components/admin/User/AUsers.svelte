@@ -4,12 +4,13 @@
   import type { USER } from "@interfaces";
   import { getUsers } from "@helpers/API";
 
-  import Button from "@material/Button.svelte";
+  // import Button from "@material/Button.svelte";
   import PlusIcon from '@icons/Plus.svelte';
   import UserIcon from '@icons/Account.svelte';
   import AdminIcon from '@icons/Shield.svelte';
   import DelegateIcon from '@icons/Sword.svelte';
-  import Tooltip from "@components/material/Tooltip.svelte";
+  import { Button, Card, Heading, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, A } from "flowbite-svelte";
+  // import Tooltip from "@components/material/Tooltip.svelte";
 
   const HEADER = "Usuarios";
   const ADD = "Añadir usuario";
@@ -60,6 +61,7 @@
   onMount(() => {
     getUsers()
       .then((res) => {
+        if ( !res ) return;
         users = res.results;
 
         if ( users.length ) {
@@ -77,142 +79,74 @@
 
 </script>
 
-<div class="card bg-white mt-20">
-  <h1 class="text-3xl text-center">{ HEADER }</h1>
+<Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
+  <Heading class="text-3xl text-center">{ HEADER }</Heading>
 
   <div class="actions">
-    <Button class="bg-green-500" on:click={ addUser }>
+    <Button on:click={ addUser }>
       <PlusIcon size="1.2rem"/> { ADD }
     </Button>
   </div>
 
-  <!-- 
-    name: string;
-      avatar: string;
-      role: ROLE;
-    username: string;
-    ci: string;
-      sex: 'M' | 'F';
-      age: number;
-    email: string;
-      isEmailVerified: boolean;
-    province: string;
-    municipality: string;
-    credit: number;
-    
-    id: string;
-    password: string;
-  -->
-
   {#if users.length > 0}
-    <div class="table-wrapper rounded-md overflow-x-auto">
-      <table class="table-auto stripped w-full overflow-hidden">
-        <thead>
-          <tr>
-            {#each columns as C}
-              {#if C.show }
-                <th>{ C.column }</th>
-              {/if}
-            {/each}
-          </tr>
-        </thead>
-        <tbody>
-          {#each users as u}
-
-            <tr>
-              <td
-                data-show={ columns[0].show }
-                data-cell="Nombre"
-                class="text-blue-800">
-                <Link to={"/admin/user/" + u.id } class="flex items-center gap-2">
-                  <!-- Avatar -->
-                  {#if u.avatar}
-                    <img src={ u.avatar } alt={ u.name } class="avatar">
-                  {:else}
-                    <div class="avatar">
-                      <UserIcon size="100%"/>
-                    </div>
-                  {/if}
-  
-                  <!-- Name -->
-                  { u.name }
-  
-                  <!-- Role -->
-                  {#if u.role === 'admin'}
-                    <Tooltip text="Administrador" position="top">
-                      <AdminIcon />
-                    </Tooltip>
-                    {:else if u.role === 'delegate'}
-                    <Tooltip text="Delegado" position="top">
-                      <DelegateIcon />
-                    </Tooltip>
-                  {/if}
-                </Link>
-              </td>
-              <td data-show={ columns[1].show } data-cell="Usuario">{ u.username }</td>
-              <td data-show={ columns[2].show } data-cell="CI">
-                { u.ci || "-" }
-  
-                <div>
-                  { u.sex } / { u.age } años
-                </div>
-              </td>
-              <td data-show={ columns[3].show } data-cell="Email">{ u.email || "-" }</td>
-              <td data-show={ columns[4].show } data-cell="Provincia">{ u.province || "-" }</td>
-              <td data-show={ columns[5].show } data-cell="Municipio">{ u.municipality || "-" }</td>
-              <td data-show={ columns[6].show } data-cell="Crédito">{ u.credit } CUP</td>
-            </tr>
+    <Table striped hoverable noborder={false} shadow>
+        <TableHead>
+          {#each columns as C}
+            {#if C.show }
+              <TableHeadCell>{ C.column }</TableHeadCell>
+            {/if}
           {/each}
-        </tbody>
-      </table>
-    </div>
+        </TableHead>
+
+        <TableBody>
+          {#each users as u}
+            <TableBodyRow>
+              {#if columns[0].show}
+                <TableBodyCell>
+                  <Link to={"/admin/user/" + u.id} class="flex gap-2 items-center">
+                    {#if u.avatar}
+                      <img src={ u.avatar } alt={ u.name } class="avatar">
+                    {:else}
+                      <div class="avatar">
+                        <UserIcon size="100%"/>
+                      </div>
+                    {/if}
+
+                    { u.name }
+                  </Link>
+                </TableBodyCell>
+              {/if}
+
+              {#if columns[1].show}
+                <TableBodyCell> { u.username } </TableBodyCell>
+              {/if}
+
+              {#if columns[2].show}
+                <TableBodyCell>
+                  { u.ci || "-" }
+                  <div> { u.sex } / { u.age } años </div>
+                </TableBodyCell>
+              {/if}
+
+               {#if columns[3].show} <TableBodyCell>{ u.email || "-" }</TableBodyCell> {/if}
+               {#if columns[4].show} <TableBodyCell>{ u.province || "-" }</TableBodyCell> {/if}
+               {#if columns[5].show} <TableBodyCell>{ u.municipality || "-" }</TableBodyCell> {/if}
+               {#if columns[6].show} <TableBodyCell>{ u.credit } CUP</TableBodyCell> {/if}
+            </TableBodyRow>
+          {/each}
+        </TableBody>
+      </Table>
 
     <div class="actions">
-      <Button class="bg-green-500" on:click={ addUser }>
+      <Button on:click={ addUser }>
         <PlusIcon size="1.2rem"/> { ADD }
       </Button>
     </div>
   {/if}
-</div>
+</Card>
 
 <style lang="postcss">
   .actions {
-    @apply flex justify-start text-white text-sm my-4;
-  }
-
-  td[data-cell="Usuario"] {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 15ch;
-    overflow: hidden;
-  }
-
-  td[data-show="false"] {
-    display: none;
-  }
-
-  @media (max-width: 650px) {
-    th {
-      display: none;
-    }
-
-    td {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
-
-    td[data-cell="Usuario"] {
-      max-width: 35ch;
-    }
-
-    td::before {
-      content: attr(data-cell) ": ";
-      display: flex;
-    }
-
-    td[data-cell="Nombre"]::before {
-      display: none;
-    }
+    @apply flex justify-start my-4;
   }
 </style>

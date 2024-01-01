@@ -6,8 +6,8 @@
   import { getContest } from "@helpers/API";
   import { actualTime, sTimer, timer } from "@helpers/timer";
   import { getAverageS, getStatsCFromContest } from "@helpers/statistics";
-  import Tooltip from "@material/Tooltip.svelte";
-  import Button from "@material/Button.svelte";
+  // import Tooltip from "@material/Tooltip.svelte";
+  // import Button from "@material/Button.svelte";
 
   // Icons
   import HomeIcon from '@icons/Home.svelte';
@@ -99,7 +99,7 @@
   <div class="card h-4 overflow-hidden">
     <h1 class="text-2xl text-center">{ contest.name }</h1>
     
-    <Button>hola</Button>
+    <!-- <Button>hola</Button> -->
 
     <ul class="action-container">
       <li class="action bg-green-600">
@@ -181,9 +181,9 @@
         </span>
         <span class="info-content category-container">
           {#each contest.categories as ct }
-            <Tooltip position="top" text={ ct.name }>
+            <!-- <Tooltip position="top" text={ ct.name }>
               <img class="category" src="{ ct.icon }" alt="{ ct.name }">
-            </Tooltip>
+            </Tooltip> -->
           {/each}
         </span>
       </li>

@@ -4,6 +4,7 @@
   import { navigate } from 'svelte-routing';
   import { getContests } from "@helpers/API";
   import type { CONTEST_RESULT } from "@interfaces";
+  import { Table, TableHead, TableHeadCell, Heading, Card, TableBody, TableBodyCell, TableBodyRow } from "flowbite-svelte";
 
   let contestResults: CONTEST_RESULT = {
     limit: 0,
@@ -25,10 +26,33 @@
   });
 </script>
 
-<div class="card">
-  <h1 class="text-center text-3xl">Competencias</h1>
+<Heading class="text-center text-3xl mt-4">Competencias</Heading>
 
-  <table class="table-auto text-center w-full mt-4">
+<Card class="mx-auto max-w-[60rem] mt-4">
+  <Table>
+    <TableHead>
+      <TableHeadCell>#</TableHeadCell>
+      <TableHeadCell>Nombre</TableHeadCell>
+      <TableHeadCell>Fecha</TableHeadCell>
+      <TableHeadCell>Hora</TableHeadCell>
+    </TableHead>
+
+    <TableBody>
+      {#each contestResults.results as r, pos}
+        <TableBodyRow>
+          <TableBodyCell>{pos + 1}</TableBodyCell>
+          <TableBodyCell>{r.name}</TableBodyCell>
+          <TableBodyCell>{ moment( r.date ).format('DD/MM/YYYY') }</TableBodyCell>
+          <TableBodyCell>{ moment( r.date ).format('hh:mm a') }</TableBodyCell>
+        </TableBodyRow>
+      {/each}
+    </TableBody>
+  </Table>
+</Card>
+
+<!-- <div class="card">  -->
+
+  <!-- <table class="table-auto text-center w-full mt-4">
     <thead class="border-b border-black">
       <tr>
         <th>#</th>
@@ -53,5 +77,5 @@
         </tr>
       {/each}
     </tbody>
-  </table>
-</div>
+  </table> -->
+<!-- </div> -->

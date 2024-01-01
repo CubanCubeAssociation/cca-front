@@ -3,8 +3,9 @@
   import { Link, navigate } from 'svelte-routing';
   import type { CATEGORY } from '@interfaces';
   import { getCategories } from '@helpers/API';
-  import Button from '@components/material/Button.svelte';
   import PlusIcon from '@icons/Plus.svelte';
+  import { Button, Card, Heading, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
+    import WcaCategory from '@components/wca/WCACategory.svelte';
   
   const HEADER = "Categorías";
   const ADD = "Añadir categoría";
@@ -18,57 +19,57 @@
   onMount(() => {
     getCategories()
       .then(res => {
+        if ( !res ) {
+          return;
+        }
         categories = res.results;
       })
-      .catch(err => console.log("ERROR: ", err));
+      .catch(err => console.dir(err));
   });
 </script>
 
-<div class="card bg-white mt-20">
-  <h1 class="text-3xl text-center">{ HEADER }</h1>
+<Card class="mt-4 max-w-lg w-[calc(100%-2rem)] mx-auto mb-8">
+  <Heading class="text-3xl text-center">{ HEADER }</Heading>
 
   <div class="actions">
-    <Button class="bg-green-500" on:click={ addCategory }>
+    <Button on:click={ addCategory }>
       <PlusIcon size="1.2rem"/> { ADD }
     </Button>
   </div>
 
-  <table class="table-auto w-full">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Ícono</th>
-        <th>Scrambler</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each categories as cat}
-        <tr>
-          <td class="text-blue-800">
-            <Link to={"/admin/category/" + cat.id }>
-              { cat.name }
-            </Link>
-          </td>
-          <td>
-            <img
-              class="category-img mx-auto"
-              src={ cat.icon } alt={ cat.name }>
-          </td>
-          <td>{ cat.scrambler }</td>
-        </tr>
-      {/each}
-    </tbody>
-  </table>
+  {#if categories.length > 0}
+    <Table striped hoverable noborder={false} shadow>
+        <TableHead>
+          <TableHeadCell>Nombre</TableHeadCell>
+          <TableHeadCell>Ícono</TableHeadCell>
+          <TableHeadCell>Scrambler</TableHeadCell>
+        </TableHead>
 
-  <div class="actions">
-    <Button class="bg-green-500" on:click={ addCategory }>
-      <PlusIcon size="1.2rem"/> { ADD }
-    </Button>
-  </div>
-</div>
+        <TableBody>
+          {#each categories as cat}
+            <TableBodyRow>
+              <TableBodyCell>
+                <Link to={"/admin/category/" + cat.id }> { cat.name } </Link>
+              </TableBodyCell>
+              <TableBodyCell>
+                <WcaCategory icon={ cat.scrambler }/>
+              </TableBodyCell>
+              <TableBodyCell>{ cat.scrambler }</TableBodyCell>
+            </TableBodyRow>
+          {/each}
+        </TableBody>
+      </Table>
+
+    <div class="actions">
+      <Button on:click={ addCategory }>
+        <PlusIcon size="1.2rem"/> { ADD }
+      </Button>
+    </div>
+  {/if}
+</Card>
 
 <style lang="postcss">
   .actions {
-    @apply flex justify-start text-white text-sm my-4;
+    @apply flex justify-start my-4;
   }
 </style>

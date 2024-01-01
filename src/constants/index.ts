@@ -5,87 +5,70 @@ export const API = 'http://localhost:3000/v1';
 
 export const ICONS: CATEGORY[] = [
   {
-    icon: '/WCA/222so.svg',
     name: '2x2x2',
     scrambler: '222so'
   },
   {
-    icon: '/WCA/333.svg',
     name: '3x3x3',
     scrambler: '333'
   },
   {
-    icon: '/WCA/333fm.svg',
     name: '3x3x3 FM',
     scrambler: '333fm'
   },
   {
-    icon: '/WCA/333ni.svg',
     name: '3x3x3 BF',
     scrambler: '333ni'
   },
   {
-    icon: '/WCA/333mbf.svg',
     name: '3x3x3 MBF',
     scrambler: '333mbf'
   },
   {
-    icon: '/WCA/333oh.svg',
     name: '3x3x3 OH',
     scrambler: '333oh'
   },
   {
-    icon: '/WCA/444bld.svg',
     name: '4x4x4 BLD',
     scrambler: '444bld'
   },
   {
-    icon: '/WCA/444wca.svg',
     name: '4x4x4',
     scrambler: '444wca'
   },
   {
-    icon: '/WCA/555wca.svg',
     name: '5x5x5',
     scrambler: '555wca'
   },
   {
-    icon: '/WCA/555bld.svg',
     name: '5x5x5 BLD',
     scrambler: '555bld'
   },
   {
-    icon: '/WCA/666wca.svg',
     name: '6x6x6',
     scrambler: '666wca'
   },
   {
-    icon: '/WCA/777wca.svg',
     name: '7x7x7',
     scrambler: '777wca'
   },
   {
-    icon: '/WCA/clkwca.svg',
     name: 'Clock',
     scrambler: 'clkwca'
   },
   {
-    icon: '/WCA/mgmp.svg',
     name: 'Megaminx',
     scrambler: 'mgmp'
   },
   {
-    icon: '/WCA/pyrso.svg',
     name: 'Pyraminx',
     scrambler: 'pyrso'
   },
   {
-    icon: '/WCA/skbso.svg',
     name: 'Skewb',
     scrambler: 'skbso'
   },
   {
-    icon: '/WCA/sqrs.svg',
     name: 'Square-1',
     scrambler: 'sqrs'
   },
