@@ -76,6 +76,15 @@ export interface CONTESTANT {
   categories: CATEGORY[];
 }
 
+export interface ROUND {
+  category: CATEGORY;
+  contestant: USER;
+  solves: SOLVE[];
+  round: number;
+  Ao5: number;
+  Mo3: number;
+}
+
 export interface CONTEST {
   id: string;
   name: string;
@@ -89,7 +98,7 @@ export interface CONTEST {
   visible: boolean;
   status: CONTEST_STATUS;
   paidUsers: USER[];
-  solves: SOLVE[];
+  solves: ROUND[];
   [key: string]: any;
 }
 

@@ -1,17 +1,16 @@
-import type { SOLVE } from "../interfaces";
+import type { ROUND, SOLVE } from "../interfaces";
 import { checkPath, createPath } from "./object";
 import { infinitePenalty, stringToMillis } from "./timer";
 
-export function getStatsCFromContest(solves: SOLVE[]) {
+export function getStatsCFromContest(solves: ROUND[]) {
   console.log("SOLVES: ", solves);
-
+  
   let mp = solves.reduce((acc, s) => {
     let ct = s.category.name;
     let rnd = s.round.toString();
-    let us = s.user.name;
+    let us = s.contestant.name;
 
     if ( !checkPath(acc, [ ct, rnd, us ], true) ) {
-      console.log( '!checkPath: ', [ ct, rnd, us ]);
       createPath(acc, [ ct, rnd, us ], [], true);
     }
     
@@ -71,4 +70,18 @@ export function getAverageS(n: number, arr: SOLVE[]): (number | null)[] {
       : stringToMillis(e.time)
     )
   );
+}
+
+export function contestAo5(arr: SOLVE[]): number {
+  let solves: SOLVE[] = [];
+
+  arr.sort((s1: SOLVE, s2: SOLVE) => {
+    return !s1.isExtra && s2.isExtra ? -1 : 0;
+  });
+
+  for (let i = 0, maxi = arr.length; i < maxi; i += 1) {
+    solves[ arr[i].solve - 1 ] = arr[i];
+  }
+
+  return getAverageS(5, solves)[4] || Infinity;
 }

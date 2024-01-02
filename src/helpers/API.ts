@@ -25,6 +25,11 @@ function withoutID(r: any): any {
   return res;
 }
 
+function map(obj: any, key: string, mapHandler: (...args: any[]) => any) {
+  obj[key] = obj[key].map(mapHandler);
+  return obj;
+}
+
 // AUTH
 export async function login(email: string, password: string): Promise<LOGIN_DATA> {
   let loginData: LOGIN_DATA = await ky.post(API + '/auth/login', {

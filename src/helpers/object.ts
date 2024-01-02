@@ -5,10 +5,8 @@ export function checkPath(obj: any, path: string[], useMap: boolean = false): bo
 
   for ( let i = 0, maxi = path.length; i < maxi; i += 1 ) {
     if ( useMap && tmp.has( path[i] ) ) {
-      console.log('useMap: ', path[i]);
       tmp = tmp.get( path[i] );
     } else if ( !useMap && Object.prototype.hasOwnProperty.call(tmp, path[i]) ) {
-      console.log('!useMap: ', path[i]);
       tmp = tmp[ path[i] ];
     } else {
       return false;

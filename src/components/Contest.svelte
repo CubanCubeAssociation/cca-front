@@ -2,13 +2,12 @@
   import { onMount } from "svelte";
   import moment from "moment";
   // @ts-ignore
-  import { STATUS_ORDER, type CONTEST, type CONTEST_STATUS } from "@interfaces";
+  import { STATUS_ORDER, type CONTEST, type CONTEST_STATUS, type SOLVE } from "@interfaces";
   import { getContest } from "@helpers/API";
-  import { actualTime, sTimer, timer } from "@helpers/timer";
-  import { getAverageS, getStatsCFromContest } from "@helpers/statistics";
+  import { actualTime, timer } from "@helpers/timer";
+  import { contestAo5, getStatsCFromContest } from "@helpers/statistics";
   import Tooltip from "@material/Tooltip.svelte";
-  import Button from "@material/Button.svelte";
-
+  
   // Icons
   import HomeIcon from '@icons/Home.svelte';
   import DateIcon from '@icons/Calendar.svelte';
@@ -17,6 +16,7 @@
   import PuzzleIcon from '@icons/Puzzle.svelte';
   import StateIcon from '@icons/StateMachine.svelte';
   import EyeIcon from '@icons/Eye.svelte';
+  import RoundView from "./RoundView.svelte";
 
   export let name: string;
 
@@ -25,7 +25,10 @@
   let contest: CONTEST;
   let section: number = 0;
   let results: any = [];
+  let showRound = false;
+  let roundData: { 0: string; 1: SOLVE[] } = [ '', [] ];
 
+  
   function before(state: CONTEST_STATUS) {
     let idx = STATUS_ORDER.indexOf(contest.status);
     let idx1 = STATUS_ORDER.indexOf(state);
@@ -81,13 +84,7 @@
       //   { icon: '/WCA/sqrs.svg', name: 'sqrs', scrambler: 'sqrs' },
       // ]
 
-      let solves = [1, 2, 3].map(n => {
-        let sv = { ...c.solves[0] };
-        sv.solve = n;
-        return sv;
-      });
-
-      results = getStatsCFromContest( solves );
+      results = getStatsCFromContest( c.solves );
       console.log("RESULTS: ", results);
 
     }).catch((e) => {
@@ -100,7 +97,7 @@
 {#if show404}
   ERROR
 {:else if contest}
-  <div class="card bg-white mt-20">
+  <div class="card bg-white mt-20 hidden">
     <h1 class="text-2xl text-center">{ contest.name }</h1>
     
     <ul class="action-container">
@@ -208,26 +205,17 @@
                 <th>Nombre</th>
                 <th>Ao5</th>
                 <th>Mejor</th>
+                <th>Peor</th>
               </tr>
             </thead>
             <tbody>
               {#each rounds[1] as users, p}
-                <tr>
+                <tr on:click={ () => { showRound = !!(roundData = users); } }>
                   <td>{ p + 1 }</td>
                   <td>{ users[0] }</td>
-                  <td> { timer( getAverageS(5, users[1])[4] || 0, true ) } </td>
+                  <td> { timer( contestAo5(users[1]) ) } </td>
                   <td> { timer( users[1].map(actualTime).sort()[0], true ) } </td>
-                </tr>
-                <tr>
-                  <td colspan="4">
-                    <div class="flex gap-2 justify-center">
-                      {#each users[1] as sv}
-                        <div class="solve" class:extra={ sv.isExtra } data-number={ sv.isExtra ? -sv.extra : sv.solve }>
-                          { sTimer(sv, true) }
-                        </div>
-                      {/each}
-                    </div>
-                  </td>
+                  <td> { timer( users[1].map(actualTime).sort().reverse()[0], true ) } </td>
                 </tr>
               {/each}
             </tbody>
@@ -240,6 +228,8 @@
 {:else}
   Loading...
 {/if}
+
+<RoundView round={ roundData } show={ showRound } on:close={ () => showRound = false }/>
 
 <style lang="postcss">
   .action-container {
@@ -271,25 +261,5 @@
 
   .category {
     @apply w-8 h-8;
-  }
-
-  .solve {
-    @apply relative w-max p-1 rounded-md border-2 border-green-500
-      cursor-pointer hover:shadow-md transition-all duration-200;
-  }
-
-  .solve.extra {
-    @apply border-blue-500;
-  }
-
-  .solve::before {
-    @apply absolute -top-2 -right-2 bg-green-800 w-5 h-5
-      text-xs text-white grid place-items-center
-      rounded-full;
-    content: attr(data-number);
-  }
-
-  .solve.extra::before {
-    @apply bg-blue-800;
   }
 </style>
