@@ -4,6 +4,7 @@
   import { navigate } from 'svelte-routing';
   import { getContests } from "@helpers/API";
   import type { CONTEST_RESULT } from "@interfaces";
+  import { Table, TableHead, TableHeadCell, Heading, Card, TableBody, TableBodyCell, TableBodyRow } from "flowbite-svelte";
 
   let contestResults: CONTEST_RESULT = {
     limit: 0,
@@ -25,35 +26,56 @@
   });
 </script>
 
-<div class="card bg-white mt-20">
-  <h1 class="text-center text-3xl">Competencias</h1>
+<Heading class="text-center text-3xl mt-4">Competencias</Heading>
 
-  <div class="table-wrapper rounded-md overflow-x-auto shadow-md">
-    <table class="table-auto text-center w-full stripped overflow-hidden">
-      <thead class="border-b border-black">
-        <tr>
-          <th>#</th>
-          <th>Nombre</th>
-          <th>Fecha</th>
-          <th>Hora</th>
+<Card class="mx-auto max-w-[60rem] mt-4">
+  <Table>
+    <TableHead>
+      <TableHeadCell>#</TableHeadCell>
+      <TableHeadCell>Nombre</TableHeadCell>
+      <TableHeadCell>Fecha</TableHeadCell>
+      <TableHeadCell>Hora</TableHeadCell>
+    </TableHead>
+
+    <TableBody>
+      {#each contestResults.results as r, pos}
+        <TableBodyRow>
+          <TableBodyCell>{pos + 1}</TableBodyCell>
+          <TableBodyCell>{r.name}</TableBodyCell>
+          <TableBodyCell>{ moment( r.date ).format('DD/MM/YYYY') }</TableBodyCell>
+          <TableBodyCell>{ moment( r.date ).format('hh:mm a') }</TableBodyCell>
+        </TableBodyRow>
+      {/each}
+    </TableBody>
+  </Table>
+</Card>
+
+<!-- <div class="card">  -->
+
+  <!-- <table class="table-auto text-center w-full mt-4">
+    <thead class="border-b border-black">
+      <tr>
+        <th>#</th>
+        <th>Nombre</th>
+        <th>Fecha</th>
+        <th>Hora</th>
+      </tr>
+    </thead>
+    <tbody>
+      {#each contestResults.results as r, pos}
+        <tr class="hover:bg-gray-200 cursor-pointer transition-all duration-100"
+          on:click={ () => navigate('/contests/' + r.name) }
+        >
+          <td class="text-black">{pos + 1}</td>
+          <td class="text-blue-600">{r.name}</td>
+          <td class="text-orange-600">
+            { moment( r.date ).format('DD/MM/YYYY') }
+          </td>
+          <td class="text-green-600">
+            { moment( r.date ).format('hh:mm a') }
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {#each contestResults.results as r, pos}
-          <tr class="hover:bg-gray-200 cursor-pointer transition-all duration-100"
-            on:click={ () => navigate('/contests/' + r.name) }
-          >
-            <td>{pos + 1}</td>
-            <td>{r.name}</td>
-            <td>
-              { moment( r.date ).format('DD/MM/YYYY') }
-            </td>
-            <td>
-              { moment( r.date ).format('hh:mm a') }
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
-</div>
+      {/each}
+    </tbody>
+  </table> -->
+<!-- </div> -->

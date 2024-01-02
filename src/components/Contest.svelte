@@ -4,10 +4,11 @@
   // @ts-ignore
   import { STATUS_ORDER, type CONTEST, type CONTEST_STATUS, type SOLVE } from "@interfaces";
   import { getContest } from "@helpers/API";
-  import { actualTime, timer } from "@helpers/timer";
-  import { contestAo5, getStatsCFromContest } from "@helpers/statistics";
-  import Tooltip from "@material/Tooltip.svelte";
-  
+  import { actualTime, sTimer, timer } from "@helpers/timer";
+  import { getAverageS, getStatsCFromContest } from "@helpers/statistics";
+  // import Tooltip from "@material/Tooltip.svelte";
+  // import Button from "@material/Button.svelte";
+
   // Icons
   import HomeIcon from '@icons/Home.svelte';
   import DateIcon from '@icons/Calendar.svelte';
@@ -100,6 +101,8 @@
   <div class="card bg-white mt-20 hidden">
     <h1 class="text-2xl text-center">{ contest.name }</h1>
     
+    <!-- <Button>hola</Button> -->
+
     <ul class="action-container">
       <li class="action bg-green-600">
         <button on:click={ () => showSection(0) }>Información</button>
@@ -165,9 +168,9 @@
         <span class="info-header"> <PuzzleIcon {size}/>Categorías: </span>
         <span class="info-content category-container">
           {#each contest.categories as ct }
-            <Tooltip position="top" text={ ct.name }>
+            <!-- <Tooltip position="top" text={ ct.name }>
               <img class="category" src="{ ct.icon }" alt="{ ct.name }">
-            </Tooltip>
+            </Tooltip> -->
           {/each}
         </span>
       </li>

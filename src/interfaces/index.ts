@@ -34,11 +34,13 @@ export interface LOGIN_DATA {
   tokens: TOKENS;
 }
 
+export type Scrambler = '222so' | '333' | '333fm' | '333ni' | '333mbf' | '333oh' | '444bld' | '444wca'
+  | '555wca' | '555bld' | '666wca' | '777wca' | 'clkwca' | 'mgmp' | 'pyrso' | 'skbso' | 'sqrs';
+
 export interface CATEGORY {
   id: string;
   name: string;
-  icon: string;
-  scrambler: string;
+  scrambler: Scrambler;
 }
 
 export enum PENALTY {

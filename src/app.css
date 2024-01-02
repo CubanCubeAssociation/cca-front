@@ -12,63 +12,45 @@
   line-height: 1.5;
   font-weight: 400;
   font-size: 16px;
-
+  background-color: var(--bg-color);
   color-scheme: light dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+  transition: all 200ms;
+}
 
-  --color-bg: #fff;
-  --color-tx: #333;
+:root.dark {
+  --bg-color: #181e2e;
+}
+
+:root:not(.dark) {
+  --bg-color: #d5dfff;
+}
+
+html {
+  height: 100%;
 }
 
 body {
   margin: 0;
   display: flex;
-  /* place-items: center; */
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100%;
+  position: relative;
 
-  background-color: var(--color-bg);
-  color: var(--color-tx);
-
-  --color1: #0c00ff22;
-  --color2: #67f2d722;
-
-  background-image: linear-gradient(
-    135deg,
-    var(--color1) 0%, var(--color2) 100%
-  );
+  display: flex;
+  flex-direction: column;
 }
 
-table {
-  @apply text-center shadow-md rounded-md border-collapse;
+th {
+  @apply bg-primary-500 dark:bg-[#040420] text-white;
 }
 
-th, td {
-  @apply p-2;
-}
-
-table thead tr {
-  @apply bg-gray-500 text-gray-200;
-}
-
-table.stripped tbody tr:nth-child(odd) {
-  @apply bg-gray-100 hover:bg-gray-200;
-}
-
-table.stripped tbody tr:nth-child(even) {
-  @apply hover:bg-gray-200;
-}
-
-.card {
-  @apply bg-opacity-80 mx-2 p-4 rounded-md shadow-sm;
-}
-
-.category-img {
-  @apply w-8 h-8;
+footer {
+  margin-top: auto;
 }
 
 .category-container {
