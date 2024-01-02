@@ -63,7 +63,7 @@
 
 <style lang="postcss">
   .container {
-    @apply rounded-md p-1 grid place-items-center;
+    @apply rounded-md p-1 grid place-items-center w-fit;
   }
 
   .selected {

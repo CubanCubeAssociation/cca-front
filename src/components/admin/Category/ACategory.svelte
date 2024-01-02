@@ -8,7 +8,7 @@
   import SaveIcon from "@icons/Send.svelte";
   import ExclamationIcon from '@icons/Exclamation.svelte';
   import { Button, Card, Heading, Input, Label, Modal, Tooltip } from "flowbite-svelte";
-    import WcaCategory from "@components/wca/WCACategory.svelte";
+  import WcaCategory from "@components/wca/WCACategory.svelte";
 
   export let id: string;
 

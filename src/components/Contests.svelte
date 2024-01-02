@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import moment from 'moment';
-  import { navigate } from 'svelte-routing';
+  import { Link, navigate } from 'svelte-routing';
   import { getContests } from "@helpers/API";
   import type { CONTEST_RESULT } from "@interfaces";
   import { Table, TableHead, TableHeadCell, Heading, Card, TableBody, TableBodyCell, TableBodyRow } from "flowbite-svelte";
@@ -16,6 +16,8 @@
 
   onMount(() => {
     getContests().then(c => {
+      if ( !c ) return;
+
       contestResults = c;
       contestResults.results = [
         ...contestResults.results,
@@ -29,7 +31,7 @@
 <Heading class="text-center text-3xl mt-4">Competencias</Heading>
 
 <Card class="mx-auto max-w-[60rem] mt-4">
-  <Table>
+  <Table striped shadow hoverable>
     <TableHead>
       <TableHeadCell>#</TableHeadCell>
       <TableHeadCell>Nombre</TableHeadCell>
@@ -41,7 +43,9 @@
       {#each contestResults.results as r, pos}
         <TableBodyRow>
           <TableBodyCell>{pos + 1}</TableBodyCell>
-          <TableBodyCell>{r.name}</TableBodyCell>
+          <TableBodyCell>
+            <Link to={ '/contests/' + r.name }> {r.name} </Link>
+          </TableBodyCell>
           <TableBodyCell>{ moment( r.date ).format('DD/MM/YYYY') }</TableBodyCell>
           <TableBodyCell>{ moment( r.date ).format('hh:mm a') }</TableBodyCell>
         </TableBodyRow>

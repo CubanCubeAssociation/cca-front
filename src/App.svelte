@@ -15,8 +15,9 @@
   import { userStore } from '@stores/user';
   import { tokenStore } from '@stores/token';
   import NavbarComponent from '@components/NavbarComponent.svelte';
-    import FooterComponent from '@components/FooterComponent.svelte';
-    import Home from '@components/Home.svelte';
+  import FooterComponent from '@components/FooterComponent.svelte';
+  import Home from '@components/Home.svelte';
+    import { refreshToken } from '@helpers/API';
 
   if ( localStorage.getItem('tokens') && localStorage.getItem('user') ) {
     $tokenStore = JSON.parse( localStorage.getItem('tokens')! );
@@ -24,6 +25,17 @@
   } else {
     $userStore = $tokenStore = null;
   }
+
+  (async() => {
+    if ( !$userStore || !$tokenStore || (new Date($tokenStore.access.expires)).getTime() < Date.now() ) {
+    console.log("Token does not exist or expired");
+    
+    if ( await refreshToken() ) {
+      console.log("Token updated app");
+      return;
+    }
+  }
+  })();
 </script>
 
 <Router>

@@ -1,11 +1,11 @@
-import type { SOLVE } from "../interfaces";
+import type { ROUND, SOLVE } from "../interfaces";
 import { createPath } from "./object";
 import { infinitePenalty, stringToMillis } from "./timer";
 
-export function getStatsCFromContest(solves: SOLVE[]) {
+export function getStatsCFromContest(solves: ROUND[]) {
   let mp = solves.reduce((acc, s) => {
     let ct = s.category.name;
-    let us = s.user.name;
+    let us = s.contestant.name;
 
     createPath(acc, [ ct, us ], [], true);
     

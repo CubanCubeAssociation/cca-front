@@ -73,6 +73,20 @@ export const STATUS_ORDER: CONTEST_STATUS[] = [
   'pending', 'inscription', 'running', 'results', 'finished'
 ];
 
+export interface CONTESTANT {
+  user: USER;
+  categories: CATEGORY[];
+}
+
+export interface ROUND {
+  category: CATEGORY;
+  contestant: USER;
+  solves: SOLVE[];
+  round: number;
+  Ao5: number;
+  Mo3: number;
+}
+
 export interface CONTEST {
   id: string;
   name: string;
@@ -82,12 +96,12 @@ export interface CONTEST {
   inscriptionEnd: Date;
   inscriptionCost: number;
   categories: CATEGORY[];
-  contestants: USER[];
+  contestants: CONTESTANT[];
   visible: boolean;
   status: CONTEST_STATUS;
-  inscribedUsers: USER[];
   paidUsers: USER[];
-  solves: SOLVE[];
+  solves: ROUND[];
+  [key: string]: any;
 }
 
 export interface USER {

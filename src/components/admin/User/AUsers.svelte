@@ -89,7 +89,7 @@
   </div>
 
   {#if users.length > 0}
-    <Table striped hoverable noborder={false} shadow>
+    <Table striped hoverable shadow>
         <TableHead>
           {#each columns as C}
             {#if C.show }

@@ -38,7 +38,7 @@
   </div>
 
   {#if categories.length > 0}
-    <Table striped hoverable noborder={false} shadow>
+    <Table striped hoverable shadow>
         <TableHead>
           <TableHeadCell>Nombre</TableHeadCell>
           <TableHeadCell>Ícono</TableHeadCell>
