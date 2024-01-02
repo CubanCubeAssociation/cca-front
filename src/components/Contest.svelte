@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import moment from "moment";
   // @ts-ignore
-  import { STATUS_ORDER, type CONTEST, type CONTEST_STATUS } from "@interfaces";
+  import { STATUS_ORDER, type CONTEST, type CONTEST_STATUS, type SOLVE } from "@interfaces";
   import { getContest } from "@helpers/API";
   import { actualTime, sTimer, timer } from "@helpers/timer";
   import { getAverageS, getStatsCFromContest } from "@helpers/statistics";
@@ -15,6 +15,7 @@
   import PuzzleIcon from '@icons/Puzzle.svelte';
   import StateIcon from '@icons/StateMachine.svelte';
   import EyeIcon from '@icons/Eye.svelte';
+  import RoundView from "./RoundView.svelte";
   import { Button, ButtonGroup, Card, Heading, Span, Table, TableHead, TableHeadCell, Tooltip } from "flowbite-svelte";
     import WcaCategory from "./wca/WCACategory.svelte";
 
@@ -25,7 +26,10 @@
   let contest: CONTEST;
   let section: number = 0;
   let results: any = [];
+  let showRound = false;
+  let roundData: { 0: string; 1: SOLVE[] } = [ '', [] ];
 
+  
   function before(state: CONTEST_STATUS) {
     let idx = STATUS_ORDER.indexOf(contest.status);
     let idx1 = STATUS_ORDER.indexOf(state);
@@ -64,28 +68,26 @@
       contest = c;
 
       contest.categories = [
-        { name: '222so', scrambler: '222so' },
-        { name: '333', scrambler: '333' },
-        { name: '333fm', scrambler: '333fm' },
-        { name: '333mbf', scrambler: '333mbf' },
-        { name: '333ni', scrambler: '333ni' },
-        { name: '333oh', scrambler: '333oh' },
-        { name: '444bld', scrambler: '444bld' },
-        { name: '444wca', scrambler: '444wca' },
-        { name: '555bld', scrambler: '555bld' },
-        { name: '555wca', scrambler: '555wca' },
-        { name: '666wca', scrambler: '666wca' },
-        { name: '777wca', scrambler: '777wca' },
-        { name: 'clkwca', scrambler: 'clkwca' },
-        { name: 'mgmp', scrambler: 'mgmp' },
-        { name: 'pyrso', scrambler: 'pyrso' },
-        { name: 'skbso', scrambler: 'skbso' },
-        { name: 'sqrs', scrambler: 'sqrs' },
+        { id: "", name: '222so', scrambler: '222so' },
+        { id: "", name: '333', scrambler: '333' },
+        { id: "", name: '333fm', scrambler: '333fm' },
+        { id: "", name: '333mbf', scrambler: '333mbf' },
+        { id: "", name: '333ni', scrambler: '333ni' },
+        { id: "", name: '333oh', scrambler: '333oh' },
+        { id: "", name: '444bld', scrambler: '444bld' },
+        { id: "", name: '444wca', scrambler: '444wca' },
+        { id: "", name: '555bld', scrambler: '555bld' },
+        { id: "", name: '555wca', scrambler: '555wca' },
+        { id: "", name: '666wca', scrambler: '666wca' },
+        { id: "", name: '777wca', scrambler: '777wca' },
+        { id: "", name: 'clkwca', scrambler: 'clkwca' },
+        { id: "", name: 'mgmp', scrambler: 'mgmp' },
+        { id: "", name: 'pyrso', scrambler: 'pyrso' },
+        { id: "", name: 'skbso', scrambler: 'skbso' },
+        { id: "", name: 'sqrs', scrambler: 'sqrs' },
       ];
 
       // contest.categories = [{ name: 'asdas', scrambler: '333', id: 'asdasd' }];
-
-      // console.log(c.solves);
 
       results = getStatsCFromContest( c.solves );
       console.log("RESULTS: ", results);
@@ -114,6 +116,7 @@
     </ButtonGroup>
 
     <ul class="grid gap-4 info-list">
+      <!-- Lugar -->
       <li>
         <Span class="flex items-center gap-1">
           <HomeIcon {size}/> Lugar:
@@ -121,6 +124,7 @@
         <Span class="border-2 border-green-600 dark:border-green-400 p-1 rounded-md">{ contest.place }</Span>
       </li>
 
+      <!-- Fecha -->
       <li>
         <Span class="flex items-center gap-1">
           <DateIcon {size}/>Fecha:
@@ -130,6 +134,7 @@
         }</Span>
       </li>
 
+      <!-- Hora -->
       <li>
         <Span class="flex items-center gap-1">
           <ClockIcon {size}/>Hora:
@@ -140,6 +145,7 @@
       </li>
 
       {#if before('running')}
+        <!-- Inscripcion (inicio) -->
         <li>
           <Span class="flex items-center gap-1">
             <DateIcon {size}/>Inicio de inscripción:
@@ -149,6 +155,7 @@
           }</Span>
         </li>
       
+        <!-- Inscripcion (fin) -->
         <li>
           <Span class="flex items-center gap-1">
             <DateIcon {size}/>Fin de inscripción:
@@ -158,6 +165,7 @@
           }</Span>
         </li>
 
+        <!-- Costo -->
         <li>
           <Span class="flex items-center gap-1">
             <CurrencyIcon {size}/>Costo de inscripción:
@@ -184,6 +192,7 @@
         </Span>
       </li>
 
+      <!-- Estado -->
       <li>
         <Span class="flex items-center gap-1">
           <StateIcon {size}/>Estado:
@@ -191,6 +200,7 @@
         <Span class="border-2 border-green-600 dark:border-green-400 p-1 rounded-md">{ getStatus() }</Span>
       </li>
 
+      <!-- Visible -->
       {#if checkProperty('visible')}
         <li>
           <Span class="flex items-center gap-1">
@@ -208,7 +218,7 @@
     <Heading tag="h2" class="text-center"> Resultados </Heading>
 
     {#each results as res}
-      <Heading tag="h3" class="text-center">{ res[0] }</Heading>
+      <h2 class="text-xl text-center">{ res[0] }</h2>
 
       <Table>
         <TableHead>
@@ -260,6 +270,8 @@
   Loading...
 {/if}
 
+<RoundView round={ roundData } show={ showRound } on:close={ () => showRound = false }/>
+
 <style lang="postcss">
   .info-list li {
     @apply flex gap-2;
@@ -267,21 +279,5 @@
 
   .category {
     @apply w-8 h-8;
-  }
-
-  .solve {
-    @apply w-max p-1 rounded-md border-2 border-green-500
-      cursor-pointer hover:shadow-md transition-all duration-200;
-  }
-
-  .solve.extra {
-    @apply border-blue-500 relative;
-  }
-
-  .solve.extra::before {
-    @apply absolute -top-2 -right-2 bg-blue-800 w-5 h-5
-      text-xs text-white grid place-items-center
-      rounded-full;
-    content: attr(data-extra);
   }
 </style>

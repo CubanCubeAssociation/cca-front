@@ -19,11 +19,11 @@
       if ( !c ) return;
 
       contestResults = c;
-      contestResults.results = [
-        ...contestResults.results,
-        ...contestResults.results,
-        ...contestResults.results,
-      ]
+      // contestResults.results = [
+      //   ...contestResults.results,
+      //   ...contestResults.results,
+      //   ...contestResults.results,
+      // ]
     });
   });
 </script>

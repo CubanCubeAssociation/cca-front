@@ -33,6 +33,11 @@ function withoutID(r: any): any {
   return res;
 }
 
+function map(obj: any, key: string, mapHandler: (...args: any[]) => any) {
+  obj[key] = obj[key].map(mapHandler);
+  return obj;
+}
+
 // AUTH
 export async function login(email: string, password: string): Promise<LOGIN_DATA | null> {
   try {
@@ -114,6 +119,22 @@ export async function getContest(name: string, retry = true): Promise<CONTEST | 
   return null;
 }
 
+export async function createContest(c: CONTEST): Promise<any> {
+  return await ky.post(API + '/contests', {
+    json: withoutID(c), ...commonAuth()
+  }).json();
+}
+
+export async function updateContest(c: CONTEST): Promise<any> {
+  return await ky.patch(API + '/contests/' + c.id, {
+    json: withoutID(c), ...commonAuth()
+  });
+}
+
+export async function removeContest(c: CONTEST): Promise<any> {
+  return await ky.delete(API + '/contests/' + c.id, commonAuth());
+}
+
 // USER
 export async function getUsers(retry = true): Promise<USER_RESULT | null> {
   try {
@@ -137,6 +158,10 @@ export async function getUser(id: string, retry = true): Promise<USER | null> {
   }
 
   return null;
+}
+
+export async function searchUser(text: string, signal?: AbortSignal): Promise<USER[]> {
+  return await ky.get(API + '/users/search/' + text, { signal }).json();
 }
 
 export async function createUser(u: USER) {

@@ -1,41 +1,26 @@
 import type { ROUND, SOLVE } from "../interfaces";
-import { createPath } from "./object";
+import { checkPath, createPath } from "./object";
 import { infinitePenalty, stringToMillis } from "./timer";
 
 export function getStatsCFromContest(solves: ROUND[]) {
+  console.log("SOLVES: ", solves);
+  
   let mp = solves.reduce((acc, s) => {
     let ct = s.category.name;
+    let rnd = s.round.toString();
     let us = s.contestant.name;
 
-    createPath(acc, [ ct, us ], [], true);
+    if ( !checkPath(acc, [ ct, rnd, us ], true) ) {
+      createPath(acc, [ ct, rnd, us ], [], true);
+    }
     
     // @ts-ignore
-    acc.get(ct).get(us).push( s );
+    acc.get(ct).get(rnd).get(us).push( s );
     
     return acc;
-  }, new Map< string, Map<string, SOLVE[]> >);
+  }, new Map< string, Map<string, Map<string, SOLVE[]>> >);
 
-  let results: any[] = [];
-
-  mp.forEach((cv, ck) => {
-    let cat: any[] = [];
-
-    cv.forEach((uv, uk) => {
-
-      uv.sort((a, b) => {
-        if ( a.round != b.round ) {
-          return a.round - b.round;
-        }
-        return a.solve - b.solve;
-      });
-
-      cat.push([uk, uv]);
-    });
-
-    results.push([ ck, cat ]);
-  });
-
-  return results;
+  return [...mp].map(e => [e[0], [...e[1]].map(e1 => [e1[0], [...e1[1]] ])]);
 }
 
 export function mean(values: number[]): number {
@@ -85,4 +70,18 @@ export function getAverageS(n: number, arr: SOLVE[]): (number | null)[] {
       : stringToMillis(e.time)
     )
   );
+}
+
+export function contestAo5(arr: SOLVE[]): number {
+  let solves: SOLVE[] = [];
+
+  arr.sort((s1: SOLVE, s2: SOLVE) => {
+    return !s1.isExtra && s2.isExtra ? -1 : 0;
+  });
+
+  for (let i = 0, maxi = arr.length; i < maxi; i += 1) {
+    solves[ arr[i].solve - 1 ] = arr[i];
+  }
+
+  return getAverageS(5, solves)[4] || Infinity;
 }

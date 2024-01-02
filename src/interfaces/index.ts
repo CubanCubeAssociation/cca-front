@@ -7,7 +7,7 @@ export interface USER {
   email: string;
   password: string;
   ci: string;
-  sex: 'M' | 'F';
+  sex: SEX;
   username: string;
   province: string;
   municipality: string;
@@ -38,7 +38,7 @@ export type Scrambler = '222so' | '333' | '333fm' | '333ni' | '333mbf' | '333oh'
   | '555wca' | '555bld' | '666wca' | '777wca' | 'clkwca' | 'mgmp' | 'pyrso' | 'skbso' | 'sqrs';
 
 export interface CATEGORY {
-  id?: string;
+  id: string;
   name: string;
   scrambler: Scrambler;
 }
@@ -87,13 +87,27 @@ export interface ROUND {
   Mo3: number;
 }
 
+export interface CONTESTANT {
+  user: USER;
+  categories: CATEGORY[];
+}
+
+export interface ROUND {
+  category: CATEGORY;
+  contestant: USER;
+  solves: SOLVE[];
+  round: number;
+  Ao5: number;
+  Mo3: number;
+}
+
 export interface CONTEST {
   id: string;
   name: string;
   place: string;
-  date: Date;
-  inscriptionStart: Date;
-  inscriptionEnd: Date;
+  date: string;
+  inscriptionStart: string;
+  inscriptionEnd: string;
   inscriptionCost: number;
   categories: CATEGORY[];
   contestants: CONTESTANT[];

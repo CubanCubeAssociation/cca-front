@@ -1,0 +1,100 @@
+<script lang="ts">
+  import { createEventDispatcher, tick } from 'svelte';
+
+  const dispatch = createEventDispatcher();
+ 
+  type InputType = 'text' | 'number' | 'date' | 'datetime';
+
+  export let placeholder = '';
+  export let value: Date | string | number = '';
+  export let type: InputType = "text";
+  export let size: number | undefined = undefined;
+  export let disabled = false;
+  export let focus = false;
+  export let min: number | undefined = undefined;
+  export let max: number | undefined = undefined;
+  export let step = 1;
+  export let inpClass = '';
+  
+  let cl = '';
+  export {cl as class};
+  
+  let ref: HTMLInputElement;
+
+  $: type = ['text', 'number', 'date', 'datetime'].indexOf(type) === -1 ? 'text' : type;
+  $: focus ? ref && tick().then(() => ref.focus()) : ref && tick().then(() => ref.blur());
+  
+  function keyup(e: KeyboardEvent) {
+    dispatch("keyup", e);
+
+    e.code === "Enter" && dispatch("UENTER", e);
+    e.code === "Esc" && dispatch("UESCAPE", e);
+  }
+  function keydown(e: KeyboardEvent) {
+    dispatch("keydown", e);
+    e.code === "Enter" && dispatch("DENTER", e);
+    e.code === "Esc" && dispatch("DESCAPE", e);
+  }
+  function input(e: any) { dispatch("input", e); }
+  function change(e: any) { dispatch("change", e); }
+
+</script>
+
+<div class="w-full h-10 px-2 py-2 rounded-md relative transition-all
+  duration-200 border border-solid border-gray-400 wrapper
+  focus-within:shadow focus-within:shadow-blue-200 pointer-events-none
+  bg-white text-black
+  { cl || '' }">
+  {#if type === 'text'}
+  <input class={ inpClass || '' }
+    bind:this={ref} bind:value
+    on:keydown={keydown} on:keyup={keyup} on:input={ input } on:change={ change }
+    {disabled} type="text" { size } placeholder="a">
+  {/if}
+  
+  {#if type === 'number'}
+  <input class={ inpClass || '' } {min} {max} {disabled} {step} type="number" bind:this={ref} 
+    on:keydown={keydown} on:keyup={keyup} on:input={ input } on:change={ change } bind:value placeholder="">
+  {/if}
+
+  {#if type === 'date'}
+  <input class={ inpClass || '' } {disabled} type="date" bind:this={ref}
+    on:keydown={keydown} on:keyup={keyup} on:input={ input } on:change={ change } bind:value placeholder="">
+  {/if}
+
+  {#if type === 'datetime'}
+  <input class={ inpClass || '' } {disabled} type="datetime-local" bind:this={ref}
+    on:keydown={keydown} on:keyup={keyup} on:input={ input } on:change={ change } bind:value placeholder="">
+  {/if}
+  <span class="placeholder absolute top-0 mt-2 origin-left transition-all duration-200
+  text-neutral-500">{placeholder}</span>
+</div>
+
+<style lang="postcss">
+  input {
+    @apply h-full flex w-full bg-transparent border-none outline-none text-inherit pointer-events-auto;
+  }
+
+  input::placeholder {
+    opacity: 0;
+  }
+
+  input:not(:placeholder-shown) + .placeholder {
+    @apply -my-5 scale-75 text-gray-400;
+  }
+
+  input:focus + .placeholder {
+    @apply -my-5 scale-75 text-gray-800;
+  }
+
+  .hidden-markers input::-webkit-outer-spin-button,
+  .hidden-markers input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type^="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.8);
+  }
+</style>
