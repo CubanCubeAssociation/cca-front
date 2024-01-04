@@ -1,4 +1,5 @@
 import type { CONTEST } from "@interfaces";
+import type { Indicator } from "flowbite-svelte";
 
 export function getSearchParams(loc: string): Map<string, string> {
   return loc.slice(1).split("&").reduce((m, e) => {
@@ -26,4 +27,13 @@ export function getStatus(st: CONTEST['status']): string {
   if ( st === 'results' ) return 'Resultados';
   if ( st === 'finished' ) return 'Finalizada';
   return '-';
+}
+
+export function getIndicatorColor(st: CONTEST['status']): InstanceType<typeof Indicator>['$$prop_def']['color'] {
+  if ( st === 'pending' ) return 'yellow';
+  if ( st === 'inscription' ) return 'blue';
+  if ( st === 'running' ) return 'green';
+  if ( st === 'results' ) return 'purple';
+  if ( st === 'finished' ) return 'red';
+  return "gray";
 }

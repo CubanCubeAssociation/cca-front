@@ -4,6 +4,7 @@ import { tokenStore } from '../stores/token';
 import { userStore } from '../stores/user';
 import { API } from '../constants';
 import { get } from 'svelte/store';
+import { isAuth, tokenNeedsRefresh } from './auth';
 
 // Common internal helper function
 function getAuth(): string {
@@ -84,80 +85,68 @@ export async function refreshToken() {
   return false;
 }
 
-async function handleError({ response: { status } }: any) {
-  try {
-    if (status === 401) {
-      return await refreshToken();
-    }
-  } catch { }
-
-  return false;
-}
-
 // CONTEST
-export async function getContests(retry = true): Promise<CONTEST_RESULT | null> {
-  try {
-    return await ky.get(API + '/contests', commonAuth()).json();
-  } catch (err) {
-    if (retry && await handleError(err)) {
-      return getContests(false);
-    }
+export async function getContests(): Promise<CONTEST_RESULT> {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
   }
 
-  return null;
+  return await ky.get(API + '/contests', commonAuth()).json();
 }
 
-export async function getContest(name: string, retry = true): Promise<CONTEST | null> {
-  try {
-    return await ky.get(API + '/contests/' + name, commonAuth()).json();
-  } catch (err) {
-    if (retry && await handleError(err)) {
-      return getContest(name, false);
-    }
+export async function getContest(name: string): Promise<CONTEST> {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
   }
 
-  return null;
+  return await ky.get(API + '/contests/' + name, commonAuth()).json();
 }
 
 export async function createContest(c: CONTEST): Promise<any> {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
+  }
+
+  console.log("CONTEST: ", c);
+
   return await ky.post(API + '/contests', {
     json: withoutID(c), ...commonAuth()
   }).json();
 }
 
 export async function updateContest(c: CONTEST): Promise<any> {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
+  }
+
   return await ky.patch(API + '/contests/' + c.id, {
     json: withoutID(c), ...commonAuth()
   });
 }
 
 export async function removeContest(c: CONTEST): Promise<any> {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
+  }
+
   return await ky.delete(API + '/contests/' + c.id, commonAuth());
 }
 
 // USER
-export async function getUsers(retry = true): Promise<USER_RESULT | null> {
-  try {
-    return await ky.get(API + '/users', commonAuth()).json();
-  } catch (err) {
-    if (retry && await handleError(err)) {
-      return getUsers(false);
-    }
+export async function getUsers(): Promise<USER_RESULT> {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
   }
 
-  return null;
+  return await ky.get(API + '/users', commonAuth()).json();
 }
 
-export async function getUser(id: string, retry = true): Promise<USER | null> {
-  try {
-    return await ky.get(API + '/users/' + id, commonAuth()).json();
-  } catch (err) {
-    if (retry && await handleError(err)) {
-      return getUser(id, false);
-    }
+export async function getUser(id: string): Promise<USER> {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
   }
-
-  return null;
+  
+  return await ky.get(API + '/users/' + id, commonAuth()).json();
 }
 
 export async function searchUser(text: string, signal?: AbortSignal): Promise<USER[]> {
@@ -165,6 +154,10 @@ export async function searchUser(text: string, signal?: AbortSignal): Promise<US
 }
 
 export async function createUser(u: USER) {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
+  }
+
   const props = [
     "email", "password", "name", "ci", "username",
     "province", "municipality", "credit", "avatar", "role", "sex"
@@ -181,6 +174,10 @@ export async function createUser(u: USER) {
 }
 
 export async function updateUser(u: USER) {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
+  }
+
   const props = [
     "email", "password", "name", "ci", "username", "sex",
     "province", "municipality", "credit", "avatar", "role"
@@ -197,6 +194,10 @@ export async function updateUser(u: USER) {
 }
 
 export async function removeUser(u: USER) {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
+  }
+
   return await ky.delete(API + '/users/' + u.id, {
     ...commonAuth()
   });
@@ -205,69 +206,49 @@ export async function removeUser(u: USER) {
 // SOLVE
 
 // CATEGORY
-export async function getCategories(retry = true): Promise<CATEGORY_RESULT | null> {
-  try {
-    return await ky.get(API + '/categories?limit=20', commonAuth()).json();
-  } catch (err) {
-    if (retry && await handleError(err)) {
-      return getCategories(false);
-    }
+export async function getCategories(): Promise<CATEGORY_RESULT> {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
   }
 
-  return null;
+  return await ky.get(API + '/categories?limit=20', commonAuth()).json();
 }
 
-export async function getCategory(id: string, retry = true): Promise<CATEGORY | null> {
-  try {
-    return await ky.get(API + '/categories/' + id, commonAuth()).json();
-  } catch (err) {
-    if (retry && await handleError(err)) {
-      return getCategory(id, false);
-    }
+export async function getCategory(id: string): Promise<CATEGORY> {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
   }
 
-  return null;
+  return await ky.get(API + '/categories/' + id, commonAuth()).json();
 }
 
-export async function createCategory(c: CATEGORY, retry = true) {
-  try {
-    return await ky.post(API + '/categories', {
-      json: withoutID(c),
-      ...commonAuth()
-    });
-  } catch (err) {
-    if (retry && await handleError(err)) {
-      return createCategory(c, false);
-    }
+export async function createCategory(c: CATEGORY) {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
   }
 
-  return null;
+  return await ky.post(API + '/categories', {
+    json: withoutID(c),
+    ...commonAuth()
+  });
 }
 
-export async function updateCategory(c: CATEGORY, retry = true) {
-  try {
-    return await ky.patch(API + '/categories/' + c.id, {
-      json: withoutID(c), ...commonAuth()
-    });
-  } catch (err) {
-    if (retry && await handleError(err)) {
-      return updateCategory(c, false);
-    }
+export async function updateCategory(c: CATEGORY) {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
   }
 
-  return null;
+  return await ky.patch(API + '/categories/' + c.id, {
+    json: withoutID(c), ...commonAuth()
+  });
 }
 
-export async function removeCategory(c: CATEGORY, retry = true) {
-  try {
-    return await ky.delete(API + '/categories/' + c.id, {
-      ...commonAuth()
-    });
-  } catch (err) {
-    if (retry && await handleError(err)) {
-      return removeCategory(c, false);
-    }
+export async function removeCategory(c: CATEGORY) {
+  if ( tokenNeedsRefresh() ) {
+    await refreshToken();
   }
 
-  return null;
+  return await ky.delete(API + '/categories/' + c.id, {
+    ...commonAuth()
+  });
 }

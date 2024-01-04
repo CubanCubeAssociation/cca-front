@@ -9,7 +9,7 @@
   import UserIcon from '@icons/Account.svelte';
   import AdminIcon from '@icons/Shield.svelte';
   import DelegateIcon from '@icons/Sword.svelte';
-  import { Button, Card, Heading, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, A } from "flowbite-svelte";
+  import { Button, Card, Heading, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, A, Avatar } from "flowbite-svelte";
   // import Tooltip from "@components/material/Tooltip.svelte";
 
   const HEADER = "Usuarios";
@@ -104,15 +104,7 @@
               {#if columns[0].show}
                 <TableBodyCell>
                   <Link to={"/admin/user/" + u.id} class="flex gap-2 items-center">
-                    {#if u.avatar}
-                      <img src={ u.avatar } alt={ u.name } class="avatar">
-                    {:else}
-                      <div class="avatar">
-                        <UserIcon size="100%"/>
-                      </div>
-                    {/if}
-
-                    { u.name }
+                    <Avatar alt={ u.name } src={ u.avatar }/> { u.name }
                   </Link>
                 </TableBodyCell>
               {/if}
@@ -128,10 +120,10 @@
                 </TableBodyCell>
               {/if}
 
-               {#if columns[3].show} <TableBodyCell>{ u.email || "-" }</TableBodyCell> {/if}
-               {#if columns[4].show} <TableBodyCell>{ u.province || "-" }</TableBodyCell> {/if}
-               {#if columns[5].show} <TableBodyCell>{ u.municipality || "-" }</TableBodyCell> {/if}
-               {#if columns[6].show} <TableBodyCell>{ u.credit } CUP</TableBodyCell> {/if}
+              {#if columns[3].show} <TableBodyCell>{ u.email || "-" }</TableBodyCell> {/if}
+              {#if columns[4].show} <TableBodyCell>{ u.province || "-" }</TableBodyCell> {/if}
+              {#if columns[5].show} <TableBodyCell>{ u.municipality || "-" }</TableBodyCell> {/if}
+              {#if columns[6].show} <TableBodyCell>{ u.credit } CUP</TableBodyCell> {/if}
             </TableBodyRow>
           {/each}
         </TableBody>

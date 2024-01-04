@@ -5,7 +5,7 @@
   import { getCategories } from '@helpers/API';
   import PlusIcon from '@icons/Plus.svelte';
   import { Button, Card, Heading, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from 'flowbite-svelte';
-    import WcaCategory from '@components/wca/WCACategory.svelte';
+  import WcaCategory from '@components/wca/WCACategory.svelte';
   
   const HEADER = "Categorías";
   const ADD = "Añadir categoría";

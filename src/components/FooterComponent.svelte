@@ -1,12 +1,16 @@
 <script>
-  import { Footer, FooterCopyright, FooterLinkGroup, FooterBrand, FooterLink } from 'flowbite-svelte';
+  import { Footer, FooterCopyright, FooterLinkGroup, FooterBrand, FooterLink, Span } from 'flowbite-svelte';
     import { Link } from 'svelte-routing';
+    import CcaLogo from './CCALogo.svelte';
 </script>
 
 <Footer footerType="logo">
   <div class="sm:flex sm:items-center sm:justify-between">
     <Link to="/">
-      <FooterBrand href="/" spanClass="ml-2" src="/logo.png" alt="CCA Logo" name="CCA" />
+      <div class="flex">
+        <CcaLogo size="2rem"/>
+        <Span class="self-center whitespace-nowrap text-xl font-semibold ml-2"> CCA </Span>
+      </div>
     </Link>
     
     <FooterLinkGroup ulClass="flex flex-wrap gap-3 items-center mb-6 text-sm text-gray-500 sm:mb-0 dark:text-gray-400">

@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { navigate } from "svelte-routing";
-  import { Button, Card, Heading, Input, Label, Modal, Radio, Select } from 'flowbite-svelte';
+  import { Button, Card, Heading, Input, Label, Modal, Radio, Select, Span } from 'flowbite-svelte';
   import { createUser, getUser, removeUser, updateUser } from "@helpers/API";
   import type { USER } from "@interfaces";
   import { PROVINCIAS, ROLES } from "@constants";
   import DeleteIcon from "@icons/Delete.svelte";
   import SaveIcon from "@icons/Send.svelte";
   import ExclamationIcon from '@icons/Exclamation.svelte';
+    import { ExclamationCircleOutline, TrashBinSolid } from "flowbite-svelte-icons";
 
   export let id = 'new';
 
@@ -80,8 +81,8 @@
   $: updateMunicipalities(user.province);
 </script>
 
-<Card class="mt-4 min-w-[calc(100%-2rem)] mx-auto">
-  <Heading class="text-3xl text-center">{ id === 'new' ? 'Crear' : 'Editar'} usuario</Heading>
+<Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
+  <Heading class="text-3xl text-center">{ id === 'new' ? 'Crear usuario' : `Editar "${ user.name }"`}</Heading>
 
   <form class="mt-8 grid gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2" on:submit|preventDefault={ save }>
     <div>
@@ -141,7 +142,9 @@
   
     <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
       {#if id != 'new' }
-        <Button color="red" class="gap-2" on:click={ () => showModal = true }> <DeleteIcon size="1.2rem"/> Eliminar </Button>
+        <Button color="red" on:click={ () => showModal = true }>
+          <TrashBinSolid size="sm"/> <Span class="ml-1">Eliminar</Span>
+        </Button>
       {/if}
 
       <Button type="submit" class="gap-2"><SaveIcon size="1.2rem"/> { id === 'new' ? 'Crear' : 'Guardar' }</Button>
@@ -149,14 +152,16 @@
   </form>
 </Card>
 
-<Modal bind:open={ showModal } autoclose outsideclose size="xs">
+<Modal bind:open={ showModal } outsideclose autoclose title="Eliminar usuario" size="xs">
   <div class="flex flex-col items-center justify-center">
-    <div class="icon-circle border-[.3rem] border-gray-400 dark:border-gray-200 w-[4rem] h-[4rem] rounded-full grid">
-      <ExclamationIcon class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
-    </div>
-    <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400 mt-2">¿Desea eliminar este usuario?</h3>
-    <div class="flex gap-2">
-      <Button on:click={ deleteUser } color="red"><DeleteIcon size="1.2rem"/> Eliminar</Button>
+    <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
+
+    <Heading tag="h4" class="text-center">¿Desea eliminar el usuario "{ user.name }"?</Heading>
+
+    <div class="flex gap-2 mt-4">
+      <Button color="red" on:click={ deleteUser }>
+        <TrashBinSolid size="sm"/> <Span class="ml-1">Eliminar</Span>
+      </Button>
       <Button color="alternative">Cancelar</Button>
     </div>
   </div>

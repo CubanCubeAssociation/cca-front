@@ -1,3 +1,5 @@
+import type { CONTESTANT } from "@interfaces";
+
 export function checkPath(obj: any, path: string[], useMap: boolean = false): boolean {
   if ( typeof obj === 'undefined' ) return false;
 
@@ -45,10 +47,10 @@ type MODEL = 'CONTEST' | 'SOLVE' | 'USER' | 'CATEGORY';
 
 export function fromModel(obj: any, model: MODEL) {
   const REFS: { [k:string]: string[] } = {
-    CATEGORY: [],
+    CATEGORY: [ ],
     SOLVE: [ "contest", "category", "user", "scrambler", "judge" ],
     USER: [],
-    CONTEST: [ "categories", "paidUsers", "solves" ],
+    CONTEST: [ "categories", "solves", "categories" ],
   };
 
   const RMODEL = REFS[ model ];
@@ -59,11 +61,20 @@ export function fromModel(obj: any, model: MODEL) {
   for (let i = 0, maxi = entries.length; i < maxi; i += 1) {
     let { 0: k, 1: v } = entries[i] as any;
 
-    if ( model === 'CONTEST' && k === "contestants" ) {
-      res[k] = v.map((e: any) => ({
-        user: e.user.id,
-        categories: e.categories.map((e1: any) => e1.id || e1)
-      }));
+    if ( model === 'CONTEST' && ['contestants', 'categories'].indexOf(k) > -1 ) {
+      if ( k === "contestants" ){
+        res[k] = v.map((e: any) => ({
+          user: e.user.id,
+          categories: e.categories.map((e1: any) => e1.id || e1),
+          paid: e.paid,
+          paidAmount: e.paidAmount,
+        }) as CONTESTANT);
+      } else if ( k === 'categories' ) {
+        res[k] = v.map((e: any) => ({
+          category: e.category.id,
+          rounds: e.rounds
+        }));
+      }
     } else if ( RMODEL.indexOf( k ) > -1 ) {
       res[k] = v.map((e: any) => typeof e === 'string' ? e : e.id);
     } else {

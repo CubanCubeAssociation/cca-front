@@ -17,6 +17,7 @@
   import Ipyrso from "./Ipyrso.svelte";
   import Iskbso from "./Iskbso.svelte";
   import Isqrs from "./Isqrs.svelte";
+  import { createEventDispatcher } from "svelte";
 
   export let icon: Scrambler = '333';
   export let size = '2rem';
@@ -28,9 +29,16 @@
   export let ariaHidden = false;
   export let title = '';
   export let desc = '';
+  export let buttonClass = '';
+
+  const dispatch = createEventDispatcher();
 
   let cl = '';
   export { cl as class };
+
+  function handleClick(ev: MouseEvent) {
+    dispatch('click', ev);
+  }
 
   let iconMap = {
     "222so": I222,
@@ -53,17 +61,17 @@
   } as const;
 </script>
 
-<div class="container" class:selected>
+<button type="button" class={"container " + buttonClass} class:selected on:click={ handleClick }>
   {#if icon in iconMap }
     <svelte:component this={ iconMap[icon] } {size} {width} {height} {color} {ariaLabel} {ariaHidden} {title} {desc} class={cl}/>
   {:else}
     <I333 {size} {width} {height} {color} {ariaLabel} {ariaHidden} {title} {desc} class={cl}/>
   {/if}
-</div>
+</button>
 
 <style lang="postcss">
   .container {
-    @apply rounded-md p-1 grid place-items-center w-fit;
+    @apply rounded-md p-1 grid place-items-center w-fit cursor-default;
   }
 
   .selected {

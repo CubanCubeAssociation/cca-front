@@ -1,21 +1,22 @@
 <script lang="ts">
   import type { SOLVE } from "@interfaces";
-  import Modal from "./modals/Modal.svelte";
+  // import Modal from "./modals/Modal.svelte";
   import { createEventDispatcher } from "svelte";
   import { sTimer } from "@helpers/timer";
+  import { Modal } from "flowbite-svelte";
 
-  export let show = false;
+  export let open = false;
   export let solve: SOLVE;
 
   let dispatch = createEventDispatcher();
 
   function handleClose() {
-    show = false;
+    open = false;
     dispatch('close');
   }
 </script>
 
-<Modal bind:show on:close={ handleClose }>
+<Modal bind:open on:close={ handleClose }>
   <div class="table-wrapper rounded-md overflow-x-auto shadow-md">
     <table class="table-auto text-center w-full stripped overflow-hidden">
       <tbody>

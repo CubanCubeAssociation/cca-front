@@ -1,8 +1,17 @@
 <script lang="ts">
-  import { DarkMode, Dropdown, DropdownItem, NavBrand, NavHamburger, NavLi, NavUl, Navbar } from "flowbite-svelte";
+  import { DarkMode, Dropdown, DropdownItem, NavBrand, NavHamburger, NavLi, NavUl, Navbar, Span } from "flowbite-svelte";
   import { Link } from "svelte-routing";
   import { userStore } from '@stores/user';
   import ChevronDownOutline from '@icons/ChevronDown.svelte';
+  import ShieldIcon from '@icons/Shield.svelte';
+  import SwordIcon from '@icons/Sword.svelte';
+  import TrophyIcon from '@icons/Trophy.svelte';
+  import RulesIcon from '@icons/Script.svelte';
+  import CubeIcon from '@icons/Cube.svelte';
+  import UserIcon from '@icons/AccountGroup.svelte';
+  import { isAuth, isRole, minRole } from "@helpers/auth";
+  import WcaCategory from "./wca/WCACategory.svelte";
+    import CcaLogo from "./CCALogo.svelte";
 
   function checkMobile(cb: any) {
     if ( window.innerWidth < 768 ) {
@@ -15,10 +24,8 @@
   <Navbar let:hidden let:toggle class="justify-between fixed top-0 left-0 w-full z-50">
     <Link to="/">
       <NavBrand>
-        <img class="w-10 h-10 mr-2" src="/logo.png" alt="CCA logo">
-        <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white mr-2">
-          CCA
-        </span>
+        <CcaLogo size="2rem"/>
+        <Span class="self-center whitespace-nowrap text-xl font-semibold ml-2"> CCA </Span>
       </NavBrand>
     </Link>
   
@@ -28,23 +35,48 @@
     </div>
     
     <NavUl {hidden} class="order-1">
-      <Link on:click={ () => checkMobile(toggle) } to="/contests"><NavLi> Competencias </NavLi></Link>
-      <Link on:click={ () => checkMobile(toggle) } to="/results"><NavLi> Resultados </NavLi></Link>
-      <Link on:click={ () => checkMobile(toggle) } to="/rules"><NavLi> Reglamento </NavLi></Link>
-      <Link on:click={ () => checkMobile(toggle) } to="/cca"><NavLi> CCA </NavLi></Link>
+      <Link on:click={ () => checkMobile(toggle) } to="/contests">
+        <NavLi class="flex items-center gap-1"> <SwordIcon class="dark:text-red-400 text-red-600"/> Competencias </NavLi>
+      </Link>
+      <Link on:click={ () => checkMobile(toggle) } to="/results">
+        <NavLi class="flex items-center gap-1"> <TrophyIcon class="dark:text-yellow-300 text-yellow-400"/> Resultados </NavLi>
+      </Link>
+      <Link on:click={ () => checkMobile(toggle) } to="/rules">
+        <NavLi class="flex items-center gap-1"> <RulesIcon class="dark:text-orange-300 text-orange-400"/> Reglamento </NavLi>
+      </Link>
+      <Link on:click={ () => checkMobile(toggle) } to="/cca">
+        <NavLi class="flex items-center gap-1"> <CubeIcon class="dark:text-primary-400 text-primary-500"/> CCA </NavLi>
+      </Link>
       
-      {#if !$userStore}
+      {#if !isAuth($userStore)}
         <Link to="/login"><NavLi> Entrar </NavLi></Link>
       {/if}
   
-      {#if $userStore}
-        <NavLi class="cursor-pointer">
-          ADMIN <ChevronDownOutline class="w-3 h-3 ms-2 text-primary-800 dark:text-white inline" />
+      {#if minRole($userStore, 'delegate')}
+        <NavLi class="cursor-pointer flex items-center gap-1">
+          <ShieldIcon class="dark:text-green-400 text-green-600"/>
+          ADMIN
+          <ChevronDownOutline class="w-3 h-3 ms-2 text-primary-800 dark:text-white inline" />
         </NavLi>
         <Dropdown class="w-44 z-20">
-          <Link to="/admin/user" on:click={ () => checkMobile(toggle) }><DropdownItem>Usuarios</DropdownItem></Link>
-          <Link to="/admin/contest" on:click={ () => checkMobile(toggle) }><DropdownItem>Competencias</DropdownItem></Link>
-          <Link to="/admin/category" on:click={ () => checkMobile(toggle) }><DropdownItem>Categorías</DropdownItem></Link>
+          <Link to="/admin/user" on:click={ () => checkMobile(toggle) }>
+            <DropdownItem class="flex items-center gap-1">
+              <UserIcon class="dark:text-blue-400"/> Usuarios
+            </DropdownItem>
+          </Link>
+          <Link to="/admin/contest" on:click={ () => checkMobile(toggle) }>
+            <DropdownItem class="flex items-center gap-1">
+              <SwordIcon class="dark:text-red-400"/> Competencias
+            </DropdownItem>
+          </Link>
+
+          {#if isRole($userStore, 'admin')}
+            <Link to="/admin/category" on:click={ () => checkMobile(toggle) }>
+              <DropdownItem class="flex items-center gap-1">
+                <WcaCategory icon="333" size=".7rem" class="text-yellow-400" buttonClass="!p-[.1rem]"/> Categorías
+              </DropdownItem>
+            </Link>
+          {/if}
         </Dropdown>
       {/if}
     </NavUl>

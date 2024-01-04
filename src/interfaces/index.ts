@@ -43,6 +43,11 @@ export interface CATEGORY {
   scrambler: Scrambler;
 }
 
+export interface CONTEST_CATEGORY {
+  category: CATEGORY;
+  rounds: number;
+}
+
 export enum PENALTY {
   NONE = '00',
   DNS = '01',
@@ -73,11 +78,6 @@ export const STATUS_ORDER: CONTEST_STATUS[] = [
   'pending', 'inscription', 'running', 'results', 'finished'
 ];
 
-export interface CONTESTANT {
-  user: USER;
-  categories: CATEGORY[];
-}
-
 export interface ROUND {
   category: CATEGORY;
   contestant: USER;
@@ -90,6 +90,8 @@ export interface ROUND {
 export interface CONTESTANT {
   user: USER;
   categories: CATEGORY[];
+  paid: boolean;
+  paidAmount: number;
 }
 
 export interface ROUND {
@@ -109,11 +111,10 @@ export interface CONTEST {
   inscriptionStart: string;
   inscriptionEnd: string;
   inscriptionCost: number;
-  categories: CATEGORY[];
+  categories: CONTEST_CATEGORY[];
   contestants: CONTESTANT[];
   visible: boolean;
   status: CONTEST_STATUS;
-  paidUsers: USER[];
   solves: ROUND[];
   [key: string]: any;
 }

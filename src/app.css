@@ -53,13 +53,6 @@ footer {
   margin-top: auto;
 }
 
-.category-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(2rem, 1fr));
-  gap: .5rem;
-  width: 100%;
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: .8rem;

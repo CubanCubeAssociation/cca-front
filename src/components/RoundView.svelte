@@ -6,12 +6,13 @@
   
   import type { SOLVE } from "@interfaces";
   import { createEventDispatcher, onMount } from "svelte";
-  import Modal from "./modals/Modal.svelte";
+  // import Modal from "./modals/Modal.svelte";
   import SolveView from "./SolveView.svelte";
   import { infinitePenalty, sTimer } from "@helpers/timer";
+    import { Modal } from "flowbite-svelte";
 
   export let round: Round;
-  export let show = false;
+  export let open = false;
 
   let solveModal = false;
   let solveModalData: SOLVE;
@@ -25,7 +26,7 @@
   }
 
   function handleClose() {
-    show = false;
+    open = false;
     dispatch('close');
   }
 
@@ -43,7 +44,7 @@
 
 </script>
 
-<Modal bind:show on:close={ handleClose }>
+<Modal bind:open autoclose outsideclose on:close={ handleClose }>
   <div class="flex gap-2 justify-center">
     <div class="table-wrapper rounded-md overflow-x-auto shadow-md">
       <table class="table-auto text-center w-full stripped overflow-hidden">
@@ -68,4 +69,4 @@
   </div>
 </Modal>
 
-<SolveView show={ solveModal } solve={ solveModalData } on:close={ () => solveModal = false }/>
+<SolveView bind:open={ solveModal } solve={ solveModalData } on:close={ () => solveModal = false }/>

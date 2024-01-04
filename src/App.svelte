@@ -17,7 +17,8 @@
   import NavbarComponent from '@components/NavbarComponent.svelte';
   import FooterComponent from '@components/FooterComponent.svelte';
   import Home from '@components/Home.svelte';
-    import { refreshToken } from '@helpers/API';
+  import { refreshToken } from '@helpers/API';
+  import { isAuth } from '@helpers/auth';
 
   if ( localStorage.getItem('tokens') && localStorage.getItem('user') ) {
     $tokenStore = JSON.parse( localStorage.getItem('tokens')! );
@@ -27,11 +28,12 @@
   }
 
   (async() => {
-    if ( !$userStore || !$tokenStore || (new Date($tokenStore.access.expires)).getTime() < Date.now() ) {
+    if ( !isAuth($userStore) ) {
     console.log("Token does not exist or expired");
     
     if ( await refreshToken() ) {
       console.log("Token updated app");
+      location.reload();
       return;
     }
   }
@@ -58,7 +60,7 @@
   
   <!-- Todo -->
   <PrivateRoute path="/admin/contest"><AContests /> </PrivateRoute>
-  <PrivateRoute path="/admin/contest/:id" let:params><AContest id={ params.id }/></PrivateRoute>
+  <PrivateRoute path="/admin/contest/:name" let:params><AContest name={ params.name }/></PrivateRoute>
 
   <!-- Todo -->
   <PrivateRoute path="/admin/solve"><ASolves /> </PrivateRoute>
