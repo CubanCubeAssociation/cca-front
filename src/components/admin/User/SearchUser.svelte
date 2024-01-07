@@ -5,14 +5,15 @@
   import SendIcon from "@icons/Send.svelte";
   import DeleteIcon from "@icons/Delete.svelte";
   import { uniqueArray } from "@helpers/object";
-  import { Button, Checkbox, Heading, Input, Modal, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
+  import { Button, Checkbox, Dropdown, DropdownItem, Heading, Input, Modal, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
+  import { SearchSolid } from "flowbite-svelte-icons";
 
   export let show = false;
   export let multiple = false;
+  export let type: 'dropdown' | 'modal' = 'modal';
 
   const dispatch = createEventDispatcher();
 
-  let dialog: HTMLDialogElement;
   let selected: USER[] = [];
   let userList: USER[] = [];
   let checks: boolean[] = [];
@@ -20,10 +21,6 @@
   let input = '';
   let controller = new AbortController();
   let { signal } = controller;
-
-  function showModal() {
-    dialog.showModal();
-  }
 
   function handleInput() {
     let str = input.trim();
@@ -62,83 +59,101 @@
     selected = selected;
   }
 
-  function sendUsers() {
-    dispatch("user", selected);
+  function sendUsers(user?: USER) {
+    if ( !multiple ) {
+      return dispatch("user", user || userList.filter((_, p) => checks[p]));
+    }
+
+    dispatch("user", user || selected);
   }
 </script>
 
-<Modal title={ `Buscar ${ multiple ? 'usuarios' : 'usuario' }` } bind:open={ show } autoclose outsideclose>
-  <Input bind:value={ input } placeholder="Buscar..." on:input={ handleInput } on:change={ handleInput }/>
+{#if type === 'modal'}
+  <Modal title={ `Buscar ${ multiple ? 'usuarios' : 'usuario' }` } bind:open={ show } autoclose outsideclose>
+    <Input bind:value={ input } placeholder="Buscar..." on:input={ handleInput } on:change={ handleInput }/>
 
-  {#if userList.length}
-    <Table striped shadow hoverable>
-      <TableHead>
-        <TableHeadCell></TableHeadCell>
-        <TableHeadCell>Nombre</TableHeadCell>
-        <TableHeadCell>Usuario</TableHeadCell>
-      </TableHead>
+    {#if userList.length}
+      <Table striped shadow hoverable>
+        <TableHead>
+          <TableHeadCell></TableHeadCell>
+          <TableHeadCell>Nombre</TableHeadCell>
+          <TableHeadCell>Usuario</TableHeadCell>
+        </TableHead>
 
-      <TableBody>
-        {#each userList as c, i (c.username)}
-          <TableBodyRow>
-            <TableBodyCell>
-              <Checkbox class="cursor-pointer" bind:checked={ checks[i] } on:change={ updateChecked }/>
-            </TableBodyCell>
+        <TableBody>
+          {#each userList as c, i (c.username)}
+            <TableBodyRow>
+              <TableBodyCell>
+                <Checkbox class="enabled:cursor-pointer" bind:checked={ checks[i] } disabled={ !multiple && checked && !checks[i] } on:change={ updateChecked }/>
+              </TableBodyCell>
 
-            <TableBodyCell class="cursor-pointer">
-              { c.name }
-            </TableBodyCell>
+              <TableBodyCell class="cursor-pointer">
+                { c.name }
+              </TableBodyCell>
 
-            <TableBodyCell>
-              { c.username }
-            </TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
-  {/if}
+              <TableBodyCell>
+                { c.username }
+              </TableBodyCell>
+            </TableBodyRow>
+          {/each}
+        </TableBody>
+      </Table>
+    {/if}
 
-  {#if checked}
-    <Button on:click={ addSelected }>Añadir ({checked})</Button>
-  {/if}
+    {#if multiple}
+      {#if checked}
+        <Button on:click={ addSelected }>Añadir ({checked})</Button>
+      {/if}
 
-  {#if selected.length}
-    <Heading tag="h4" class="text-center">Seleccionados</Heading>
+      {#if selected.length}
+        <Heading tag="h4" class="text-center">Seleccionados</Heading>
 
-    <Table striped shadow hoverable>
-      <TableHead>
-        <TableHeadCell>Nombre</TableHeadCell>
-        <TableHeadCell>Usuario</TableHeadCell>
-        <TableHeadCell></TableHeadCell>
-      </TableHead>
+        <Table striped shadow hoverable>
+          <TableHead>
+            <TableHeadCell>Nombre</TableHeadCell>
+            <TableHeadCell>Usuario</TableHeadCell>
+            <TableHeadCell></TableHeadCell>
+          </TableHead>
 
-      <TableBody>
-        {#each selected as c, i (c.username)}
-          <TableBodyRow>
-            <TableBodyCell on:click={ () => checks[i] = !checks[i] }>
-              { c.name }
-            </TableBodyCell>
+          <TableBody>
+            {#each selected as c, i (c.username)}
+              <TableBodyRow>
+                <TableBodyCell on:click={ () => checks[i] = !checks[i] }>
+                  { c.name }
+                </TableBodyCell>
 
-            <TableBodyCell>
-              { c.username }
-            </TableBodyCell>
+                <TableBodyCell>
+                  { c.username }
+                </TableBodyCell>
 
-            <TableBodyCell>
-              <Button color="red" on:click={ () => deleteSelected(i) }><DeleteIcon size="1.2rem"/></Button>
-            </TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
-  {/if}
-  
-  <svelte:fragment slot="footer">
-    <div class="flex gap-2 justify-center mt-2">
-      <Button color="alternative">Cancelar</Button>
-      
-      <Button on:click={ sendUsers } disabled={ selected.length === 0 }>
-        <SendIcon size="1.2rem"/> Aceptar
-      </Button>
+                <TableBodyCell>
+                  <Button type="button" color="red" on:click={ () => deleteSelected(i) }><DeleteIcon size="1.2rem"/></Button>
+                </TableBodyCell>
+              </TableBodyRow>
+            {/each}
+          </TableBody>
+        </Table>
+      {/if}
+    {/if}
+    
+    <svelte:fragment slot="footer">
+      <div class="flex gap-2 justify-center mt-2">
+        <Button color="alternative">Cancelar</Button>
+        
+        <Button on:click={ () => sendUsers() } disabled={ (!multiple && !checked) || (multiple && selected.length === 0) }>
+          <SendIcon size="1.2rem"/> Aceptar
+        </Button>
+      </div>
+    </svelte:fragment>
+  </Modal>
+{:else}
+  <Dropdown placement="bottom" bind:open={ show }>
+    <div slot="header" class="px-4 py-2">
+      <Input bind:value={ input } placeholder="Buscar..." on:input={ handleInput } on:change={ handleInput } />
     </div>
-  </svelte:fragment>
-</Modal>
+
+    {#each userList as user}
+      <DropdownItem on:click={() => { show = false; multiple = false; sendUsers(user); }}>{ user.name }</DropdownItem>
+    {/each}
+  </Dropdown>
+{/if}

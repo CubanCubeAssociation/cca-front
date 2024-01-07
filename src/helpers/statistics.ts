@@ -1,4 +1,5 @@
 import type { ROUND, SOLVE } from "../interfaces";
+import { MultiSet } from "./multiset";
 import { checkPath, createPath } from "./object";
 import { infinitePenalty, stringToMillis } from "./timer";
 
@@ -39,24 +40,40 @@ export function median(values: number[]): number {
 
 export function getAverage(n: number, arr: number[]): (number | null)[] {
   let res: (number | null)[] = [];
+  let set: MultiSet<number> = new MultiSet();
+  let d = (n === 3) ? 0 : Math.ceil(n * 0.05);
   let len = arr.length - 1;
-  let elems: number[] = [];
-  let disc = (n === 3) ? 0 : Math.ceil(n * 0.05);
+  let infP = 0;
+  let sum = 0;
+  
+  let getIndex = (i: number) => len - i;
 
   for (let i = 0, maxi = len; i <= maxi; i += 1) {
-    elems.push( arr[len - i] );
+    let t = arr[ getIndex(i) ];
 
-    if ( elems.length < n ) {
-      res.push(null);
+    set.add( t );
+    infP += (isFinite(t) ? 0 : 1);
+    sum += (isFinite(t) ? t : 0);
+    
+    if ( i + 1 < n ) {
+      res.push( null );
     } else {
-      let e1 = elems.slice().sort((a, b) => isFinite(a) && isFinite(b) ? a - b : isFinite(a) ? -1 : 1);
-      let sumd = e1.reduce((s, e, p) => {
-        return (p >= disc && p < n - disc) ? s + e : s;
-      }, 0);
-      
-      res.push( isFinite(sumd) ? sumd / (n - disc * 2) : null);
+      if ( infP > d ) {
+        res.push( null );
+      } else {
+        let elems = set.toArray();
+        let s = sum;
+        
+        elems.slice(0, d).forEach(v => s -= v);
+        d && elems.slice(-d).filter(isFinite).forEach(v => s -= v);
 
-      elems.shift();
+        res.push( s / (n - 2 * d) );
+      }
+
+      let t1 = arr[ getIndex(i - n + 1) ];
+      set.rem( t1 );
+      infP -= (isFinite(t1) ? 0 : 1);
+      sum -= (isFinite(t1) ? t1 : 0);      
     }
   }
 
@@ -72,16 +89,19 @@ export function getAverageS(n: number, arr: SOLVE[]): (number | null)[] {
   );
 }
 
-export function contestAo5(arr: SOLVE[]): number {
-  let solves: SOLVE[] = [];
-
+export function getContestAverage(arr: SOLVE[], mode: 'Ao5' | 'Mo3' = 'Ao5'): number {
+  let solves: SOLVE[] = []
+ 
   arr.sort((s1: SOLVE, s2: SOLVE) => {
     return !s1.isExtra && s2.isExtra ? -1 : 0;
   });
 
   for (let i = 0, maxi = arr.length; i < maxi; i += 1) {
-    solves[ arr[i].solve - 1 ] = arr[i];
+    if ( arr[i].isExtra && arr[i].extra < 0 ) continue;
+    solves[ arr[i].isExtra ? arr[i].extra - 1 : i ] = arr[i];
   }
 
-  return getAverageS(5, solves)[4] || Infinity;
+  let n = mode === 'Ao5' ? 5 : 3;
+
+  return getAverageS(n, solves.slice(0, n))[n - 1] || Infinity;
 }

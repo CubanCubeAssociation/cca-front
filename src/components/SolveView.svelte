@@ -22,8 +22,6 @@
       <tbody>
         <tr> <td>Categoría</td> <td>{ solve?.category?.name || '' }</td> </tr>
         <tr> <td>Competidor</td> <td>{ solve?.user?.name || '' }</td> </tr>
-        <tr> <td>Scrambler</td> <td>{ solve?.scrambler?.name || '' }</td> </tr>
-        <tr> <td>Juez</td> <td>{ solve?.judge?.name || '' }</td> </tr>
         <tr> <td>Ronda</td> <td>{ solve?.round || '' }</td> </tr>
         <tr> <td>Número</td> <td>{ solve?.solve || '' }</td> </tr>
         <tr> <td>Tiempo</td> <td>{ sTimer(solve, true, true) }</td> </tr>

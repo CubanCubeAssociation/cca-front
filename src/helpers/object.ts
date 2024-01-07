@@ -1,5 +1,3 @@
-import type { CONTESTANT } from "@interfaces";
-
 export function checkPath(obj: any, path: string[], useMap: boolean = false): boolean {
   if ( typeof obj === 'undefined' ) return false;
 
@@ -43,17 +41,32 @@ export function createPath(obj: any, path: string[], def: any, useMap: boolean =
   return obj;
 }
 
-type MODEL = 'CONTEST' | 'SOLVE' | 'USER' | 'CATEGORY';
+type MODEL = 'CONTEST' | 'SOLVE' | 'USER' | 'CATEGORY' | 'contestant' | 'solve' | 'round';
+
+function isModel(md: string, k: string) {
+  return (md.startsWith('$') ? md.slice(1) : md.split(":")[0]) === k;
+}
+
+function removeID(obj: any) {
+  let res = Object.assign({}, obj);
+  delete res._id;
+
+  return res;
+}
 
 export function fromModel(obj: any, model: MODEL) {
   const REFS: { [k:string]: string[] } = {
     CATEGORY: [ ],
-    SOLVE: [ "contest", "category", "user", "scrambler", "judge" ],
     USER: [],
-    CONTEST: [ "categories", "solves", "categories" ],
+    CONTEST: [ "contestants:contestant", "rounds:round", "categories:category" ],
+    round: [ '$category', '$contestant' ],
+    contestant: [ "$user", "categories" ],
+    category: [ '$category' ],
   };
 
   const RMODEL = REFS[ model ];
+
+  // console.log("MODEL_RMODEL: ", model, RMODEL);
 
   let res: any = {};
   let entries = Object.entries(obj);
@@ -61,22 +74,19 @@ export function fromModel(obj: any, model: MODEL) {
   for (let i = 0, maxi = entries.length; i < maxi; i += 1) {
     let { 0: k, 1: v } = entries[i] as any;
 
-    if ( model === 'CONTEST' && ['contestants', 'categories'].indexOf(k) > -1 ) {
-      if ( k === "contestants" ){
-        res[k] = v.map((e: any) => ({
-          user: e.user.id,
-          categories: e.categories.map((e1: any) => e1.id || e1),
-          paid: e.paid,
-          paidAmount: e.paidAmount,
-        }) as CONTESTANT);
-      } else if ( k === 'categories' ) {
-        res[k] = v.map((e: any) => ({
-          category: e.category.id,
-          rounds: e.rounds
-        }));
+    let md = RMODEL.find(md => isModel(md, k));
+    
+    if ( model === 'round' && (k === 'Ao5' || k === 'Mo3') ) {
+      continue;
+    } else if ( md ) {
+      let p = md.startsWith('$') ? md.slice(1) : md.split(":");
+      
+      if ( Array.isArray(p) ) {
+        res[k] = v.map((e: any) => p.length === 2 ? removeID( fromModel(e, p[1] as MODEL) ) : typeof e === 'string' ? e : e.id);
+      } else {
+        res[k] = typeof v === 'string' ? v : v.id;
       }
-    } else if ( RMODEL.indexOf( k ) > -1 ) {
-      res[k] = v.map((e: any) => typeof e === 'string' ? e : e.id);
+
     } else {
       res[k] = v;
     }
@@ -97,4 +107,26 @@ export function uniqueArray(arr: any[], cr: (...args: any) => any): any[] {
     key.delete( crs[p] );
     return true;
   })
+}
+
+export function clone(obj: any): any {
+  switch(typeof obj) {
+    case 'boolean':
+    case 'number':
+    case 'string':
+    case 'undefined':
+    case 'function':
+      return obj;
+  }
+
+  if ( typeof obj === 'bigint' ) {
+    return BigInt(obj);
+  }
+
+  if ( Array.isArray(obj) ) return obj.map(clone);
+  
+  return Object.entries(obj).reduce((acc: any, e) => {
+    acc[ e[0] ] = clone(e[1]);
+    return acc;
+  }, {});
 }

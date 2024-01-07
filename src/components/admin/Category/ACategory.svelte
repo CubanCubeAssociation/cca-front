@@ -4,12 +4,10 @@
   import type { CATEGORY } from "@interfaces";
   import { createCategory, getCategory, removeCategory, updateCategory } from "@helpers/API";
   import { navigate } from "svelte-routing";
-  import DeleteIcon from "@icons/Delete.svelte";
   import SaveIcon from "@icons/Send.svelte";
-  import ExclamationIcon from '@icons/Exclamation.svelte';
   import { Button, Card, Heading, Input, Label, Modal, Span, Tooltip } from "flowbite-svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
-    import { ExclamationCircleOutline, TrashBinSolid } from "flowbite-svelte-icons";
+  import { ExclamationCircleOutline, TrashBinSolid } from "flowbite-svelte-icons";
 
   export let id: string;
 
@@ -31,7 +29,7 @@
   }
 
   function save() {
-    if ( id ) {
+    if ( type === 'update' ) {
       updateCategory(category)
         .then(exit)
         .catch(err => console.log("ERROR: ", err));
@@ -49,7 +47,7 @@
   }
 
   onMount(() => {
-    type = id ? 'update' : 'create';
+    type = id != 'new' ? 'update' : 'create';
 
     id && getCategory(id)
       .then(cat => {

@@ -56,35 +56,26 @@ export enum PENALTY {
 }
 
 export interface SOLVE {
-  id: string;
-  contest: CONTEST;
-  category: CATEGORY;
-  user: USER;
-  scrambler: USER;
-  judge: USER;
-  round: number;
-  reconstruction: string;
-  time: string;
-  solve: number;
   isExtra: boolean;
   extra: number;
+  reconstruction: string;
+  time: string;
   penaltyType: PENALTY;
   penaltyDetails: string;
 }
 
-export type CONTEST_STATUS = 'pending' | 'inscription' | 'running' | 'results' | 'finished';
-
-export const STATUS_ORDER: CONTEST_STATUS[] = [
-  'pending', 'inscription', 'running', 'results', 'finished'
-];
-
 export interface ROUND {
   category: CATEGORY;
   contestant: USER;
-  solves: SOLVE[];
+  t1: SOLVE;
+  t2: SOLVE;
+  t3: SOLVE;
+  t4: SOLVE;
+  t5: SOLVE;
+  e1: SOLVE;
+  e2: SOLVE;
   round: number;
-  Ao5: number;
-  Mo3: number;
+  average: number;
 }
 
 export interface CONTESTANT {
@@ -94,14 +85,11 @@ export interface CONTESTANT {
   paidAmount: number;
 }
 
-export interface ROUND {
-  category: CATEGORY;
-  contestant: USER;
-  solves: SOLVE[];
-  round: number;
-  Ao5: number;
-  Mo3: number;
-}
+export type CONTEST_STATUS = 'pending' | 'inscription' | 'running' | 'results' | 'finished';
+
+export const STATUS_ORDER: CONTEST_STATUS[] = [
+  'pending', 'inscription', 'running', 'results', 'finished'
+];
 
 export interface CONTEST {
   id: string;
@@ -115,7 +103,7 @@ export interface CONTEST {
   contestants: CONTESTANT[];
   visible: boolean;
   status: CONTEST_STATUS;
-  solves: ROUND[];
+  rounds: ROUND[];
   [key: string]: any;
 }
 

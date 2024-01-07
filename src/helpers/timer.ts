@@ -51,7 +51,8 @@ export function actualTime(s: SOLVE): number {
   return stringToMillis(s.time) + penalties * 2;
 }
 
-export function sTimer(s: SOLVE, dec?: boolean, suff?: boolean, html?: boolean): string {
+export function sTimer(s: SOLVE | undefined, dec?: boolean, suff?: boolean, html?: boolean): string {
+  if ( !s ) return '';
   if ( s.penaltyType === PENALTY.DNS ) return 'DNS';
   if ( s.penaltyType === PENALTY.DNF ) return 'DNF';
   return timer(actualTime(s), dec, suff, html);
