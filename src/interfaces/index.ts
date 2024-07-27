@@ -1,4 +1,4 @@
-export type ROLE = 'user' | 'delegate' | 'admin';
+export type ROLE = 'user' | 'delegate' | 'admin' | 'root';
 export type SEX = 'M' | 'F';
 
 export interface USER {
@@ -104,7 +104,6 @@ export interface CONTEST {
   visible: boolean;
   status: CONTEST_STATUS;
   rounds: ROUND[];
-  [key: string]: any;
 }
 
 export interface USER {
@@ -151,3 +150,8 @@ export interface PROVINCE {
   nombre: string;
   municipios: string[];
 }
+
+export type Alignment = 'start' | 'end';
+export type Side = 'top' | 'right' | 'bottom' | 'left';
+export type AlignedPlacement = `${Side}-${Alignment}`;
+export type Placement = Side | AlignedPlacement;

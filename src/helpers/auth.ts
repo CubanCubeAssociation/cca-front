@@ -1,3 +1,4 @@
+import { ROLES } from "@constants";
 import type { ROLE, USER } from "@interfaces";
 import { tokenStore } from "@stores/token";
 import { get } from "svelte/store";
@@ -15,6 +16,6 @@ export function isRole(user: USER | null, role: ROLE) {
 }
 
 export function minRole(user: USER | null, role: ROLE) {
-  const roles: ROLE[] = [ 'user', 'delegate', 'admin' ];
-  return isAuth(user) && roles.indexOf( user!.role ) >= roles.indexOf(role);
+  const roles = ROLES.map(r => r.value);
+  return isAuth(user) && roles.indexOf( user!.role ) <= roles.indexOf(role);
 }

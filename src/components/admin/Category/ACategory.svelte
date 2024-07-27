@@ -22,6 +22,7 @@
 
   function selectIcon(ic: CATEGORY) {
     category.scrambler = ic.scrambler;
+    category.name = ic.name;
   }
 
   function exit() {

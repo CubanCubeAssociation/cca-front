@@ -4,7 +4,7 @@ import { tokenStore } from '../stores/token';
 import { userStore } from '../stores/user';
 import { API } from '../constants';
 import { get } from 'svelte/store';
-import { isAuth, tokenNeedsRefresh } from './auth';
+import { tokenNeedsRefresh } from './auth';
 
 // Common internal helper function
 function getAuth(): string {

@@ -1,14 +1,13 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { navigate } from "svelte-routing";
-  import { Button, Card, Heading, Input, Label, Modal, Radio, Select, Span } from 'flowbite-svelte';
+  import { Button, Card, Heading, Input, Label, Modal, Radio, Span } from 'flowbite-svelte';
+  import { ExclamationCircleOutline, TrashBinSolid } from "flowbite-svelte-icons";
   import { createUser, getUser, removeUser, updateUser } from "@helpers/API";
   import type { USER } from "@interfaces";
   import { PROVINCIAS, ROLES } from "@constants";
-  import DeleteIcon from "@icons/Delete.svelte";
   import SaveIcon from "@icons/Send.svelte";
-  import ExclamationIcon from '@icons/Exclamation.svelte';
-    import { ExclamationCircleOutline, TrashBinSolid } from "flowbite-svelte-icons";
+  import Select from '@components/Select.svelte';
 
   export let id = 'new';
 
@@ -48,6 +47,37 @@
     }
   }
 
+  // dev-only
+  function createGroup() {
+    const names = ['Angel', 'Carmen', 'Pedro', 'Juan', 'Andrea', 'Paco', 'Lucía', 'Ramiro', 'Abraham', 'Carlos', 'Edgar',
+      'Lucio', 'Pascual', 'Ana', 'Lidia', 'Rosa'];
+    
+    for (let i = 1; i <= 10; i += 1) {
+      let nm = names[ Math.floor(Math.random() * names.length) ];
+      let lnm = 'A' + Math.random().toString().split('.')[1].slice(0, 5);
+      let username = Math.random().toString().split('.')[1];
+      let p = Math.floor(Math.random() * PROVINCIAS.length);
+      let m = Math.floor(Math.random() * PROVINCIAS[p].municipios.length);
+
+      createUser({
+        name: nm + ' ' + lnm,
+        email: username + '@gmail.com',
+        password: 'Alfa123Perro',
+        ci: '970413' + (new Array(5).fill(0)).map(_ => Math.random().toString()[4]).join(''),
+        sex: 'M',
+        username,
+        province: PROVINCIAS[p].nombre,
+        municipality: PROVINCIAS[p].municipios[m],
+        credit: 0,
+        avatar: '',
+        role: 'user',
+        isEmailVerified: false,
+        age: 0,
+        id: ''
+      });
+    }
+  }
+
   function deleteUser() {
     showModal = false;
 
@@ -57,6 +87,7 @@
   }
 
   function updateMunicipalities(province: string) {
+    console.log("PROVINCE: ", province);
     municipios = (PROVINCIAS.filter(p => p.nombre === province)[0] || {}).municipios || [];
   }
 
@@ -122,12 +153,14 @@
 
     <div>
       <Label class="mb-2">Provincia</Label>
-      <Select items={ PROVINCIAS.map(p => ({ name: p.nombre, value: p.nombre })) } bind:value={ user.province }/>
+      <Select items={ PROVINCIAS } transform={ e => e.nombre } label={ e => e.nombre }
+        bind:value={ user.province } onChange={ updateMunicipalities } placement="right-start"/>
     </div>
 
     <div>
       <Label class="mb-2">Municipio</Label>
-      <Select items={ municipios.map(p => ({ name: p, value: p })) } bind:value={ user.municipality }/>
+      <Select items={ municipios } transform={ e => e } label={e => e} bind:value={ user.municipality }
+        placement="right-start"/>
     </div>
 
     <div>
@@ -137,7 +170,7 @@
 
     <div>
       <Label class="mb-2">Rol</Label>
-      <Select items={ ROLES } bind:value={ user.role }/>
+      <Select items={ ROLES.slice(1) } transform={ e => e.value } label={e => e.name} bind:value={ user.role } placement="right-start"/>
     </div>
   
     <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
@@ -150,6 +183,8 @@
       <Button type="submit" class="gap-2"><SaveIcon size="1.2rem"/> { id === 'new' ? 'Crear' : 'Guardar' }</Button>
     </div>
   </form>
+
+  <Button class="w-fit mx-auto mt-4" on:click={ createGroup }>Crear grupo</Button>
 </Card>
 
 <Modal bind:open={ showModal } outsideclose autoclose title="Eliminar usuario" size="xs">

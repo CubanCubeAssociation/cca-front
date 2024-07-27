@@ -60,16 +60,19 @@ footer {
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #ddd;
+  background-color: rgb(20 32 57);
+  border-radius: 1rem;
+  border: 1px solid #fff3;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #0007;
+  background-color: rgb(76, 82, 141);
   border-radius: 1rem;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #0009;
+  background-color: rgb(60, 77, 225);
+  cursor: pointer;
 }
 
 ::-webkit-scrollbar-button {

@@ -19,7 +19,7 @@
   import Isqrs from "./Isqrs.svelte";
   import { createEventDispatcher } from "svelte";
 
-  export let icon: Scrambler = '333';
+  export let icon: Scrambler | '' = '333';
   export let size = '2rem';
   export let selected = false;
   export let width = size;
@@ -30,6 +30,7 @@
   export let title = '';
   export let desc = '';
   export let buttonClass = '';
+  export let noFallback = false;
 
   const dispatch = createEventDispatcher();
 
@@ -49,22 +50,22 @@
     "333oh": I333oh,
     "444bld": I444bld,
     "444wca": I444wca,
-    "555wca": I555bld,
-    "555bld": I555wca,
+    "555wca": I555wca,
+    "555bld": I555bld,
     "666wca": I666wca,
     "777wca": I777wca,
     "clkwca": Iclkwca,
     "mgmp": Imgmp,
     "pyrso": Ipyrso,
     "skbso": Iskbso,
-    "sqrs": Isqrs,
-  } as const;
+    "sqrs": Isqrs
+  } as any;
 </script>
 
 <button type="button" class={"container " + buttonClass} class:selected on:click={ handleClick }>
   {#if icon in iconMap }
     <svelte:component this={ iconMap[icon] } {size} {width} {height} {color} {ariaLabel} {ariaHidden} {title} {desc} class={cl}/>
-  {:else}
+  {:else if !noFallback}
     <I333 {size} {width} {height} {color} {ariaLabel} {ariaHidden} {title} {desc} class={cl}/>
   {/if}
 </button>

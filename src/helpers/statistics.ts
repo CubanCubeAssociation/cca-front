@@ -3,6 +3,10 @@ import { MultiSet } from "./multiset";
 import { checkPath, createPath } from "./object";
 import { infinitePenalty, stringToMillis } from "./timer";
 
+export function minmax(v: number, a: number, b: number): number {
+  return Math.max(a, Math.min(v, b));
+}
+
 export function getStatsCFromContest(solves: ROUND[]) {
   console.log("SOLVES: ", solves);
   
@@ -104,4 +108,45 @@ export function getContestAverage(arr: SOLVE[], mode: 'Ao5' | 'Mo3' = 'Ao5'): nu
   let n = mode === 'Ao5' ? 5 : 3;
 
   return getAverageS(n, solves.slice(0, n))[n - 1] || Infinity;
+}
+
+function sortSolves(rnd: ROUND[]) {
+  return rnd.sort((a, b) => {
+    if ( a.category.id != b.category.id ) {
+      return a.category.name < b.category.name ? -1 : 1;
+    }
+    
+    if ( a.round != b.round ) {
+      return a.round - b.round;
+    }
+
+    if ( a.average != b.average ) {
+      return a.average - b.average;
+    }
+
+    return a.contestant.name < b.contestant.name ? -1 : 1;
+  });
+}
+
+export function getRoundsInfo(rnds: ROUND[]) {
+  rnds.forEach((rnd) => {
+    rnd.average = getContestAverage(
+      [rnd.t1, rnd.t2, rnd.t3, rnd.t4, rnd.t5, rnd.e1, rnd.e2],
+      (rnd.category.scrambler === '666wca' || rnd.category.scrambler === '777wca') ? 'Mo3' : 'Ao5'
+    );
+  });
+
+  let rounds = sortSolves(rnds);
+  let roundGroup: ROUND[][] = [];
+
+  for (let i = 0, p = -1, maxi = rnds.length; i < maxi; i += 1) {
+    if ( i === 0 || (i > 0 && rnds[i].category.id != rnds[i - 1].category.id ) ) {
+      p += 1;
+      roundGroup[p] = [];
+    }
+
+    roundGroup[p].push( rnds[i] );
+  }
+
+  return { rounds, roundGroup };
 }

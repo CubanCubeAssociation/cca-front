@@ -9,9 +9,9 @@
   import RulesIcon from '@icons/Script.svelte';
   import CubeIcon from '@icons/Cube.svelte';
   import UserIcon from '@icons/AccountGroup.svelte';
-  import { isAuth, isRole, minRole } from "@helpers/auth";
+  import { isAuth, minRole } from "@helpers/auth";
   import WcaCategory from "./wca/WCACategory.svelte";
-    import CcaLogo from "./CCALogo.svelte";
+  import CcaLogo from "./CCALogo.svelte";
 
   function checkMobile(cb: any) {
     if ( window.innerWidth < 768 ) {
@@ -21,7 +21,7 @@
 </script>
 
 <div class="relative py-10">
-  <Navbar let:hidden let:toggle class="justify-between fixed top-0 left-0 w-full z-50">
+  <Navbar let:hidden let:toggle class="justify-between fixed top-0 left-0 w-full z-10">
     <Link to="/">
       <NavBrand>
         <CcaLogo size="2rem"/>
@@ -70,7 +70,7 @@
             </DropdownItem>
           </Link>
 
-          {#if isRole($userStore, 'admin')}
+          {#if minRole($userStore, 'admin')}
             <Link to="/admin/category" on:click={ () => checkMobile(toggle) }>
               <DropdownItem class="flex items-center gap-1">
                 <WcaCategory icon="333" size=".7rem" class="text-yellow-400" buttonClass="!p-[.1rem]"/> Categorías

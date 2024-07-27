@@ -66,8 +66,6 @@ export function fromModel(obj: any, model: MODEL) {
 
   const RMODEL = REFS[ model ];
 
-  // console.log("MODEL_RMODEL: ", model, RMODEL);
-
   let res: any = {};
   let entries = Object.entries(obj);
 
@@ -86,9 +84,12 @@ export function fromModel(obj: any, model: MODEL) {
       } else {
         res[k] = typeof v === 'string' ? v : v.id;
       }
-
     } else {
       res[k] = v;
+      
+      if ( model === 'round' && /^[et][12345]$/.test(k) ) {
+        res[k].time = res[k].time || 'DNS';
+      }
     }
   }
 
@@ -118,6 +119,8 @@ export function clone(obj: any): any {
     case 'function':
       return obj;
   }
+
+  if ( obj === null ) return obj;
 
   if ( typeof obj === 'bigint' ) {
     return BigInt(obj);

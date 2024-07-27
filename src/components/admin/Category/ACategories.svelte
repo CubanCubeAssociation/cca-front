@@ -22,7 +22,7 @@
         if ( !res ) {
           return;
         }
-        categories = res.results;
+        categories = res.results.sort((a, b) => a.name < b.name ? -1 : 1);
       })
       .catch(err => console.dir(err));
   });
