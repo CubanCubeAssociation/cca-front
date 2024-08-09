@@ -114,12 +114,14 @@ export async function createContest(c: CONTEST): Promise<any> {
   }).json();
 }
 
-export async function updateContest(c: CONTEST): Promise<any> {
+export async function updateContest(c: CONTEST, id: string): Promise<any> {
   if ( tokenNeedsRefresh() ) {
     await refreshToken();
   }
 
-  return await ky.patch(API + '/contests/' + c.id, {
+  console.log("CONTEST: ", c);
+
+  return await ky.patch(API + '/contests/' + id, {
     json: withoutID(c), ...commonAuth()
   });
 }

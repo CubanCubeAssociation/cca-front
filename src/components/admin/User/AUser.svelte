@@ -87,7 +87,6 @@
   }
 
   function updateMunicipalities(province: string) {
-    console.log("PROVINCE: ", province);
     municipios = (PROVINCIAS.filter(p => p.nombre === province)[0] || {}).municipios || [];
   }
 

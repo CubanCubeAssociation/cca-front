@@ -49,7 +49,7 @@
       </Link>
       
       {#if !isAuth($userStore)}
-        <Link to="/login"><NavLi> Entrar </NavLi></Link>
+        <Link on:click={ () => checkMobile(toggle) } to="/login"><NavLi> Entrar </NavLi></Link>
       {/if}
   
       {#if minRole($userStore, 'delegate')}

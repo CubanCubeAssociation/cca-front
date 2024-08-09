@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Label, Input, A, Button, Card } from "flowbite-svelte";
+  import { Label, Input, A, Button, Card, Spinner } from "flowbite-svelte";
   import { login } from "@helpers/API";
   import { navigate, useLocation } from "svelte-routing";
   import { onMount } from "svelte";
@@ -9,19 +9,23 @@
   let password = "";
   let error = "";
   let location = useLocation();
+  let loading = false;
 
   async function _login() {
+    loading = true;
     try {
       let res = await login(email, password);
 
       if (!res) {
         error = "Error de autenticación.";
+        loading = false;
         return;
       }
       let ret = new URL(($location as any).href).searchParams.get("returnTo");
       navigate(ret || "/");
     } catch (e) {
       error = "Email o contraseña inválidos.";
+      loading = false;
     }
   }
 
@@ -55,6 +59,8 @@
         id="email"
         placeholder="name@company.com"
         required
+        aria
+        autocomplete="email"
       />
     </div>
     <div>
@@ -67,12 +73,19 @@
         id="password"
         placeholder="••••••••"
         required
+        autocomplete="current-password"
       />
     </div>
 
     <div class="flex items-start">
       <A href="/" aClass="ml-auto text-sm">Olvidó su contraseña?</A>
     </div>
-    <Button type="submit">Entrar</Button>
+    <Button type="submit">
+      {#if loading}
+        <Spinner size="5" color="white" />
+      {:else}
+        Entrar
+      {/if}
+    </Button>
   </form>
 </Card>

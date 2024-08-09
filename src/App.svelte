@@ -30,7 +30,7 @@
   (async () => {
     if (!isAuth($userStore)) {
       console.log("Token does not exist or expired");
-      
+
       $userStore = null;
       $tokenStore = null;
 
@@ -57,27 +57,20 @@
   <!-- Admin -->
   <!-- Done -->
   <PrivateRoute path="/admin/category"><ACategories /></PrivateRoute>
-  <PrivateRoute path="/admin/category/:id" let:params
-    ><ACategory id={params.id} /></PrivateRoute
-  >
+  <PrivateRoute path="/admin/category/:id" let:params><ACategory id={params.id} /></PrivateRoute>
 
   <!-- Todo -->
   <PrivateRoute path="/admin/user"><AUsers /></PrivateRoute>
-  <PrivateRoute path="/admin/user/:id" let:params
-    ><AUser id={params.id} /></PrivateRoute
-  >
+  <PrivateRoute path="/admin/user/:id" let:params><AUser id={params.id} /></PrivateRoute>
 
   <!-- Todo -->
   <PrivateRoute path="/admin/contest"><AContests /></PrivateRoute>
-  <PrivateRoute path="/admin/contest/:name" let:params
-    ><AContest name={params.name} /></PrivateRoute
+  <PrivateRoute path="/admin/contest/:name" let:params><AContest name={params.name} /></PrivateRoute
   >
 
   <!-- Todo -->
   <PrivateRoute path="/admin/solve"><ASolves /></PrivateRoute>
-  <PrivateRoute path="/admin/solve/:id" let:params
-    ><ASolve id={params.id} /></PrivateRoute
-  >
+  <PrivateRoute path="/admin/solve/:id" let:params><ASolve id={params.id} /></PrivateRoute>
 
   <FooterComponent />
 </Router>

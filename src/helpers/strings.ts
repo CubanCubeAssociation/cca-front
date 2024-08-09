@@ -37,3 +37,26 @@ export function getIndicatorColor(st: CONTEST['status']): InstanceType<typeof In
   if ( st === 'finished' ) return 'red';
   return "gray";
 }
+
+export function weakRandomUUID() {
+  return Math.random().toString(36).slice(2);
+}
+
+export function randomUUID() {
+  if (crypto && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  let lens = [8, 4, 4, 4, 12];
+  let res: string[][] = [];
+
+  for (let i = 0; i < 5; i += 1) {
+    res[i] = [];
+
+    for (let j = 0; j < lens[i]; j += 1) {
+      res[i].push(Math.random().toString(16).slice(2));
+    }
+  }
+
+  return res.map(s => s.join("")).join("-");
+}

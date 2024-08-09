@@ -76,6 +76,7 @@ export interface ROUND {
   e2: SOLVE;
   round: number;
   average: number;
+  id: string;
 }
 
 export interface CONTESTANT {
