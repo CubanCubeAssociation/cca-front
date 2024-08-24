@@ -38,6 +38,7 @@
   }
 
   function editRound(rnd: ROUND) {
+    rnd.id = rnd.category.id + rnd.round + rnd.contestant.id;
     dispatch("edit", rnd);
   }
 </script>
