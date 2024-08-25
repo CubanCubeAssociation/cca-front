@@ -16,13 +16,28 @@
   import StateIcon from "@icons/StateMachine.svelte";
   import EyeIcon from "@icons/Eye.svelte";
   import PencilIcon from "@icons/Pencil.svelte";
-  import { Button, ButtonGroup, Card, Heading, Indicator, Span, Spinner, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell, Tooltip } from "flowbite-svelte";
+  import {
+    Button,
+    ButtonGroup,
+    Card,
+    Heading,
+    Indicator,
+    Span,
+    Spinner,
+    Table,
+    TableBody,
+    TableBodyCell,
+    TableBodyRow,
+    TableHead,
+    TableHeadCell,
+    Tooltip,
+  } from "flowbite-svelte";
   import WcaCategory from "./wca/WCACategory.svelte";
   import { Link } from "svelte-routing";
   import { minRole } from "@helpers/auth";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
   import { userStore } from "@stores/user";
-    import ResultView from "./ResultView.svelte";
+  import ResultView from "./ResultView.svelte";
 
   export let name: string;
 
@@ -49,23 +64,20 @@
 
   onMount(() => {
     getContest(name)
-      .then((res) => {
-        console.log("CONTEST: ", res);
+      .then(res => {
         contest = res;
-        contest.date = moment(contest.date).format("YYYY-MM-DDThh:mm");
-        contest.inscriptionStart = moment(contest.inscriptionStart).format(
-          "YYYY-MM-DD",
-        );
-        contest.inscriptionEnd = moment(contest.inscriptionEnd).format(
-          "YYYY-MM-DD",
-        );
+        contest.date = moment.utc(contest.date).format("YYYY-MM-DDThh:mm");
+        contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
+        contest.inscriptionEnd = moment(contest.inscriptionEnd).format("YYYY-MM-DD");
+
+        console.log("CONTEST: ", res);
 
         let roundInfo = getRoundsInfo(contest.rounds);
 
         contest.rounds = roundInfo.rounds;
         roundGroup = roundInfo.roundGroup;
       })
-      .catch((e) => {
+      .catch(e => {
         if (e.name === "HTTPError" && e.response.status === 404) {
           show404 = true;
         }
@@ -89,22 +101,16 @@
     </Heading>
 
     <ButtonGroup>
-      <Button
-        color="blue"
-        class="rounded-tl-md rounded-bl-md"
-        on:click={() => showSection(0)}>Información</Button
+      <Button color="blue" class="rounded-tl-md rounded-bl-md" on:click={() => showSection(0)}
+        >Información</Button
       >
 
       {#if contest.status === "inscription"}
-        <Button color="yellow" on:click={() => showSection(1)}
-          >Registrarse</Button
-        >
+        <Button color="yellow" on:click={() => showSection(1)}>Registrarse</Button>
       {/if}
 
-      <Button
-        color="green"
-        class="rounded-tr-md rounded-br-md"
-        on:click={() => showSection(2)}>Competidores</Button
+      <Button color="green" class="rounded-tr-md rounded-br-md" on:click={() => showSection(2)}
+        >Competidores</Button
       >
     </ButtonGroup>
 
@@ -178,9 +184,7 @@
         <Span class="flex items-center gap-1">
           <PuzzleIcon {size} />Categorías:
         </Span>
-        <Span
-          class="p-1 border-b-2 border-b-green-500 flex flex-wrap gap-2 max-w-[25rem]"
-        >
+        <Span class="p-1 border-b-2 border-b-green-500 flex flex-wrap gap-2 max-w-[25rem]">
           {#each contest.categories as ct}
             <WcaCategory icon={ct.category.scrambler} />
             <Tooltip>{ct.category.name}</Tooltip>
@@ -216,13 +220,11 @@
   <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
     <Heading tag="h2" class="text-center">Resultados</Heading>
 
-    <ResultView { roundGroup }/>
+    <ResultView {roundGroup} />
   </Card>
 {:else}
-  <Card
-    class="mt-4 max-w-3xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4"
-  >
-    <Spinner size="20" />
+  <Card class="mt-4 max-w-3xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
+    <Spinner size="10" />
   </Card>
 {/if}
 
@@ -235,6 +237,6 @@
   }
 
   .info-list li {
-    @apply flex gap-2;
+    @apply flex gap-2 items-center;
   }
 </style>

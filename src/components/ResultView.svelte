@@ -51,7 +51,7 @@
         {rounds[0].category.name}
       </Heading>
 
-      <Table striped hoverable shadow divClass="w-full relative overflow-x-auto">
+      <Table hoverable shadow divClass="w-full relative overflow-x-auto">
         <TableHead>
           <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
           <TableHeadCell class={TABLE_HEAD_CLASS}>Nombre</TableHeadCell>

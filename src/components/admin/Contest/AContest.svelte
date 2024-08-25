@@ -10,6 +10,7 @@
     type ROUND,
     type SOLVE,
     PENALTY,
+    STATUS_ORDER,
   } from "@interfaces";
 
   import {
@@ -373,7 +374,7 @@
           console.log("CONTEST: ", res);
           if (!res) return;
           contest = res;
-          contest.date = moment(contest.date).format("YYYY-MM-DDThh:mm");
+          contest.date = moment.utc(contest.date).format("YYYY-MM-DDThh:mm");
           contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
           contest.inscriptionEnd = moment(contest.inscriptionEnd).format("YYYY-MM-DD");
 
@@ -466,26 +467,16 @@
           <div>
             <Label class="mb-2">Estado</Label>
 
-            <!-- <Button color="alternative" class="gap-2">
-              <Indicator color={getIndicatorColor(contest.status)} />
-              {getStatus(contest.status)}
-              <ChevronDown />
-            </Button>
-            <Dropdown bind:open={dropdownOpen}>
-              {#each STATUS_ORDER as st}
-                <DropdownItem
-                  on:click={() => {
-                    contest.status = st;
-                    dropdownOpen = false;
-                  }}
-                >
-                  <div class="flex items-center gap-2">
-                    <Indicator color={getIndicatorColor(st)} />
-                    {getStatus(st)}
-                  </div>
-                </DropdownItem>
-              {/each}
-            </Dropdown> -->
+            <Select
+              items={STATUS_ORDER}
+              bind:value={contest.status}
+              transform={e => e}
+              label={e => getStatus(e)}
+              hasIcon={e => getIndicatorColor(e)}
+              iconComponent={Indicator}
+              iconKey="color"
+              iconSize={null}
+            />
           </div>
 
           <!-- Categorias -->
