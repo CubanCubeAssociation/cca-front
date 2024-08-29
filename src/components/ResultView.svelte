@@ -18,7 +18,7 @@
   import { minRole } from "@helpers/auth";
   import { createEventDispatcher } from "svelte";
 
-  export let roundGroup: ROUND[][] = [];
+  export let roundGroup: ROUND[][][] = [];
   export let allowEdit = false;
 
   const dispatch = createEventDispatcher();
@@ -44,81 +44,87 @@
 </script>
 
 <Accordion class="w-full">
-  {#each roundGroup as rounds}
+  {#each roundGroup as group}
+    {@const category = group.reduce((acc, e) => [...acc, ...e], [])[0]}
+
     <AccordionItem paddingDefault="py-0 px-0 pr-2">
       <Heading tag="h4" slot="header" class="flex items-center gap-2 my-4">
-        <WcaCategory icon={rounds[0].category.scrambler} size="1.5rem" />
-        {rounds[0].category.name}
+        <WcaCategory icon={category.category.scrambler} size="1.5rem" />
+        {category.category.name}
       </Heading>
 
-      <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-        <TableHead>
-          <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
-          <TableHeadCell class={TABLE_HEAD_CLASS}>Nombre</TableHeadCell>
-          <TableHeadCell class={TABLE_HEAD_CLASS}>T1</TableHeadCell>
-          <TableHeadCell class={TABLE_HEAD_CLASS}>T2</TableHeadCell>
-          <TableHeadCell class={TABLE_HEAD_CLASS}>T3</TableHeadCell>
-          <TableHeadCell class={TABLE_HEAD_CLASS}>T4</TableHeadCell>
-          <TableHeadCell class={TABLE_HEAD_CLASS}>T5</TableHeadCell>
+      {#each group as rounds}
+        <Heading tag="h5" slot="header" class="flex items-center gap-2 my-4 justify-center">
+          Ronda {rounds[0].round}
+        </Heading>
 
-          {#if ["666wca", "777wca"].indexOf(rounds[0].category.scrambler) > -1}
-            <TableHeadCell class={TABLE_HEAD_CLASS}>Mo3</TableHeadCell>
-          {:else}
-            <TableHeadCell class={TABLE_HEAD_CLASS}>Ao5</TableHeadCell>
-          {/if}
-        </TableHead>
+        <Table hoverable shadow divClass="w-full relative overflow-x-auto">
+          <TableHead>
+            <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
+            <TableHeadCell class={TABLE_HEAD_CLASS}>Nombre</TableHeadCell>
+            <TableHeadCell class={TABLE_HEAD_CLASS}>T1</TableHeadCell>
+            <TableHeadCell class={TABLE_HEAD_CLASS}>T2</TableHeadCell>
+            <TableHeadCell class={TABLE_HEAD_CLASS}>T3</TableHeadCell>
 
-        <TableBody>
-          {#each rounds as rnd, p}
-            <TableBodyRow>
-              <TableBodyCell class={TABLE_CELL_CLASS}>
-                {#if p === 0}
-                  <Award type="gold" />
-                {:else if p === 1}
-                  <Award type="silver" />
-                {:else if p === 2}
-                  <Award type="bronze" />
+            {#if ["666wca", "777wca"].indexOf(category.category.scrambler) > -1}
+              <TableHeadCell class={TABLE_HEAD_CLASS}>Mo3</TableHeadCell>
+            {:else}
+              <TableHeadCell class={TABLE_HEAD_CLASS}>T4</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS}>T5</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS + " dark:text-primary-400"}>Ao5</TableHeadCell>
+            {/if}
+          </TableHead>
+
+          <TableBody>
+            {#each rounds as rnd, p}
+              <TableBodyRow>
+                <TableBodyCell class={TABLE_CELL_CLASS}>
+                  {#if p === 0}
+                    <Award type="gold" />
+                  {:else if p === 1}
+                    <Award type="silver" />
+                  {:else if p === 2}
+                    <Award type="bronze" />
+                  {:else}
+                    <span class="flex justify-center">{p + 1}</span>
+                  {/if}
+                </TableBodyCell>
+
+                {#if minRole($userStore, "admin")}
+                  <TableBodyCell
+                    class={TABLE_CELL_CLASS + (allowEdit ? " cursor-pointer" : "")}
+                    on:click={() => editRound(rnd)}>{rnd.contestant.name}</TableBodyCell
+                  >
                 {:else}
-                  <span class="flex justify-center">{p + 1}</span>
+                  <TableBodyCell class={TABLE_CELL_CLASS}>{rnd.contestant.name}</TableBodyCell>
                 {/if}
-              </TableBodyCell>
 
-              {#if minRole($userStore, "admin")}
-                <TableBodyCell
-                  class={TABLE_CELL_CLASS + (allowEdit ? " cursor-pointer" : "")}
-                  on:click={() => editRound(rnd)}>{rnd.contestant.name}</TableBodyCell
-                >
-              {:else}
-                <TableBodyCell class={TABLE_CELL_CLASS}>{rnd.contestant.name}</TableBodyCell>
-              {/if}
+                {#each rndKeys as tp, p}
+                  {#if p < 3 || !isMo3(rounds)}
+                    <TableBodyCell class={TABLE_CELL_CLASS}>
+                      <span
+                        class="flex justify-center"
+                        class:best={isPos(rnd, p, 0)}
+                        class:worst={isPos(rnd, p, isMo3(rounds) ? 2 : 4)}
+                      >
+                        {sTimer(rnd[tp], true)}
+                        <!--  <Award type="NR"/> -->
+                      </span>
+                    </TableBodyCell>
+                  {/if}
+                {/each}
 
-              {#each rndKeys as tp, p}
-                {#if p < 3 || !isMo3(rounds)}
-                  <TableBodyCell class={TABLE_CELL_CLASS}>
-                    <span
-                      class="flex justify-center"
-                      class:best={isPos(rnd, p, 0)}
-                      class:worst={isPos(rnd, p, isMo3(rounds) ? 2 : 4)}
-                    >
-                      {sTimer(rnd[tp], true)}
-                      <!--  <Award type="NR"/> -->
-                    </span>
-                  </TableBodyCell>
-                {:else}
-                  <TableBodyCell class={TABLE_CELL_CLASS}>-</TableBodyCell>
-                {/if}
-              {/each}
-
-              <TableBodyCell class={TABLE_CELL_CLASS}>
-                <span class="flex justify-center">
-                  {timer(rnd.average, true)}
-                  <!-- <Award type="NR"/> -->
-                </span>
-              </TableBodyCell>
-            </TableBodyRow>
-          {/each}
-        </TableBody>
-      </Table>
+                <TableBodyCell class={TABLE_CELL_CLASS}>
+                  <span class="flex justify-center dark:text-primary-400 text-primary-600">
+                    {timer(rnd.average, true)}
+                    <!-- <Award type="NR"/> -->
+                  </span>
+                </TableBodyCell>
+              </TableBodyRow>
+            {/each}
+          </TableBody>
+        </Table>
+      {/each}
     </AccordionItem>
   {/each}
 </Accordion>

@@ -112,8 +112,9 @@ export function getContestAverage(arr: SOLVE[], mode: "Ao5" | "Mo3" = "Ao5"): nu
   }
 
   let n = mode === "Ao5" ? 5 : 3;
+  let avg = getAverageS(n, solves.slice(0, n))[n - 1];
 
-  return getAverageS(n, solves.slice(0, n))[n - 1] || Infinity;
+  return avg ? avg : Infinity;
 }
 
 function sortSolves(rnd: ROUND[]) {
@@ -143,15 +144,22 @@ export function getRoundsInfo(rnds: ROUND[]) {
   });
 
   let rounds = sortSolves(rnds);
-  let roundGroup: ROUND[][] = [];
+  let roundGroup: ROUND[][][] = [];
 
   for (let i = 0, p = -1, maxi = rnds.length; i < maxi; i += 1) {
+    let r = rnds[i].round;
+
     if (i === 0 || (i > 0 && rnds[i].category.id != rnds[i - 1].category.id)) {
       p += 1;
       roundGroup[p] = [];
+      roundGroup[p][r - 1] = [];
     }
 
-    roundGroup[p].push(rnds[i]);
+    if (i > 0 && rnds[i].category.id === rnds[i - 1].category.id && r != rnds[i - 1].round) {
+      roundGroup[p][r - 1] = [];
+    }
+
+    roundGroup[p][r - 1].push(rnds[i]);
   }
 
   return { rounds, roundGroup };

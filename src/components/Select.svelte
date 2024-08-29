@@ -24,7 +24,7 @@
   export let useFixed = false;
   export let iconComponent: any = WcaCategory;
   export let iconKey = "icon";
-  export let iconSize: string | null = "2.2rem";
+  export let iconSize: string | null = "1.2rem";
   export let preferIcon = false;
 
   const selectID = "s" + weakRandomUUID().replace(/-/g, "");

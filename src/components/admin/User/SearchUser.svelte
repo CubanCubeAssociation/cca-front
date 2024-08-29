@@ -4,13 +4,26 @@
   import { searchUser } from "@helpers/API";
   import SendIcon from "@icons/Send.svelte";
   import DeleteIcon from "@icons/Delete.svelte";
+  import AddIcon from "@icons/Plus.svelte";
   import { uniqueArray } from "@helpers/object";
-  import { Button, Checkbox, Dropdown, DropdownItem, Heading, Input, Modal, Table, TableBody, TableBodyCell, TableBodyRow, TableHead, TableHeadCell } from "flowbite-svelte";
-  import { SearchSolid } from "flowbite-svelte-icons";
+  import {
+    Button,
+    Dropdown,
+    DropdownItem,
+    Heading,
+    Input,
+    Modal,
+    Table,
+    TableBody,
+    TableBodyCell,
+    TableBodyRow,
+    TableHead,
+    TableHeadCell,
+  } from "flowbite-svelte";
 
   export let show = false;
   export let multiple = false;
-  export let type: 'dropdown' | 'modal' = 'modal';
+  export let type: "dropdown" | "modal" = "modal";
 
   const dispatch = createEventDispatcher();
 
@@ -18,17 +31,17 @@
   let userList: USER[] = [];
   let checks: boolean[] = [];
   let checked = 0;
-  let input = '';
+  let input = "";
   let controller = new AbortController();
   let { signal } = controller;
 
   function handleInput() {
     let str = input.trim();
-    
-    if ( str ) {
+
+    if (str) {
       controller.abort();
-      
-      searchUser(str, signal).then((res) => {
+
+      searchUser(str, signal).then(res => {
         userList = res;
         checks = userList.map(_ => false);
         checked = 0;
@@ -40,19 +53,17 @@
     }
   }
 
-  function addSelected(ev: MouseEvent) {
-    ev.stopPropagation();
+  // function addSelected(ev: MouseEvent) {
+  //   ev.stopPropagation();
 
-    let temp = [ ...selected, ...userList.filter(
-      (_, p) => checks[p]
-    ) ];
+  //   let temp = [...selected, ...userList.filter((_, p) => checks[p])];
 
-    selected = uniqueArray(temp, (e) => e.username);
-  }
+  //   selected = uniqueArray(temp, e => e.username);
+  // }
 
-  function updateChecked() {
-    checked = checks.reduce((acc, e) => acc + (e ? 1 : 0), 0);
-  }
+  // function updateChecked() {
+  //   checked = checks.reduce((acc, e) => acc + (e ? 1 : 0), 0);
+  // }
 
   function deleteSelected(pos: number) {
     selected.splice(pos, 1);
@@ -60,7 +71,7 @@
   }
 
   function sendUsers(user?: USER) {
-    if ( !multiple ) {
+    if (!multiple) {
       return dispatch("user", user || userList.filter((_, p) => checks[p]));
     }
 
@@ -68,9 +79,19 @@
   }
 </script>
 
-{#if type === 'modal'}
-  <Modal title={ `Buscar ${ multiple ? 'usuarios' : 'usuario' }` } bind:open={ show } autoclose outsideclose>
-    <Input bind:value={ input } placeholder="Buscar..." on:input={ handleInput } on:change={ handleInput }/>
+{#if type === "modal"}
+  <Modal
+    title={`Buscar ${multiple ? "usuarios" : "usuario"}`}
+    bind:open={show}
+    autoclose
+    outsideclose
+  >
+    <Input
+      bind:value={input}
+      placeholder="Buscar..."
+      on:input={handleInput}
+      on:change={handleInput}
+    />
 
     {#if userList.length}
       <Table striped shadow hoverable>
@@ -81,18 +102,27 @@
         </TableHead>
 
         <TableBody>
-          {#each userList as c, i (c.username)}
+          {#each userList as c (c.username)}
             <TableBodyRow>
               <TableBodyCell>
-                <Checkbox class="enabled:cursor-pointer" bind:checked={ checks[i] } disabled={ !multiple && checked && !checks[i] } on:change={ updateChecked }/>
+                <Button
+                  class="px-2 py-2"
+                  type="button"
+                  on:click={e => {
+                    e.stopPropagation();
+                    selected = uniqueArray([...selected, c], e => e.username);
+                  }}
+                >
+                  <AddIcon size="1.2rem" class="pointer-events-none" />
+                </Button>
               </TableBodyCell>
 
               <TableBodyCell class="cursor-pointer">
-                { c.name }
+                {c.name}
               </TableBodyCell>
 
               <TableBodyCell>
-                { c.username }
+                {c.username}
               </TableBodyCell>
             </TableBodyRow>
           {/each}
@@ -101,9 +131,9 @@
     {/if}
 
     {#if multiple}
-      {#if checked}
-        <Button on:click={ addSelected }>Añadir ({checked})</Button>
-      {/if}
+      <!-- {#if checked}
+        <Button on:click={addSelected}>Añadir ({checked})</Button>
+      {/if} -->
 
       {#if selected.length}
         <Heading tag="h4" class="text-center">Seleccionados</Heading>
@@ -118,16 +148,18 @@
           <TableBody>
             {#each selected as c, i (c.username)}
               <TableBodyRow>
-                <TableBodyCell on:click={ () => checks[i] = !checks[i] }>
-                  { c.name }
+                <TableBodyCell on:click={() => (checks[i] = !checks[i])}>
+                  {c.name}
                 </TableBodyCell>
 
                 <TableBodyCell>
-                  { c.username }
+                  {c.username}
                 </TableBodyCell>
 
                 <TableBodyCell>
-                  <Button type="button" color="red" on:click={ () => deleteSelected(i) }><DeleteIcon size="1.2rem"/></Button>
+                  <Button type="button" color="red" on:click={() => deleteSelected(i)}
+                    ><DeleteIcon size="1.2rem" /></Button
+                  >
                 </TableBodyCell>
               </TableBodyRow>
             {/each}
@@ -135,25 +167,39 @@
         </Table>
       {/if}
     {/if}
-    
+
     <svelte:fragment slot="footer">
       <div class="flex gap-2 justify-center mt-2">
         <Button color="alternative">Cancelar</Button>
-        
-        <Button on:click={ () => sendUsers() } disabled={ (!multiple && !checked) || (multiple && selected.length === 0) }>
-          <SendIcon size="1.2rem"/> Aceptar
+
+        <Button
+          on:click={() => sendUsers()}
+          disabled={(!multiple && !checked) || (multiple && selected.length === 0)}
+        >
+          <SendIcon size="1.2rem" /> Aceptar
         </Button>
       </div>
     </svelte:fragment>
   </Modal>
 {:else}
-  <Dropdown placement="bottom" bind:open={ show }>
+  <Dropdown placement="bottom" bind:open={show}>
     <div slot="header" class="px-4 py-2">
-      <Input bind:value={ input } placeholder="Buscar..." on:input={ handleInput } on:change={ handleInput } />
+      <Input
+        bind:value={input}
+        placeholder="Buscar..."
+        on:input={handleInput}
+        on:change={handleInput}
+      />
     </div>
 
     {#each userList as user}
-      <DropdownItem on:click={() => { show = false; multiple = false; sendUsers(user); }}>{ user.name }</DropdownItem>
+      <DropdownItem
+        on:click={() => {
+          show = false;
+          multiple = false;
+          sendUsers(user);
+        }}>{user.name}</DropdownItem
+      >
     {/each}
   </Dropdown>
 {/if}

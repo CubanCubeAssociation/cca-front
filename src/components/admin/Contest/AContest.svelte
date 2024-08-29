@@ -11,6 +11,7 @@
     type SOLVE,
     PENALTY,
     STATUS_ORDER,
+    type CONTEST_CATEGORY,
   } from "@interfaces";
 
   import {
@@ -18,7 +19,6 @@
     getCategories,
     getContest,
     removeContest,
-    searchUser as searchUsers,
     updateContest,
   } from "@helpers/API";
 
@@ -30,11 +30,9 @@
   import { clone, fromModel, uniqueArray } from "@helpers/object";
   import SearchUser from "../User/SearchUser.svelte";
   import {
-    A,
     Button,
     Card,
-    Dropdown,
-    DropdownItem,
+    Checkbox,
     Heading,
     Indicator,
     Input,
@@ -59,7 +57,6 @@
     TrashBinSolid,
     ExclamationCircleOutline,
   } from "flowbite-svelte-icons";
-  import ChevronDown from "@icons/ChevronDown.svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { sTimer } from "@helpers/timer";
   import { getRoundsInfo } from "@helpers/statistics";
@@ -95,7 +92,10 @@
   let deleteRoundDialog = false;
   let deleteUserData: CONTESTANT | null = null;
   let selectedUser: CONTESTANT | null = null;
-  let roundGroup: ROUND[][] = [];
+  let roundGroup: ROUND[][][] = [];
+  let checked: boolean[] = [];
+  let bundleAction = "Agregar categoría";
+  let bundleCategory: CONTEST_CATEGORY;
 
   function exit() {
     navigate("/admin/contest");
@@ -106,8 +106,8 @@
 
     if (name != "new") {
       updateContest(cnt, contest.id)
-        .then(res => {
-          console.log("GUARDADO", res);
+        .then(() => {
+          console.log("GUARDADO");
         })
         .catch(err => console.log("ERROR: ", err));
     } else {
@@ -224,86 +224,93 @@
 
     let { contestants, categories } = contest;
 
-    for (let i = 0, maxi = contestants.length; i < maxi; i += 1) {
-      let cnt = contestants[i];
+    for (let j = 0, maxj = categories.length; j < maxj; j += 1) {
+      let cat = categories[j].category.id;
 
-      for (let j = 0, maxj = categories.length; j < maxj; j += 1) {
-        let cat = categories[j].category.id;
+      for (let r = 1, maxr = categories[j].rounds; r <= maxr; r += 1) {
+        for (let i = 0, maxi = contestants.length; i < maxi; i += 1) {
+          let cnt = contestants[i];
 
-        if (
-          cnt.categories.some(ct => ct.id === cat) &&
-          !roundGroup.some(r =>
-            r.some(
-              rnd => rnd.category.id === cat && rnd.round === 1 && cnt.user.id === rnd.contestant.id
+          if (
+            cnt.categories.some(ct => ct.id === cat) &&
+            !roundGroup.some(rg =>
+              rg.some(rnd =>
+                rnd.some(
+                  rres =>
+                    rres.category.id === cat &&
+                    rres.round === r &&
+                    cnt.user.id === rres.contestant.id
+                )
+              )
             )
-          )
-        ) {
-          round = {
-            contestant: cnt.user,
-            category: contest.categories[j].category,
-            round: 1,
-            t1: {
-              extra: -1,
-              isExtra: false,
-              penaltyDetails: "",
-              reconstruction: "",
-              time: "",
-              penaltyType: PENALTY.NONE,
-            },
-            t2: {
-              extra: -1,
-              isExtra: false,
-              penaltyDetails: "",
-              reconstruction: "",
-              time: "",
-              penaltyType: PENALTY.NONE,
-            },
-            t3: {
-              extra: -1,
-              isExtra: false,
-              penaltyDetails: "",
-              reconstruction: "",
-              time: "",
-              penaltyType: PENALTY.NONE,
-            },
-            t4: {
-              extra: -1,
-              isExtra: false,
-              penaltyDetails: "",
-              reconstruction: "",
-              time: "",
-              penaltyType: PENALTY.NONE,
-            },
-            t5: {
-              extra: -1,
-              isExtra: false,
-              penaltyDetails: "",
-              reconstruction: "",
-              time: "",
-              penaltyType: PENALTY.NONE,
-            },
-            e1: {
-              extra: -1,
-              isExtra: true,
-              penaltyDetails: "",
-              reconstruction: "",
-              time: "",
-              penaltyType: PENALTY.NONE,
-            },
-            e2: {
-              extra: -1,
-              isExtra: true,
-              penaltyDetails: "",
-              reconstruction: "",
-              time: "",
-              penaltyType: PENALTY.NONE,
-            },
-            id: "",
-            average: 0,
-          };
+          ) {
+            round = {
+              contestant: cnt.user,
+              category: contest.categories[j].category,
+              round: r,
+              t1: {
+                extra: -1,
+                isExtra: false,
+                penaltyDetails: "",
+                reconstruction: "",
+                time: "",
+                penaltyType: PENALTY.NONE,
+              },
+              t2: {
+                extra: -1,
+                isExtra: false,
+                penaltyDetails: "",
+                reconstruction: "",
+                time: "",
+                penaltyType: PENALTY.NONE,
+              },
+              t3: {
+                extra: -1,
+                isExtra: false,
+                penaltyDetails: "",
+                reconstruction: "",
+                time: "",
+                penaltyType: PENALTY.NONE,
+              },
+              t4: {
+                extra: -1,
+                isExtra: false,
+                penaltyDetails: "",
+                reconstruction: "",
+                time: "",
+                penaltyType: PENALTY.NONE,
+              },
+              t5: {
+                extra: -1,
+                isExtra: false,
+                penaltyDetails: "",
+                reconstruction: "",
+                time: "",
+                penaltyType: PENALTY.NONE,
+              },
+              e1: {
+                extra: -1,
+                isExtra: true,
+                penaltyDetails: "",
+                reconstruction: "",
+                time: "",
+                penaltyType: PENALTY.NONE,
+              },
+              e2: {
+                extra: -1,
+                isExtra: true,
+                penaltyDetails: "",
+                reconstruction: "",
+                time: "",
+                penaltyType: PENALTY.NONE,
+              },
+              id: "",
+              average: 0,
+            };
 
-          addResult = true;
-          return;
+            addResult = true;
+            return;
+          }
         }
       }
     }
@@ -330,9 +337,13 @@
       c =>
         c.categories.some(ct => ct.id === catId) &&
         !roundGroup.some(r =>
-          r.some(
-            rnd =>
-              rnd.category.id === catId && rnd.round === roundNum && c.user.id === rnd.contestant.id
+          r.some(rnd =>
+            rnd.some(
+              rres =>
+                rres.category.id === catId &&
+                rres.round === roundNum &&
+                c.user.id === rres.contestant.id
+            )
           )
         )
     );
@@ -340,6 +351,8 @@
 
   function updateRoundInfo(rnds: ROUND[]) {
     let roundInfo = getRoundsInfo(rnds);
+
+    console.log("ROUND_INFO: ", roundInfo);
 
     contest.rounds = roundInfo.rounds;
     roundGroup = roundInfo.roundGroup;
@@ -353,8 +366,6 @@
     } else {
       rnds = [...contest.rounds, clone(round)];
     }
-
-    console.log("RNDS: ", rnds);
 
     updateRoundInfo(rnds);
     addResult = false;
@@ -371,12 +382,13 @@
     name != "new" &&
       getContest(name)
         .then(res => {
-          console.log("CONTEST: ", res);
           if (!res) return;
           contest = res;
+          console.log("CONTEST: ", res);
           contest.date = moment.utc(contest.date).format("YYYY-MM-DDThh:mm");
           contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
           contest.inscriptionEnd = moment(contest.inscriptionEnd).format("YYYY-MM-DD");
+          checked = contest.contestants.map(_ => false);
 
           updateRoundInfo(contest.rounds);
         })
@@ -499,7 +511,6 @@
           <!-- Visible -->
           <div class="flex items-center gap-2">
             <Label for="visible" class="cursor-pointer select-none">Visible</Label>
-            <!-- <Checkbox class="cursor-pointer" bind:checked={ contest.visible }/> -->
             <Toggle class="cursor-pointer" bind:checked={contest.visible} />
           </div>
 
@@ -541,15 +552,53 @@
           <UserOutline size="sm" /> Competidores
         </div>
 
-        <div class="w-full mb-4">
+        <div class="w-full mb-4 flex items-center gap-2">
           <Button on:click={() => (addDialog = true)}>
             <PlusIcon /> Añadir competidor
           </Button>
+
+          {#if checked.some(e => e)}
+            <Select
+              bind:value={bundleAction}
+              items={["Agregar categoría", "Remover categoría"]}
+              transform={e => e}
+            />
+            <Select
+              bind:value={bundleCategory}
+              items={contest.categories}
+              transform={e => e}
+              label={e => e.category.name}
+            />
+            <Button
+              color="purple"
+              on:click={() => {
+                let users = contest.contestants.filter((_, p) => checked[p]);
+
+                if (bundleAction.startsWith("Agregar")) {
+                  users.forEach(user => {
+                    user.categories = [
+                      ...user.categories.filter(cat => cat.id != bundleCategory.category.id),
+                      bundleCategory.category,
+                    ];
+                  });
+                } else {
+                  users.forEach(user => {
+                    user.categories = user.categories.filter(
+                      cat => cat.id != bundleCategory.category.id
+                    );
+                  });
+                }
+
+                contest = contest;
+              }}>Aplicar</Button
+            >
+          {/if}
         </div>
 
         {#if contest.contestants.length}
           <Table hoverable striped shadow>
             <TableHead>
+              <TableHeadCell></TableHeadCell>
               <TableHeadCell>Nombre</TableHeadCell>
               <TableHeadCell>Usuario</TableHeadCell>
               <TableHeadCell>Categorías</TableHeadCell>
@@ -559,8 +608,14 @@
             </TableHead>
 
             <TableBody>
-              {#each contest.contestants as c (c.user.username)}
+              {#each contest.contestants as c, p (c.user.username)}
                 <TableBodyRow>
+                  <TableBodyCell
+                    ><Checkbox
+                      bind:checked={checked[p]}
+                      on:change={() => (checked = checked)}
+                    /></TableBodyCell
+                  >
                   <TableBodyCell>{c.user.name}</TableBodyCell>
                   <TableBodyCell>{c.user.username}</TableBodyCell>
                   <TableBodyCell>
