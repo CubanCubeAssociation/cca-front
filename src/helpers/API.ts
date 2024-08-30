@@ -100,12 +100,12 @@ export async function refreshToken() {
 }
 
 // CONTEST
-export async function getContests(): Promise<CONTEST_RESULT> {
+export async function getContests(page: number, limit = 10): Promise<CONTEST_RESULT> {
   if (tokenNeedsRefresh()) {
     await refreshToken();
   }
 
-  return await ky.get(API + "/contests", commonAuth()).json();
+  return await ky.get(API + `/contests?page=${page}&limit=${limit}`, commonAuth()).json();
 }
 
 export async function getContest(name: string): Promise<CONTEST> {

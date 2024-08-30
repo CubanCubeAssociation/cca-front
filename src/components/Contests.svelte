@@ -17,6 +17,8 @@
     Spinner,
     Button,
   } from "flowbite-svelte";
+  import PaginatorComponent from "./PaginatorComponent.svelte";
+  import { Paginator } from "@classes/Paginator";
 
   let contestResults: CONTEST_RESULT = {
     limit: 0,
@@ -28,23 +30,31 @@
 
   let loading = false;
   let error = false;
+  let pg = new Paginator([], 10);
 
   function refreshContestData() {
     loading = true;
     error = false;
 
-    getContests()
+    getContests(pg.page)
       .then(c => {
         if (!c) {
           error = true;
           return;
         }
         contestResults = c;
+        pg.setTotal(c.totalResults);
+        pg = pg;
       })
       .catch(_ => (error = true))
       .finally(() => {
         loading = false;
       });
+  }
+
+  function updatePaginator() {
+    pg = pg;
+    refreshContestData();
   }
 
   onMount(() => {
@@ -53,11 +63,15 @@
 </script>
 
 <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 grid place-items-center">
+  <Heading tag="h2" class="text-center mb-4">Competencias</Heading>
+
+  {#if contestResults.results.length > 0}
+    <PaginatorComponent {pg} on:update={updatePaginator} class="mb-4" />
+  {/if}
+
   {#if loading}
     <Spinner size="10" />
   {:else if contestResults.results.length > 0}
-    <Heading tag="h2" class="text-center mb-4">Competencias</Heading>
-
     <Table striped shadow hoverable>
       <TableHead>
         <TableHeadCell>#</TableHeadCell>
@@ -79,6 +93,8 @@
         {/each}
       </TableBody>
     </Table>
+
+    <PaginatorComponent {pg} on:update={updatePaginator} class="mt-4" />
   {:else if error}
     <Span class="text-center !text-red-500">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
