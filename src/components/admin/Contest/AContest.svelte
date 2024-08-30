@@ -209,6 +209,10 @@
     addResult = true;
   }
 
+  function getRoundLimits(rounds: number) {
+    return [Infinity, ...[6, 12, 24, 48].slice(0, rounds - 1).reverse()];
+  }
+
   function prepareResult() {
     if (contest.categories.length === 0) {
       console.log("Add some categories");
@@ -222,96 +226,83 @@
       return;
     }
 
-    let { contestants, categories } = contest;
+    let { categories } = contest;
 
     for (let j = 0, maxj = categories.length; j < maxj; j += 1) {
       let cat = categories[j].category.id;
 
       for (let r = 1, maxr = categories[j].rounds; r <= maxr; r += 1) {
-        for (let i = 0, maxi = contestants.length; i < maxi; i += 1) {
-          let cnt = contestants[i];
+        let contestants = getContestants(cat, r);
 
-          if (
-            cnt.categories.some(ct => ct.id === cat) &&
-            !roundGroup.some(rg =>
-              rg.some(rnd =>
-                rnd.some(
-                  rres =>
-                    rres.category.id === cat &&
-                    rres.round === r &&
-                    cnt.user.id === rres.contestant.id
-                )
-              )
-            )
-          ) {
-            round = {
-              contestant: cnt.user,
-              category: contest.categories[j].category,
-              round: r,
-              t1: {
-                extra: -1,
-                isExtra: false,
-                penaltyDetails: "",
-                reconstruction: "",
-                time: "",
-                penaltyType: PENALTY.NONE,
-              },
-              t2: {
-                extra: -1,
-                isExtra: false,
-                penaltyDetails: "",
-                reconstruction: "",
-                time: "",
-                penaltyType: PENALTY.NONE,
-              },
-              t3: {
-                extra: -1,
-                isExtra: false,
-                penaltyDetails: "",
-                reconstruction: "",
-                time: "",
-                penaltyType: PENALTY.NONE,
-              },
-              t4: {
-                extra: -1,
-                isExtra: false,
-                penaltyDetails: "",
-                reconstruction: "",
-                time: "",
-                penaltyType: PENALTY.NONE,
-              },
-              t5: {
-                extra: -1,
-                isExtra: false,
-                penaltyDetails: "",
-                reconstruction: "",
-                time: "",
-                penaltyType: PENALTY.NONE,
-              },
-              e1: {
-                extra: -1,
-                isExtra: true,
-                penaltyDetails: "",
-                reconstruction: "",
-                time: "",
-                penaltyType: PENALTY.NONE,
-              },
-              e2: {
-                extra: -1,
-                isExtra: true,
-                penaltyDetails: "",
-                reconstruction: "",
-                time: "",
-                penaltyType: PENALTY.NONE,
-              },
-              id: "",
-              average: 0,
-            };
+        if (contestants.length === 0) continue;
+        const cnt = contestants[0];
 
-            addResult = true;
-            return;
-          }
-        }
+        round = {
+          contestant: cnt.user,
+          category: categories[j].category,
+          round: r,
+          t1: {
+            extra: -1,
+            isExtra: false,
+            penaltyDetails: "",
+            reconstruction: "",
+            time: "",
+            penaltyType: PENALTY.NONE,
+          },
+          t2: {
+            extra: -1,
+            isExtra: false,
+            penaltyDetails: "",
+            reconstruction: "",
+            time: "",
+            penaltyType: PENALTY.NONE,
+          },
+          t3: {
+            extra: -1,
+            isExtra: false,
+            penaltyDetails: "",
+            reconstruction: "",
+            time: "",
+            penaltyType: PENALTY.NONE,
+          },
+          t4: {
+            extra: -1,
+            isExtra: false,
+            penaltyDetails: "",
+            reconstruction: "",
+            time: "",
+            penaltyType: PENALTY.NONE,
+          },
+          t5: {
+            extra: -1,
+            isExtra: false,
+            penaltyDetails: "",
+            reconstruction: "",
+            time: "",
+            penaltyType: PENALTY.NONE,
+          },
+          e1: {
+            extra: -1,
+            isExtra: true,
+            penaltyDetails: "",
+            reconstruction: "",
+            time: "",
+            penaltyType: PENALTY.NONE,
+          },
+          e2: {
+            extra: -1,
+            isExtra: true,
+            penaltyDetails: "",
+            reconstruction: "",
+            time: "",
+            penaltyType: PENALTY.NONE,
+          },
+          id: "",
+          average: 0,
+        };
+
+        addResult = true;
+        return;
       }
     }
   }
@@ -332,28 +323,42 @@
     return new Array(cct ? cct.rounds : 5).fill(0).map((_, p) => p + 1);
   }
 
-  function getContestants(catId: string, roundNum: number) {
-    return contest.contestants.filter(
-      c =>
-        c.categories.some(ct => ct.id === catId) &&
-        !roundGroup.some(r =>
-          r.some(rnd =>
-            rnd.some(
-              rres =>
-                rres.category.id === catId &&
-                rres.round === roundNum &&
-                c.user.id === rres.contestant.id
+  function getContestants(catId: string, roundNum: number): CONTESTANT[] {
+    const limit = getRoundLimits(
+      contest.categories.filter(ct => ct.category.id === catId)[0].rounds
+    )[roundNum - 1];
+
+    if (roundNum === 1) {
+      return contest.contestants.filter(
+        c =>
+          c.categories.some(ct => ct.id === catId) &&
+          !roundGroup.some(r =>
+            r.some(rnd =>
+              rnd.some(
+                rres =>
+                  rres.category.id === catId &&
+                  rres.round === roundNum &&
+                  c.user.id === rres.contestant.id
+              )
             )
           )
-        )
+      );
+    }
+
+    const flatRounds = roundGroup.flat(5);
+    const currentRound = flatRounds.filter(
+      rnd => rnd.category.id === catId && rnd.round === roundNum
     );
+    const podium = flatRounds
+      .filter(rnd => rnd.category.id === catId && rnd.round === roundNum - 1)
+      .slice(0, limit)
+      .filter(rnd => currentRound.every(round => round.contestant.id != rnd.contestant.id));
+
+    return podium.map(p => contest.contestants.find(cnt => cnt.user.id === p.contestant.id)!);
   }
 
   function updateRoundInfo(rnds: ROUND[]) {
     let roundInfo = getRoundsInfo(rnds);
-
-    console.log("ROUND_INFO: ", roundInfo);
-
     contest.rounds = roundInfo.rounds;
     roundGroup = roundInfo.roundGroup;
   }
