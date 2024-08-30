@@ -5,7 +5,7 @@ import { resolve } from 'path';
 export default defineConfig((env) => ({
   plugins: [svelte()],
   publicDir: 'public',
-  base: env.mode === 'production' ? './' : '',
+  base: env.mode === 'production' ? '/' : '',
   server: {
     host: true,
     port: 5000

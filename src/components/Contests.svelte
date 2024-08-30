@@ -83,7 +83,7 @@
       <TableBody>
         {#each contestResults.results as r, pos}
           <TableBodyRow>
-            <TableBodyCell>{pos + 1}</TableBodyCell>
+            <TableBodyCell>{(pg.page - 1) * pg.limit + pos + 1}</TableBodyCell>
             <TableBodyCell>
               <Link to={"/contests/" + r.name}>{r.name}</Link>
             </TableBodyCell>
