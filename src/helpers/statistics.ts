@@ -8,8 +8,6 @@ export function minmax(v: number, a: number, b: number): number {
 }
 
 export function getStatsCFromContest(solves: ROUND[]) {
-  console.log("SOLVES: ", solves);
-
   let mp = solves.reduce((acc, s) => {
     let ct = s.category.name;
     let rnd = s.round.toString();

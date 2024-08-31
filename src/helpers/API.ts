@@ -14,6 +14,7 @@ import { userStore } from "../stores/user";
 import { API } from "../constants";
 import { get } from "svelte/store";
 import { tokenNeedsRefresh } from "./auth";
+import { navigate } from "svelte-routing";
 
 // Common internal helper function
 function getAuth(): string {
@@ -68,8 +69,7 @@ export async function login(email: string, password: string): Promise<LOGIN_DATA
 
     return loginData;
   } catch {
-    userStore.set(null);
-    tokenStore.set(null);
+    clearSessionStores();
   }
 
   return null;
@@ -97,6 +97,30 @@ export async function refreshToken() {
   } catch {}
 
   return false;
+}
+
+export function clearSessionStores() {
+  userStore.set(null);
+  tokenStore.set(null);
+  localStorage.removeItem("tokens");
+  localStorage.removeItem("user");
+}
+
+export function redirectToLogin() {
+  clearSessionStores();
+  navigate(encodeURI(`/login?returnTo=${window.location.pathname}`));
+}
+
+export function redirectOnUnauthorized(err: { response: Response }) {
+  const status = err.response.status;
+
+  switch (status) {
+    case 401:
+    case 403: {
+      redirectToLogin();
+      break;
+    }
+  }
 }
 
 // CONTEST
@@ -292,4 +316,17 @@ export async function removeCategory(c: CATEGORY) {
   return await ky.delete(API + "/categories/" + c.id, {
     ...commonAuth(),
   });
+}
+
+// RESULTS
+export async function updateResults() {
+  if (tokenNeedsRefresh()) {
+    await refreshToken();
+  }
+
+  return await ky
+    .get(API + "/results/update", {
+      ...commonAuth(),
+    })
+    .json();
 }

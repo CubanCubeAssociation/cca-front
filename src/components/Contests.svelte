@@ -46,10 +46,8 @@
         pg.setTotal(c.totalResults);
         pg = pg;
       })
-      .catch(_ => (error = true))
-      .finally(() => {
-        loading = false;
-      });
+      .catch(() => (error = true))
+      .finally(() => (loading = false));
   }
 
   function updatePaginator() {
@@ -100,7 +98,7 @@
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
     </Span>
 
-    <Button class="mt-8" on:click={refreshContestData}>Recargar</Button>
+    <Button class="mt-8 w-min" on:click={refreshContestData}>Recargar</Button>
   {:else}
     <Span class="text-center">No hay competencias disponibles</Span>
   {/if}

@@ -18,6 +18,7 @@
     createContest,
     getCategories,
     getContest,
+    redirectOnUnauthorized,
     removeContest,
     updateContest,
   } from "@helpers/API";
@@ -404,7 +405,7 @@
         if (!res) return;
         categories = res.results.sort((a, b) => (a.name < b.name ? -1 : 1));
       })
-      .catch(err => console.log("ERROR: ", err));
+      .catch(redirectOnUnauthorized);
   });
 </script>
 

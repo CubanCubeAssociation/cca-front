@@ -24,6 +24,7 @@
   } from "flowbite-svelte";
   import { Paginator } from "@classes/Paginator";
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
+  import SearchUser from "./SearchUser.svelte";
 
   const HEADER = "Usuarios";
   const ADD = "Añadir usuario";
@@ -108,17 +109,26 @@
     updateUsers();
   }
 
+  function handleSearch(ev: CustomEvent<USER>) {
+    const user = ev.detail;
+
+    window.open(`/admin/user/${user.id}`, "_blank");
+  }
+
   onMount(updateUsers);
 </script>
 
 <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
   <Heading class="text-3xl text-center">{HEADER}</Heading>
 
-  <div class="actions">
+  <div class="actions gap-2">
     <Button on:click={addUser}>
       <PlusIcon size="1.2rem" />
       {ADD}
     </Button>
+
+    <Button>Buscar</Button>
+    <SearchUser multiple={false} on:user={handleSearch} type="dropdown" />
   </div>
 
   {#if users.length > 0}
@@ -196,7 +206,7 @@
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
     </Span>
 
-    <Button class="mt-8" on:click={updateUsers}>Recargar</Button>
+    <Button class="mt-8 w-min" on:click={updateUsers}>Recargar</Button>
   {:else}
     <Span class="text-center">No hay usuarios todavía</Span>
   {/if}

@@ -1,13 +1,15 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { Link, navigate } from "svelte-routing";
-  import { getContests } from "@helpers/API";
+  import { getContests, updateResults } from "@helpers/API";
   import type { CONTEST } from "@interfaces";
   import {
     Button,
     Card,
     Heading,
     Indicator,
+    Span,
+    Spinner,
     Table,
     TableBody,
     TableBodyCell,
@@ -20,21 +22,54 @@
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
   import PlusIcon from "@icons/Plus.svelte";
+  import { Paginator } from "@classes/Paginator";
+  import PaginatorComponent from "@components/PaginatorComponent.svelte";
 
   const HEADER = "Competencias";
   const ADD = "Añadir competencia";
 
   let contests: CONTEST[] = [];
+  let pg = new Paginator([], 10);
+  let loading = false;
+  let error = false;
 
   function addContest() {
     navigate("/admin/contest/new");
   }
 
+  function refreshContestData() {
+    loading = true;
+    error = false;
+
+    getContests(pg.page)
+      .then(res => {
+        if (!res) {
+          error = true;
+          return;
+        }
+        contests = res.results;
+        pg.setTotal(res.totalResults);
+        pg = pg;
+      })
+      .catch(() => (error = true))
+      .finally(() => (loading = false));
+  }
+
+  function updatePaginator() {
+    pg = pg;
+    refreshContestData();
+  }
+
+  function getResult() {
+    updateResults()
+      .then(res => {
+        console.log("RESULT: ", res);
+      })
+      .catch(err => console.log("ERROR: ", err));
+  }
+
   onMount(() => {
-    getContests().then(res => {
-      if (!res) return;
-      contests = res.results;
-    });
+    refreshContestData();
   });
 </script>
 
@@ -46,9 +81,17 @@
       <PlusIcon size="1.2rem" />
       {ADD}
     </Button>
+
+    <Button color="purple" on:click={getResult}>Resultados</Button>
   </div>
 
   {#if contests.length > 0}
+    <PaginatorComponent {pg} on:update={updatePaginator} class="mb-4" />
+  {/if}
+
+  {#if loading}
+    <Spinner size="10" class="mx-auto" />
+  {:else if contests.length > 0}
     <Table striped shadow hoverable>
       <TableHead>
         <TableHeadCell>#</TableHeadCell>
@@ -88,12 +131,22 @@
       </TableBody>
     </Table>
 
+    <PaginatorComponent {pg} on:update={updatePaginator} class="mt-4" />
+
     <div class="actions">
       <Button on:click={addContest}>
         <PlusIcon size="1.2rem" />
         {ADD}
       </Button>
     </div>
+  {:else if error}
+    <Span class="text-center !text-red-500">
+      Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
+    </Span>
+
+    <Button class="mt-8 w-min" on:click={refreshContestData}>Recargar</Button>
+  {:else}
+    <Span class="text-center">No hay competencias disponibles</Span>
   {/if}
 </Card>
 

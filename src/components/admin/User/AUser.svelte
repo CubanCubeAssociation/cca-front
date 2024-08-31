@@ -138,6 +138,7 @@
   >
 
   <form
+    autocomplete="off"
     class="mt-8 grid gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2"
     on:submit|preventDefault={save}
   >
@@ -165,7 +166,8 @@
           type="password"
           name="password"
           id="password"
-          placeholder="••••••••"
+          placeholder="contraseña"
+          autocomplete="off"
           required
         />
       </div>
@@ -186,7 +188,7 @@
 
     <div>
       <Label for="username" class="mb-2">Usuario</Label>
-      <Input bind:value={user.username} type="text" id="username" required />
+      <Input bind:value={user.username} type="text" id="username" required autocomplete="off" />
     </div>
 
     <div>

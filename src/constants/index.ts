@@ -2,101 +2,101 @@ import type { CATEGORY, PROVINCE, ROLE } from "../interfaces";
 
 // export const API = 'http://localhost:3000/v1';
 // export const API = 'http://192.168.180.93:3000/v1';
-export const API = 'https://cca-back.onrender.com/v1';
+export const API = "https://cca-back.onrender.com/v1";
 
 export const ICONS: CATEGORY[] = [
   {
-    id: '',
-    name: '2x2x2',
-    scrambler: '222so'
+    id: "",
+    name: "2x2x2",
+    scrambler: "222so",
   },
   {
-    id: '',
-    name: '3x3x3',
-    scrambler: '333'
+    id: "",
+    name: "3x3x3",
+    scrambler: "333",
   },
   {
-    id: '',
-    name: '3x3x3 FMC',
-    scrambler: '333fm'
+    id: "",
+    name: "3x3x3 FMC",
+    scrambler: "333fm",
   },
   {
-    id: '',
-    name: '3x3x3 BLD',
-    scrambler: '333ni'
+    id: "",
+    name: "3x3x3 BLD",
+    scrambler: "333ni",
   },
   {
-    id: '',
-    name: '3x3x3 MBLD',
-    scrambler: '333mbf'
+    id: "",
+    name: "3x3x3 MBLD",
+    scrambler: "333mbf",
   },
   {
-    id: '',
-    name: '3x3x3 OH',
-    scrambler: '333oh'
+    id: "",
+    name: "3x3x3 OH",
+    scrambler: "333oh",
   },
   {
-    id: '',
-    name: '4x4x4 BLD',
-    scrambler: '444bld'
+    id: "",
+    name: "4x4x4 BLD",
+    scrambler: "444bld",
   },
   {
-    id: '',
-    name: '4x4x4',
-    scrambler: '444wca'
+    id: "",
+    name: "4x4x4",
+    scrambler: "444wca",
   },
   {
-    id: '',
-    name: '5x5x5',
-    scrambler: '555wca'
+    id: "",
+    name: "5x5x5",
+    scrambler: "555wca",
   },
   {
-    id: '',
-    name: '5x5x5 BLD',
-    scrambler: '555bld'
+    id: "",
+    name: "5x5x5 BLD",
+    scrambler: "555bld",
   },
   {
-    id: '',
-    name: '6x6x6',
-    scrambler: '666wca'
+    id: "",
+    name: "6x6x6",
+    scrambler: "666wca",
   },
   {
-    id: '',
-    name: '7x7x7',
-    scrambler: '777wca'
+    id: "",
+    name: "7x7x7",
+    scrambler: "777wca",
   },
   {
-    id: '',
-    name: 'Clock',
-    scrambler: 'clkwca'
+    id: "",
+    name: "Clock",
+    scrambler: "clkwca",
   },
   {
-    id: '',
-    name: 'Megaminx',
-    scrambler: 'mgmp'
+    id: "",
+    name: "Megaminx",
+    scrambler: "mgmp",
   },
   {
-    id: '',
-    name: 'Pyraminx',
-    scrambler: 'pyrso'
+    id: "",
+    name: "Pyraminx",
+    scrambler: "pyrso",
   },
   {
-    id: '',
-    name: 'Skewb',
-    scrambler: 'skbso'
+    id: "",
+    name: "Skewb",
+    scrambler: "skbso",
   },
   {
-    id: '',
-    name: 'Square-1',
-    scrambler: 'sqrs'
+    id: "",
+    name: "Square-1",
+    scrambler: "sqrs",
   },
 ];
 
 export const PROVINCIAS: PROVINCE[] = [
   {
-    "id": "1",
-    "nombre": 'Pinar del Río',
-    "municipios": [
+    id: "1",
+    nombre: "Pinar del Río",
+    municipios: [
       "Consolación del Sur",
       "Guane",
       "La Palma",
@@ -107,13 +107,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "San Juan y Martínez",
       "San Luis",
       "Sandino",
-      "Viñales"
-    ]
+      "Viñales",
+    ],
   },
   {
-    "id": "2",
-    "nombre": 'Artemisa',
-    "municipios": [
+    id: "2",
+    nombre: "Artemisa",
+    municipios: [
       "Alquízar",
       "Artemisa",
       "Bauta",
@@ -124,13 +124,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "San Antonio de los Baños",
       "Bahía Honda",
       "San Cristóbal",
-      "Candelaria"
-    ]
+      "Candelaria",
+    ],
   },
   {
-    "id": "3",
-    "nombre": 'Mayabeque',
-    "municipios": [
+    id: "3",
+    nombre: "Mayabeque",
+    municipios: [
       "Batabanó",
       "Bejucal",
       "Güines",
@@ -141,13 +141,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Quivicán",
       "San José de las Lajas",
       "San Nicolás de Bari",
-      "Santa Cruz del Norte"
-    ]
+      "Santa Cruz del Norte",
+    ],
   },
   {
-    "id": "4",
-    "nombre": 'La Habana',
-    "municipios": [
+    id: "4",
+    nombre: "La Habana",
+    municipios: [
       "Arroyo Naranjo",
       "Boyeros",
       "Centro Habana",
@@ -162,13 +162,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Playa",
       "Plaza",
       "Regla",
-      "San Miguel del Padrón"
-    ]
+      "San Miguel del Padrón",
+    ],
   },
   {
-    "id": "5",
-    "nombre": 'Matanzas',
-    "municipios": [
+    id: "5",
+    nombre: "Matanzas",
+    municipios: [
       "Calimete",
       "Cárdenas",
       "Ciénaga de Zapata",
@@ -181,13 +181,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Matanzas",
       "Pedro Betancourt",
       "Perico",
-      "Unión de Reyes"
-    ]
+      "Unión de Reyes",
+    ],
   },
   {
-    "id": "6",
-    "nombre": 'Cienfuegos',
-    "municipios": [
+    id: "6",
+    nombre: "Cienfuegos",
+    municipios: [
       "Abreus",
       "Aguada de Pasajeros",
       "Cienfuegos",
@@ -195,13 +195,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Cumanayagua",
       "Palmira",
       "Rodas",
-      "Santa Isabel de las Lajas"
-    ]
+      "Santa Isabel de las Lajas",
+    ],
   },
   {
-    "id": "7",
-    "nombre": 'Villa Clara',
-    "municipios": [
+    id: "7",
+    nombre: "Villa Clara",
+    municipios: [
       "Caibarién",
       "Camajuaní",
       "Cifuentes",
@@ -214,13 +214,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Remedios",
       "Sagua la Grande",
       "Santa Clara",
-      "Santo Domingo"
-    ]
+      "Santo Domingo",
+    ],
   },
   {
-    "id": "8",
-    "nombre": 'Sancti Spíritus',
-    "municipios": [
+    id: "8",
+    nombre: "Sancti Spíritus",
+    municipios: [
       "Cabaigúan",
       "Fomento",
       "Jatibonico",
@@ -228,13 +228,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Sancti Spíritus",
       "Taguasco",
       "Trinidad",
-      "Yaguajay"
-    ]
+      "Yaguajay",
+    ],
   },
   {
-    "id": "9",
-    "nombre": 'Ciego de Ávila',
-    "municipios": [
+    id: "9",
+    nombre: "Ciego de Ávila",
+    municipios: [
       "Ciro Redondo",
       "Baraguá",
       "Bolivia",
@@ -244,13 +244,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Majagua",
       "Morón",
       "Primero de Enero",
-      "Venezuela"
-    ]
+      "Venezuela",
+    ],
   },
   {
-    "id": "10",
-    "nombre": 'Camagüey',
-    "municipios": [
+    id: "10",
+    nombre: "Camagüey",
+    municipios: [
       "Camagüey",
       "Carlos Manuel de Céspedes",
       "Esmeralda",
@@ -263,13 +263,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Santa Cruz del Sur",
       "Sibanicú",
       "Sierra de Cubitas",
-      "Vertientes"
-    ]
+      "Vertientes",
+    ],
   },
   {
-    "id": "11",
-    "nombre": 'Las Tunas',
-    "municipios": [
+    id: "11",
+    nombre: "Las Tunas",
+    municipios: [
       "Amancio Rodríguez",
       "Colombia",
       "Jesús Menéndez",
@@ -277,13 +277,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Las Tunas",
       "Majibacoa",
       "Manatí",
-      "Puerto Padre"
-    ]
+      "Puerto Padre",
+    ],
   },
   {
-    "id": "12",
-    "nombre": 'Holguín',
-    "municipios": [
+    id: "12",
+    nombre: "Holguín",
+    municipios: [
       "Antilla",
       "Báguanos",
       "Banes",
@@ -297,13 +297,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Moa",
       "Rafael Freyre",
       "Sagua de Tánamo",
-      "Urbano Noris"
-    ]
+      "Urbano Noris",
+    ],
   },
   {
-    "id": "13",
-    "nombre": 'Santiago de Cuba',
-    "municipios": [
+    id: "13",
+    nombre: "Santiago de Cuba",
+    municipios: [
       "Contramaestre",
       "Guamá",
       "Julio Antonio Mella",
@@ -312,13 +312,13 @@ export const PROVINCIAS: PROVINCE[] = [
       "Santiago de Cuba",
       "Segundo Frente",
       "Songo la Maya",
-      "Tercer Frente"
-    ]
+      "Tercer Frente",
+    ],
   },
   {
-    "id": "14",
-    "nombre": 'Guantánamo',
-    "municipios": [
+    id: "14",
+    nombre: "Guantánamo",
+    municipios: [
       "Baracoa",
       "Caimanera",
       "El Salvador",
@@ -328,18 +328,18 @@ export const PROVINCIAS: PROVINCE[] = [
       "Manuel Tames",
       "Niceto Pérez",
       "San Antonio del Sur",
-      "Yateras"
-    ]
+      "Yateras",
+    ],
   },
   {
-    "id": "15",
-    "nombre": 'Isla de la Juventud',
-    "municipios": [],
+    id: "15",
+    nombre: "Isla de la Juventud",
+    municipios: [],
   },
   {
-    "id": "16",
-    "nombre": "Granma",
-    "municipios": [
+    id: "16",
+    nombre: "Granma",
+    municipios: [
       "Bartolomé Masó",
       "Bayamo",
       "Buey Arriba",
@@ -352,12 +352,12 @@ export const PROVINCIAS: PROVINCE[] = [
       "Niquero",
       "Pilón",
       "Río Cauto",
-      "Yara"
-    ]
-  }
+      "Yara",
+    ],
+  },
 ];
 
-export const ROLES: {name: string, value: ROLE}[] = [
+export const ROLES: { name: string; value: ROLE }[] = [
   { name: "Root", value: "root" },
   { name: "Administrador", value: "admin" },
   { name: "Delegado", value: "delegate" },

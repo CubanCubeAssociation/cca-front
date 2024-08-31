@@ -17,22 +17,20 @@
   import NavbarComponent from "@components/NavbarComponent.svelte";
   import FooterComponent from "@components/FooterComponent.svelte";
   import Home from "@components/Home.svelte";
-  import { refreshToken } from "@helpers/API";
+  import { clearSessionStores, refreshToken } from "@helpers/API";
   import { isAuth } from "@helpers/auth";
 
   if (localStorage.getItem("tokens") && localStorage.getItem("user")) {
     $tokenStore = JSON.parse(localStorage.getItem("tokens")!);
     $userStore = JSON.parse(localStorage.getItem("user")!);
   } else {
-    $userStore = $tokenStore = null;
+    clearSessionStores();
   }
 
   (async () => {
     if (!isAuth($userStore)) {
       console.log("Token does not exist or expired");
-
-      $userStore = null;
-      $tokenStore = null;
+      clearSessionStores();
 
       if (await refreshToken()) {
         console.log("Token updated app");
