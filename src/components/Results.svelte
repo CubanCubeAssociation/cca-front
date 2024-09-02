@@ -1,7 +1,10 @@
 <script lang="ts">
   import {
+    Button,
     Card,
     Heading,
+    Span,
+    Spinner,
     Table,
     TableBody,
     TableBodyCell,
@@ -14,8 +17,9 @@
   import { timer } from "@helpers/timer";
   import { onMount } from "svelte";
   import { updateResults } from "@helpers/API";
-  import LinkIcon from "@icons/OpenInNew.svelte";
   import { Link } from "svelte-routing";
+  import LinkIcon from "@icons/OpenInNew.svelte";
+  import TrophyIcon from "@icons/Trophy.svelte";
 
   interface ISingleRecord {
     category: {
@@ -54,10 +58,17 @@
   let prSingleMap: Map<string, IAverageRecord> = new Map();
   let prAvgMap: Map<string, IAverageRecord> = new Map();
 
+  let loading = false;
+  let error = false;
+
   function updateCategoryMap() {
+    loading = true;
+    error = false;
+
     updateResults()
       .then((res: any) => {
         if (!res) {
+          error = true;
           return;
         }
 
@@ -90,7 +101,8 @@
         nrSingleMap = nrSingleMap;
         nrAvgMap = nrAvgMap;
       })
-      .catch(err => console.log("ERROR: ", err));
+      .catch(() => (error = true))
+      .finally(() => (loading = false));
   }
 
   function getCategories(_: any) {
@@ -103,67 +115,81 @@
 </script>
 
 <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-  <Heading tag="h1" class="text-center text-4xl flex justify-center gap-1">Resultados</Heading>
+  <Heading tag="h1" class="text-center text-4xl flex justify-center gap-1 items-center">
+    Resultados <TrophyIcon size="2rem" class="text-yellow-300" />
+  </Heading>
 
-  <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-    <TableHead>
-      <TableHeadCell class="px-2 py-4">Categoría</TableHeadCell>
-      <TableHeadCell class="px-2 py-4">Single</TableHeadCell>
-      <TableHeadCell class="px-2 py-4"></TableHeadCell>
-      <TableHeadCell class="px-2 py-4">Media</TableHeadCell>
-      <TableHeadCell class="px-2 py-4"></TableHeadCell>
-    </TableHead>
+  {#if loading}
+    <Spinner />
+  {:else if getCategories(categoryMap).length > 0}
+    <Table hoverable shadow divClass="w-full relative overflow-x-auto">
+      <TableHead>
+        <TableHeadCell class="px-2 py-4">Categoría</TableHeadCell>
+        <TableHeadCell class="px-2 py-4">Single</TableHeadCell>
+        <TableHeadCell class="px-2 py-4"></TableHeadCell>
+        <TableHeadCell class="px-2 py-4">Media</TableHeadCell>
+        <TableHeadCell class="px-2 py-4"></TableHeadCell>
+      </TableHead>
 
-    <TableBody>
-      {#each getCategories(categoryMap) as cats}
-        {@const nrs = nrSingleMap.get(cats[0])}
-        {@const nra = nrAvgMap.get(cats[0])}
-        <TableBodyRow>
-          <TableBodyCell class="px-2">
-            <Heading
-              tag="h2"
-              class="text-center text-lg w-fit flex justify-center items-center gap-1 col-span-2"
-            >
-              <WcaCategory icon={categoryIcon.get(cats[0])} size="1.2rem" />
-              {cats[1]}
-            </Heading>
-          </TableBodyCell>
+      <TableBody>
+        {#each getCategories(categoryMap) as cats}
+          {@const nrs = nrSingleMap.get(cats[0])}
+          {@const nra = nrAvgMap.get(cats[0])}
+          <TableBodyRow>
+            <TableBodyCell class="px-2">
+              <Heading
+                tag="h2"
+                class="text-center text-lg w-fit flex justify-center items-center gap-1 col-span-2"
+              >
+                <WcaCategory icon={categoryIcon.get(cats[0])} size="1.2rem" />
+                {cats[1]}
+              </Heading>
+            </TableBodyCell>
 
-          {#if nrs && nrs.time}
-            <TableBodyCell class="px-2">
-              <Link to={"/contests/" + nrs.contest}>
-                <span class="text-green-400 flex gap-2 items-center">
-                  {timer(nrs.time, true, true)}
-                  <LinkIcon size="1.2rem" />
-                </span>
-              </Link>
-            </TableBodyCell>
-            <TableBodyCell class="px-2">
-              <span class="text-sm">{nrs.contestant.name}</span>
-            </TableBodyCell>
-          {:else}
-            <TableBodyCell class="px-2">-</TableBodyCell>
-            <TableBodyCell class="px-2">-</TableBodyCell>
-          {/if}
+            {#if nrs && nrs.time}
+              <TableBodyCell class="px-2">
+                <Link to={"/contests/" + nrs.contest}>
+                  <span class="text-green-400 flex gap-2 items-center">
+                    {timer(nrs.time, true, true)}
+                    <LinkIcon size="1.2rem" />
+                  </span>
+                </Link>
+              </TableBodyCell>
+              <TableBodyCell class="px-2">
+                <span class="text-sm">{nrs.contestant.name}</span>
+              </TableBodyCell>
+            {:else}
+              <TableBodyCell class="px-2">-</TableBodyCell>
+              <TableBodyCell class="px-2">-</TableBodyCell>
+            {/if}
 
-          {#if nra && nra.time}
-            <TableBodyCell class="px-2">
-              <Link to={"/contests/" + nra.contest}>
-                <span class="text-purple-400 flex gap-2 items-center">
-                  {timer(nra.time, true, true)}
-                  <LinkIcon size="1.2rem" />
-                </span>
-              </Link>
-            </TableBodyCell>
-            <TableBodyCell class="px-2">
-              <span class="text-sm">{nra.contestant.name}</span>
-            </TableBodyCell>
-          {:else}
-            <TableBodyCell class="px-2">-</TableBodyCell>
-            <TableBodyCell class="px-2">-</TableBodyCell>
-          {/if}
-        </TableBodyRow>
-      {/each}
-    </TableBody>
-  </Table>
+            {#if nra && nra.time}
+              <TableBodyCell class="px-2">
+                <Link to={"/contests/" + nra.contest}>
+                  <span class="text-purple-400 flex gap-2 items-center">
+                    {timer(nra.time, true, true)}
+                    <LinkIcon size="1.2rem" />
+                  </span>
+                </Link>
+              </TableBodyCell>
+              <TableBodyCell class="px-2">
+                <span class="text-sm">{nra.contestant.name}</span>
+              </TableBodyCell>
+            {:else}
+              <TableBodyCell class="px-2">-</TableBodyCell>
+              <TableBodyCell class="px-2">-</TableBodyCell>
+            {/if}
+          </TableBodyRow>
+        {/each}
+      </TableBody>
+    </Table>
+  {:else if error}
+    <Span class="text-center !text-red-500">
+      Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
+    </Span>
+
+    <Button class="mt-8 w-min" on:click={updateCategoryMap}>Recargar</Button>
+  {:else}
+    <Span class="text-center">No hay resultados disponibles</Span>
+  {/if}
 </Card>

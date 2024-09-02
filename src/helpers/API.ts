@@ -325,7 +325,7 @@ export async function updateResults() {
   }
 
   return await ky
-    .get(API + "/results/update", {
+    .get(API + "/results/", {
       ...commonAuth(),
     })
     .json();
