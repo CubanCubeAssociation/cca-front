@@ -94,7 +94,7 @@
     />
 
     {#if userList.length}
-      <Table striped shadow hoverable>
+      <Table hoverable shadow divClass="w-full relative overflow-x-auto">
         <TableHead>
           <TableHeadCell></TableHeadCell>
           <TableHeadCell>Nombre</TableHeadCell>

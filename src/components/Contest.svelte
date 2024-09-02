@@ -45,7 +45,7 @@
   let show404 = false;
   let contest: CONTEST;
   let section: number = 0;
-  let roundGroup: ROUND[][] = [];
+  let roundGroup: ROUND[][][] = [];
 
   function before(state: CONTEST_STATUS) {
     let idx = STATUS_ORDER.indexOf(contest.status);
@@ -92,7 +92,7 @@
   </Card>
 {:else if contest}
   <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-    <Heading tag="h2" class="text-center flex justify-center gap-1">
+    <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">
       {contest.name}
 
       {#if minRole($userStore, "delegate")}
@@ -218,7 +218,7 @@
   </Card>
 
   <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-    <Heading tag="h2" class="text-center">Resultados</Heading>
+    <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">Resultados</Heading>
 
     <ResultView {roundGroup} />
   </Card>

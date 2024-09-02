@@ -61,7 +61,9 @@
 </script>
 
 <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 grid place-items-center">
-  <Heading tag="h2" class="text-center mb-4">Competencias</Heading>
+  <Heading tag="h1" class="text-center text-4xl flex justify-center gap-1 mb-8">
+    Competencias
+  </Heading>
 
   {#if contestResults.results.length > 0}
     <PaginatorComponent {pg} on:update={updatePaginator} class="mb-4" />
@@ -70,7 +72,7 @@
   {#if loading}
     <Spinner size="10" />
   {:else if contestResults.results.length > 0}
-    <Table striped shadow hoverable>
+    <Table hoverable shadow divClass="w-full relative overflow-x-auto">
       <TableHead>
         <TableHeadCell>#</TableHeadCell>
         <TableHeadCell>Nombre</TableHeadCell>

@@ -14,7 +14,7 @@
 </script>
 
 <main id="hero">
-  <Heading tag="h2" class="text-center mb-4">Cuban Cube Association</Heading>
+  <Heading tag="h1" class="text-center mb-4">Cuban Cube Association</Heading>
   <P align="center"
     >Lorem ipsum dolor sit amet consectetur adipisicing elit. Ullam eaque, veniam repellat velit
     omnis repudiandae doloremque sint cumque, laborum magnam illum vitae? Odio, maiores iusto minima

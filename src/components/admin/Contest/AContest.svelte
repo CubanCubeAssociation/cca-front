@@ -602,7 +602,7 @@
         </div>
 
         {#if contest.contestants.length}
-          <Table hoverable striped shadow>
+          <Table hoverable shadow divClass="w-full relative overflow-x-auto">
             <TableHead>
               <TableHeadCell></TableHeadCell>
               <TableHeadCell>Nombre</TableHeadCell>
@@ -767,7 +767,7 @@
     {/if}
   </div>
 
-  <Table shadow>
+  <Table hoverable shadow divClass="w-full relative overflow-x-auto">
     <TableHead>
       <TableHeadCell>T1</TableHeadCell>
       <TableHeadCell>T2</TableHeadCell>

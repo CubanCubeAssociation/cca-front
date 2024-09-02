@@ -92,7 +92,7 @@
   {#if loading}
     <Spinner size="10" class="mx-auto" />
   {:else if contests.length > 0}
-    <Table striped shadow hoverable>
+    <Table hoverable shadow divClass="w-full relative overflow-x-auto">
       <TableHead>
         <TableHeadCell>#</TableHeadCell>
         <TableHeadCell>Nombre</TableHeadCell>

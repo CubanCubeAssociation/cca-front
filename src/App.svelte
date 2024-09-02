@@ -19,6 +19,7 @@
   import Home from "@components/Home.svelte";
   import { clearSessionStores, refreshToken } from "@helpers/API";
   import { isAuth } from "@helpers/auth";
+  import Results from "@components/Results.svelte";
 
   if (localStorage.getItem("tokens") && localStorage.getItem("user")) {
     $tokenStore = JSON.parse(localStorage.getItem("tokens")!);
@@ -51,6 +52,7 @@
   <Route path="/login" component={Login} />
   <Route path="/contests" component={Contests} />
   <Route path="/contests/:name" component={Contest} />
+  <Route path="/results" component={Results} />
 
   <!-- Admin -->
   <!-- Done -->
