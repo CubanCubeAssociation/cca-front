@@ -140,6 +140,7 @@
   {:else if users.length > 0}
     <Table striped hoverable shadow>
       <TableHead>
+        <TableHeadCell>#</TableHeadCell>
         {#each columns as C}
           {#if C.show}
             <TableHeadCell>{C.column}</TableHeadCell>
@@ -148,8 +149,10 @@
       </TableHead>
 
       <TableBody>
-        {#each users as u}
+        {#each users as u, pos}
           <TableBodyRow>
+            <TableBodyCell>{(pg.page - 1) * pg.limit + pos + 1}</TableBodyCell>
+
             {#if columns[0].show}
               <TableBodyCell>
                 <Link to={"/admin/user/" + u.id} class="flex gap-2 items-center">

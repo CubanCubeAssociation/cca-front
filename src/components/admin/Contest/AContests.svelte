@@ -105,7 +105,7 @@
       <TableBody>
         {#each contests as ct, pos}
           <TableBodyRow>
-            <TableBodyCell>{pos + 1}</TableBodyCell>
+            <TableBodyCell>{(pg.page - 1) * pg.limit + pos + 1}</TableBodyCell>
             <TableBodyCell>
               <Link to={"/admin/contest/" + ct.name}>{ct.name}</Link>
             </TableBodyCell>
