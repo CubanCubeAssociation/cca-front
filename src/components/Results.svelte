@@ -93,17 +93,19 @@
           })
         );
 
-        NR_avg.forEach(sr => {
-          nrMap.set(sr.category.id, { single: null, mean: sr });
+        NR_single.forEach(sr => {
+          if (!sr.time) return;
+          nrMap.set(sr.category.id, { single: sr, mean: null });
         });
 
-        NR_single.forEach(sr => {
+        NR_avg.forEach(sr => {
           if (nrMap.has(sr.category.id)) {
             const nr = nrMap.get(sr.category.id)!;
-            nr.single = sr;
-          } else {
-            nrMap.set(sr.category.id, { single: sr, mean: null });
+            nr.mean = sr;
           }
+          // else { // No tiene sentido tener una media sin single
+          //   nrMap.set(sr.category.id, { single: null, mean: sr });
+          // }
         });
 
         PR_avg.forEach(pr => {
@@ -160,6 +162,7 @@
   {#if loading}
     <Spinner />
   {:else if getSortedEntries(categoryMap, 1).length > 0}
+    <!-- NR -->
     <Heading
       tag="h2"
       class="text-center text-xl w-max flex justify-center gap-1 items-center
@@ -171,10 +174,14 @@
     <Table hoverable shadow divClass="w-full relative overflow-x-auto">
       <TableHead>
         <TableHeadCell class="px-2 py-4">Categoría</TableHeadCell>
-        <TableHeadCell class="px-2 py-4">Single</TableHeadCell>
-        <TableHeadCell class="px-2 py-4"></TableHeadCell>
-        <TableHeadCell class="px-2 py-4">Media</TableHeadCell>
-        <TableHeadCell class="px-2 py-4"></TableHeadCell>
+        <TableHeadCell class="px-2 py-4 flex gap-1">
+          <span class="max-sm:text-green-400">Single</span>
+          <span class="sm:hidden">/</span>
+          <span class="max-sm:text-purple-400 sm:hidden">Media</span>
+        </TableHeadCell>
+        <TableHeadCell class="px-2 py-4">Competidor</TableHeadCell>
+        <TableHeadCell class="px-2 py-4 max-sm:hidden">Media</TableHeadCell>
+        <TableHeadCell class="px-2 py-4 max-sm:hidden">Competidor</TableHeadCell>
       </TableHead>
 
       <TableBody>
@@ -183,7 +190,7 @@
           {@const nrs = nr?.single}
           {@const nra = nr?.mean}
 
-          <TableBodyRow>
+          <TableBodyRow class={nra && nra.time ? "max-sm:row-span-2" : ""}>
             <TableBodyCell class="px-2">
               <Heading
                 tag="h3"
@@ -194,25 +201,31 @@
               </Heading>
             </TableBodyCell>
 
-            {#if nrs && nrs.time}
-              <TableBodyCell class="px-2">
-                <Link to={"/contests/" + nrs.contest}>
-                  <span class="text-green-400 flex gap-2 items-center justify-between">
-                    {timer(nrs.time, true, true)}
+            <TableBodyCell class="px-2 gap-4">
+              <Link to={"/contests/" + nrs?.contest}>
+                <span class="text-green-400 flex gap-2 items-center justify-between">
+                  {timer(nrs?.time || 0, true, true)}
+                  <LinkIcon size="1.2rem" />
+                </span>
+              </Link>
+              {#if nra && nra.time}
+                <Link to={"/contests/" + nra.contest} class="sm:hidden">
+                  <span class="text-purple-400 flex gap-2 items-center justify-between mt-2">
+                    {timer(nra.time, true, true)}
                     <LinkIcon size="1.2rem" />
                   </span>
                 </Link>
-              </TableBodyCell>
-              <TableBodyCell class="px-2">
-                <span class="text-sm">{nrs.contestant.name}</span>
-              </TableBodyCell>
-            {:else}
-              <TableBodyCell class="px-2">-</TableBodyCell>
-              <TableBodyCell class="px-2">-</TableBodyCell>
-            {/if}
+              {/if}
+            </TableBodyCell>
+            <TableBodyCell class="px-2 grid">
+              <span class="text-sm">{nrs?.contestant.name}</span>
+              {#if nra && nra.time}
+                <span class="text-sm sm:hidden mt-2">{nra.contestant.name}</span>
+              {/if}
+            </TableBodyCell>
 
             {#if nra && nra.time}
-              <TableBodyCell class="px-2">
+              <TableBodyCell class="px-2 max-sm:hidden">
                 <Link to={"/contests/" + nra.contest}>
                   <span class="text-purple-400 flex gap-2 items-center justify-between">
                     {timer(nra.time, true, true)}
@@ -220,18 +233,19 @@
                   </span>
                 </Link>
               </TableBodyCell>
-              <TableBodyCell class="px-2">
+              <TableBodyCell class="px-2 max-sm:hidden">
                 <span class="text-sm">{nra.contestant.name}</span>
               </TableBodyCell>
             {:else}
-              <TableBodyCell class="px-2">-</TableBodyCell>
-              <TableBodyCell class="px-2">-</TableBodyCell>
+              <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>
+              <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>
             {/if}
           </TableBodyRow>
         {/each}
       </TableBody>
     </Table>
 
+    <!-- PR -->
     <Heading
       tag="h2"
       class="text-center text-xl w-max flex justify-center gap-1 items-center
@@ -255,10 +269,14 @@
         <Table hoverable shadow divClass="w-full relative overflow-x-auto">
           <TableHead>
             <TableHeadCell class="px-2 py-4">Provincia</TableHeadCell>
-            <TableHeadCell class="px-2 py-4">Single</TableHeadCell>
-            <TableHeadCell class="px-2 py-4"></TableHeadCell>
-            <TableHeadCell class="px-2 py-4">Media</TableHeadCell>
-            <TableHeadCell class="px-2 py-4"></TableHeadCell>
+            <TableHeadCell class="px-2 py-4 flex gap-1">
+              <span class="max-sm:text-green-400">Single</span>
+              <span class="sm:hidden">/</span>
+              <span class="max-sm:text-purple-400 sm:hidden">Media</span>
+            </TableHeadCell>
+            <TableHeadCell class="px-2 py-4">Competidor</TableHeadCell>
+            <TableHeadCell class="px-2 py-4 max-sm:hidden">Media</TableHeadCell>
+            <TableHeadCell class="px-2 py-4 max-sm:hidden">Competidor</TableHeadCell>
           </TableHead>
 
           <TableBody>
@@ -269,25 +287,33 @@
               <TableBodyRow>
                 <TableBodyCell class="px-2">{prRes[0]}</TableBodyCell>
 
-                {#if prSingle && prSingle.time}
-                  <TableBodyCell class="px-2">
-                    <Link to={"/contests/"}>
-                      <span class="text-green-400 flex gap-2 items-center justify-between">
-                        {timer(prSingle.time, true, true)}
+                <TableBodyCell class="px-2">
+                  <Link to={"/contests/"}>
+                    <span class="text-green-400 flex gap-2 items-center justify-between">
+                      {timer(prSingle?.time || 0, true, true)}
+                      <LinkIcon size="1.2rem" />
+                    </span>
+                  </Link>
+
+                  {#if prMean && prMean.time}
+                    <Link to={"/contests/"} class="sm:hidden">
+                      <span class="text-purple-400 flex gap-2 items-center justify-between mt-2">
+                        {timer(prMean.time, true, true)}
                         <LinkIcon size="1.2rem" />
                       </span>
                     </Link>
-                  </TableBodyCell>
-                  <TableBodyCell class="px-2">
-                    <span class="text-sm">{prSingle.contestant.name}</span>
-                  </TableBodyCell>
-                {:else}
-                  <TableBodyCell class="px-2">-</TableBodyCell>
-                  <TableBodyCell class="px-2">-</TableBodyCell>
-                {/if}
+                  {/if}
+                </TableBodyCell>
+                <TableBodyCell class="px-2 grid">
+                  <span class="text-sm">{prSingle?.contestant.name}</span>
+
+                  {#if prMean && prMean.time}
+                    <span class="text-sm sm:hidden mt-2">{prMean.contestant.name}</span>
+                  {/if}
+                </TableBodyCell>
 
                 {#if prMean && prMean.time}
-                  <TableBodyCell class="px-2">
+                  <TableBodyCell class="px-2 max-sm:hidden">
                     <Link to={"/contests/"}>
                       <span class="text-purple-400 flex gap-2 items-center justify-between">
                         {timer(prMean.time, true, true)}
@@ -295,12 +321,12 @@
                       </span>
                     </Link>
                   </TableBodyCell>
-                  <TableBodyCell class="px-2">
+                  <TableBodyCell class="px-2 max-sm:hidden">
                     <span class="text-sm">{prMean.contestant.name}</span>
                   </TableBodyCell>
                 {:else}
-                  <TableBodyCell class="px-2">-</TableBodyCell>
-                  <TableBodyCell class="px-2">-</TableBodyCell>
+                  <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>
+                  <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>
                 {/if}
               </TableBodyRow>
             {/each}
