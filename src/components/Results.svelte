@@ -16,7 +16,7 @@
   import type { Scrambler } from "@interfaces";
   import { timer } from "@helpers/timer";
   import { onMount } from "svelte";
-  import { updateResults } from "@helpers/API";
+  import { getResults } from "@helpers/API";
   import { Link } from "svelte-routing";
   import LinkIcon from "@icons/OpenInNew.svelte";
   import TrophyIcon from "@icons/Trophy.svelte";
@@ -68,7 +68,7 @@
     loading = true;
     error = false;
 
-    updateResults()
+    getResults()
       .then((res: any) => {
         if (!res) {
           error = true;
@@ -217,7 +217,7 @@
                 </Link>
               {/if}
             </TableBodyCell>
-            <TableBodyCell class="px-2 grid">
+            <TableBodyCell class="px-2 max-sm:grid">
               <span class="text-sm">{nrs?.contestant.name}</span>
               {#if nra && nra.time}
                 <span class="text-sm sm:hidden mt-2">{nra.contestant.name}</span>
@@ -304,11 +304,11 @@
                     </Link>
                   {/if}
                 </TableBodyCell>
-                <TableBodyCell class="px-2 grid">
-                  <span class="text-sm">{prSingle?.contestant.name}</span>
+                <TableBodyCell class="px-2">
+                  <span class="text-sm flex items-end">{prSingle?.contestant.name}</span>
 
                   {#if prMean && prMean.time}
-                    <span class="text-sm sm:hidden mt-2">{prMean.contestant.name}</span>
+                    <span class="text-sm sm:hidden mt-2 flex gap-2 items-center justify-between">{prMean.contestant.name}</span>
                   {/if}
                 </TableBodyCell>
 

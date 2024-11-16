@@ -3,20 +3,22 @@
   import { tokenStore } from "@stores/token";
   import { redirectToLogin, refreshToken } from "@helpers/API";
 
+  const debug = false;
+
   (async () => {
     if (
       !$userStore ||
       !$tokenStore ||
       new Date($tokenStore.access.expires).getTime() < Date.now()
     ) {
-      console.log("Trying to refresh token");
+      debug && console.log("Trying to refresh token");
 
       if (await refreshToken()) {
-        console.log("Token updated");
+        debug && console.log("Token updated");
         return;
       }
 
-      console.log("Redirecting");
+      debug && console.log("Redirecting");
 
       redirectToLogin();
     }

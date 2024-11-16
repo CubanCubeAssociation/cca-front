@@ -1,5 +1,7 @@
 import type { CATEGORY, PROVINCE, ROLE } from "../interfaces";
 
+export const CCA_ICON = "/cca_logo.svg";
+
 // export const API = 'http://localhost:3000/v1';
 // export const API = 'http://192.168.180.93:3000/v1';
 export const API = "https://cca-back.onrender.com/v1";
@@ -363,3 +365,43 @@ export const ROLES: { name: string; value: ROLE }[] = [
   { name: "Delegado", value: "delegate" },
   { name: "Usuario", value: "user" },
 ];
+
+const COLORS: Record<string, string> = {
+  green: "rgb(0, 157, 84)",
+  red: "rgb(220,66,47)",
+  blue: "rgb(61, 129, 246)",
+  orange: "rgb(232, 112, 0)",
+  yellow: "rgb(255,235,59)",
+  white: "rgb(230, 230, 230)",
+  black: "rgb(0, 0, 0)",
+  // "gray": "rgb(80, 80, 80)",
+  gray: "rgb(75, 81, 90)",
+  darkGray: "rgb(50, 50, 50)",
+  lightGray: "rgb(211, 211, 211)",
+  violet: "rgb(138, 27, 255)",
+  pink: "rgb(237, 150, 161)",
+  lgreen: "rgb(74, 217, 49)",
+  lyellow: "rgb(220, 211, 165)",
+  lblue: "rgb(83, 177, 243)",
+
+  /// Printable
+  pgreen: "rgb(16, 162, 4)",
+  pred: "rgb(213, 0, 0)",
+  pblue: "rgb(43, 43, 255)",
+  porange: "rgb(255, 108, 11)",
+  pyellow: "rgb(255, 242, 0)",
+  pwhite: "rgb(255, 255, 255)",
+  pblack: "rgb(0, 0, 0)",
+  pgray: "rgb(200, 200, 200)",
+  pviolet: "rgb(185, 104, 251)",
+  ppink: "rgb(249, 187, 204)",
+  plgreen: "rgb(74, 217, 49)",
+  plyellow: "rgb(255, 255, 183)",
+  plblue: "rgb(83, 177, 243)",
+};
+
+export declare type ColorName = keyof typeof COLORS;
+
+export function getColorByName(colorName: ColorName | (string & {})) {
+  return COLORS[colorName] || (colorName as string);
+}

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import moment from "moment";
-  import { Link, navigate } from "svelte-routing";
+  import { Link } from "svelte-routing";
   import { getContests } from "@helpers/API";
   import type { CONTEST_RESULT } from "@interfaces";
   import {
@@ -16,9 +16,12 @@
     Span,
     Spinner,
     Button,
+    Indicator,
+    Tooltip,
   } from "flowbite-svelte";
   import PaginatorComponent from "./PaginatorComponent.svelte";
   import { Paginator } from "@classes/Paginator";
+  import { getIndicatorColor, getStatus } from "@helpers/strings";
 
   let contestResults: CONTEST_RESULT = {
     limit: 0,
@@ -85,7 +88,11 @@
           <TableBodyRow>
             <TableBodyCell>{(pg.page - 1) * pg.limit + pos + 1}</TableBodyCell>
             <TableBodyCell>
-              <Link to={"/contests/" + r.name}>{r.name}</Link>
+              <Link to={"/contests/" + r.name} class="flex items-center gap-2">
+                <Indicator color={getIndicatorColor(r.status)} />
+                <Tooltip>{getStatus(r.status)}</Tooltip>
+                {r.name}
+              </Link>
             </TableBodyCell>
             <TableBodyCell>{moment.utc(r.date).format("DD/MM/YYYY")}</TableBodyCell>
             <TableBodyCell>{moment.utc(r.date).format("hh:mm a")}</TableBodyCell>

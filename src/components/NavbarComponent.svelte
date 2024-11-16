@@ -12,6 +12,9 @@
   } from "flowbite-svelte";
   import { Link } from "svelte-routing";
   import { userStore } from "@stores/user";
+  import { isAuth, minRole } from "@helpers/auth";
+  import CcaLogo from "./CCALogo.svelte";
+  import WcaCategory from "./wca/WCACategory.svelte";
   import ChevronDownOutline from "@icons/ChevronDown.svelte";
   import ShieldIcon from "@icons/Shield.svelte";
   import SwordIcon from "@icons/Sword.svelte";
@@ -19,9 +22,7 @@
   import RulesIcon from "@icons/Script.svelte";
   import CubeIcon from "@icons/Cube.svelte";
   import UserIcon from "@icons/AccountGroup.svelte";
-  import { isAuth, minRole } from "@helpers/auth";
-  import WcaCategory from "./wca/WCACategory.svelte";
-  import CcaLogo from "./CCALogo.svelte";
+  import RankingIcon from "@icons/SortNumericAscending.svelte";
 
   function checkMobile(cb: any) {
     if (window.innerWidth < 768) {
@@ -53,6 +54,11 @@
       <Link on:click={() => checkMobile(toggle)} to="/results">
         <NavLi class="flex items-center gap-1">
           <TrophyIcon class="dark:text-yellow-300 text-yellow-400" /> Resultados
+        </NavLi>
+      </Link>
+      <Link on:click={() => checkMobile(toggle)} to="/rankings">
+        <NavLi class="flex items-center gap-1">
+          <RankingIcon class="dark:text-green-300 text-green-400" /> Rankings
         </NavLi>
       </Link>
       <Link on:click={() => checkMobile(toggle)} to="/rules">

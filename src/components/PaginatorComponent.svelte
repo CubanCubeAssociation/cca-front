@@ -10,6 +10,8 @@
 
   export let pg: Paginator;
   export { _cl as class };
+  export let showNextPrev = true;
+  export let showFirstLast = true;
 
   const dispatch = createEventDispatcher();
 
@@ -27,23 +29,35 @@
     " " +
     _cl}
 >
-  <li class="paginator-item">
-    <button on:click={() => setPage(1)}> <ChevronDoubleLeftIcon /> </button>
-  </li>
-  <li class="paginator-item">
-    <button on:click={() => setPage(-2)}> <ChevronLeftIcon /> </button>
-  </li>
+  {#if showFirstLast}
+    <li class="paginator-item">
+      <button on:click={() => setPage(1)}> <ChevronDoubleLeftIcon /> </button>
+    </li>
+  {/if}
+
+  {#if showNextPrev}
+    <li class="paginator-item">
+      <button on:click={() => setPage(-2)}> <ChevronLeftIcon /> </button>
+    </li>
+  {/if}
+
   {#each pg.labels as lb}
     <li class="paginator-item" class:selected={pg.page === lb}>
       <button on:click={() => setPage(lb)}>{lb}</button>
     </li>
   {/each}
-  <li class="paginator-item">
-    <button on:click={() => setPage(-1)}> <ChevronRightIcon /> </button>
-  </li>
-  <li class="paginator-item">
-    <button on:click={() => setPage(Infinity)}> <ChevronDoubleRightIcon /> </button>
-  </li>
+
+  {#if showNextPrev}
+    <li class="paginator-item">
+      <button on:click={() => setPage(-1)}> <ChevronRightIcon /> </button>
+    </li>
+  {/if}
+
+  {#if showFirstLast}
+    <li class="paginator-item">
+      <button on:click={() => setPage(Infinity)}> <ChevronDoubleRightIcon /> </button>
+    </li>
+  {/if}
 </ul>
 
 <style lang="postcss">

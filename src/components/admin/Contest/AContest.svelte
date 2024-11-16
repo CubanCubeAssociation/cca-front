@@ -27,7 +27,7 @@
   import PlusIcon from "@icons/Plus.svelte";
   import SaveIcon from "@icons/Send.svelte";
   import EditIcon from "@icons/Pencil.svelte";
-  import { getIndicatorColor, getStatus } from "@helpers/strings";
+  import { getIndicatorColor, getStatus, randomUUID } from "@helpers/strings";
   import { clone, fromModel, uniqueArray } from "@helpers/object";
   import SearchUser from "../User/SearchUser.svelte";
   import {
@@ -63,8 +63,12 @@
   import { getRoundsInfo } from "@helpers/statistics";
   import ResultView from "@components/ResultView.svelte";
   import Select from "@components/Select.svelte";
+  import { NotificationService } from "@stores/notification.service";
 
   export let name: string = "new";
+
+  const notification = NotificationService.getInstance();
+  const debug = false;
 
   let contest: CONTEST = {
     categories: [],
@@ -108,15 +112,28 @@
     if (name != "new") {
       updateContest(cnt, contest.id)
         .then(() => {
-          console.log("GUARDADO");
+          notification.addNotification({
+            key: randomUUID(),
+            header: "Guardado",
+            text: "Se guardó la competencia.",
+            timeout: 2000,
+          });
         })
-        .catch(err => console.log("ERROR: ", err));
+        .catch(err => {
+          debug && console.log("ERROR: ", err);
+          notification.addNotification({
+            key: randomUUID(),
+            header: "Error",
+            text: "Hubo un error al guardar la competencia.",
+            timeout: 2000,
+          });
+        });
     } else {
       createContest(cnt)
         .then((c: CONTEST) => {
           navigate("/admin/contest/" + c.name);
         })
-        .catch(err => console.log("ERROR: ", err));
+        .catch(err => debug && console.log("ERROR: ", err));
     }
   }
 
@@ -216,14 +233,14 @@
 
   function prepareResult() {
     if (contest.categories.length === 0) {
-      console.log("Add some categories");
+      debug && console.log("Add some categories");
       return;
     }
 
     let isCategory = contest.contestants.some(ct => ct.categories.length);
 
     if (!isCategory) {
-      console.log("Add category to some user");
+      debug && console.log("Add category to some user");
       return;
     }
 
@@ -390,7 +407,7 @@
         .then(res => {
           if (!res) return;
           contest = res;
-          console.log("CONTEST: ", res);
+          debug && console.log("CONTEST: ", res);
           contest.date = moment.utc(contest.date).format("YYYY-MM-DDThh:mm");
           contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
           contest.inscriptionEnd = moment(contest.inscriptionEnd).format("YYYY-MM-DD");

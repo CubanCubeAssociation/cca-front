@@ -27,6 +27,7 @@
 
   const HEADER = "Competencias";
   const ADD = "Añadir competencia";
+  const debug = false;
 
   let contests: CONTEST[] = [];
   let pg = new Paginator([], 10);
@@ -60,10 +61,10 @@
     refreshContestData();
   }
 
-  function getResult() {
+  function updateResult() {
     updateResults()
       .then(res => {
-        console.log("RESULT: ", res);
+        debug && console.log("RESULT: ", res);
       })
       .catch(err => console.log("ERROR: ", err));
   }
@@ -82,7 +83,7 @@
       {ADD}
     </Button>
 
-    <Button color="purple" on:click={getResult}>Resultados</Button>
+    <Button color="purple" on:click={updateResult}>Actualizar Resultados</Button>
   </div>
 
   {#if contests.length > 0}
@@ -99,7 +100,6 @@
         <TableHeadCell>Fecha</TableHeadCell>
         <TableHeadCell>Hora</TableHeadCell>
         <TableHeadCell>Categorías</TableHeadCell>
-        <TableHeadCell>Estado</TableHeadCell>
       </TableHead>
 
       <TableBody>
@@ -107,23 +107,20 @@
           <TableBodyRow>
             <TableBodyCell>{(pg.page - 1) * pg.limit + pos + 1}</TableBodyCell>
             <TableBodyCell>
-              <Link to={"/admin/contest/" + ct.name}>{ct.name}</Link>
+              <Link to={"/admin/contest/" + ct.name} class="flex items-center gap-2">
+                <Indicator color={getIndicatorColor(ct.status)} />
+                <Tooltip>{getStatus(ct.status)}</Tooltip>
+                {ct.name}
+              </Link>
             </TableBodyCell>
             <TableBodyCell>{moment.utc(ct.date).format("DD/MM/YYYY")}</TableBodyCell>
             <TableBodyCell>{moment.utc(ct.date).format("hh:mm a")}</TableBodyCell>
             <TableBodyCell>
-              <div class="w-full flex flex-wrap gap-2">
+              <div class="w-full flex flex-wrap">
                 {#each ct.categories as cat}
-                  <WcaCategory icon={cat.category.scrambler} />
+                  <WcaCategory icon={cat.category.scrambler} size="1.2rem" />
                   <Tooltip>{cat.category.name}</Tooltip>
                 {/each}
-              </div>
-            </TableBodyCell>
-            <TableBodyCell>
-              <!-- export type CONTEST_STATUS = 'pending' | 'inscription' | 'running' | 'results' | 'finished'; -->
-              <div class="flex items-center gap-2">
-                <Indicator color={getIndicatorColor(ct.status)} />
-                {getStatus(ct.status)}
               </div>
             </TableBodyCell>
           </TableBodyRow>
@@ -152,6 +149,6 @@
 
 <style lang="postcss">
   .actions {
-    @apply flex justify-start my-4;
+    @apply flex justify-start my-4 gap-2;
   }
 </style>

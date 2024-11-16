@@ -1,5 +1,5 @@
-export type ROLE = 'user' | 'delegate' | 'admin' | 'root';
-export type SEX = 'M' | 'F';
+export type ROLE = "user" | "delegate" | "admin" | "root";
+export type SEX = "M" | "F";
 
 export interface USER {
   id: string;
@@ -34,8 +34,24 @@ export interface LOGIN_DATA {
   tokens: TOKENS;
 }
 
-export type Scrambler = '222so' | '333' | '333fm' | '333ni' | '333mbf' | '333oh' | '444bld' | '444wca'
-  | '555wca' | '555bld' | '666wca' | '777wca' | 'clkwca' | 'mgmp' | 'pyrso' | 'skbso' | 'sqrs';
+export type Scrambler =
+  | "222so"
+  | "333"
+  | "333fm"
+  | "333ni"
+  | "333mbf"
+  | "333oh"
+  | "444bld"
+  | "444wca"
+  | "555wca"
+  | "555bld"
+  | "666wca"
+  | "777wca"
+  | "clkwca"
+  | "mgmp"
+  | "pyrso"
+  | "skbso"
+  | "sqrs";
 
 export interface CATEGORY {
   id: string;
@@ -49,10 +65,10 @@ export interface CONTEST_CATEGORY {
 }
 
 export enum PENALTY {
-  NONE = '00',
-  DNS = '01',
-  P2 = '10',
-  DNF = '11',
+  NONE = "00",
+  DNS = "01",
+  P2 = "10",
+  DNF = "11",
 }
 
 export interface SOLVE {
@@ -86,10 +102,14 @@ export interface CONTESTANT {
   paidAmount: number;
 }
 
-export type CONTEST_STATUS = 'pending' | 'inscription' | 'running' | 'results' | 'finished';
+export type CONTEST_STATUS = "pending" | "inscription" | "running" | "results" | "finished";
 
 export const STATUS_ORDER: CONTEST_STATUS[] = [
-  'pending', 'inscription', 'running', 'results', 'finished'
+  "pending",
+  "inscription",
+  "running",
+  "results",
+  "finished",
 ];
 
 export interface CONTEST {
@@ -122,28 +142,32 @@ export interface USER {
   isEmailVerified: boolean;
 }
 
-export interface CONTEST_RESULT {
+export interface RANKING {
+  contestant: {
+    name: string;
+    username: string;
+  };
+  contest: string;
+  time: number;
+}
+
+export interface PAGINATION_RESULT {
   limit: number;
   page: number;
+  totalPages: number;
+  totalResults: number;
+}
+
+export interface CONTEST_RESULT extends PAGINATION_RESULT {
   results: CONTEST[];
-  totalPages: number;
-  totalResults: number;
 }
 
-export interface CATEGORY_RESULT {
-  limit: number;
-  page: number;
+export interface CATEGORY_RESULT extends PAGINATION_RESULT {
   results: CATEGORY[];
-  totalPages: number;
-  totalResults: number;
 }
 
-export interface USER_RESULT {
-  limit: number;
-  page: number;
+export interface USER_RESULT extends PAGINATION_RESULT {
   results: USER[];
-  totalPages: number;
-  totalResults: number;
 }
 
 export interface PROVINCE {
@@ -152,7 +176,46 @@ export interface PROVINCE {
   municipios: string[];
 }
 
-export type Alignment = 'start' | 'end';
-export type Side = 'top' | 'right' | 'bottom' | 'left';
+export type Alignment = "start" | "end";
+export type Side = "top" | "right" | "bottom" | "left";
 export type AlignedPlacement = `${Side}-${Alignment}`;
 export type Placement = Side | AlignedPlacement;
+
+export type IColor =
+  | "gray"
+  | "red"
+  | "yellow"
+  | "green"
+  | "purple"
+  | "blue"
+  | "primary"
+  | undefined;
+
+export type INotColor =
+  | "red"
+  | "yellow"
+  | "green"
+  | "purple"
+  | "blue"
+  | "primary"
+  | "light"
+  | "dark"
+  | "none"
+  | "alternative";
+
+export interface NotificationAction {
+  text: string;
+  color?: INotColor;
+  callback: (e: MouseEvent) => void;
+}
+
+export interface INotification {
+  key?: string;
+  header: string;
+  text: string;
+  icon?: any;
+  html?: string;
+  fixed?: boolean;
+  timeout?: number;
+  actions?: NotificationAction[];
+}

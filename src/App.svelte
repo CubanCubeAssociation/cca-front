@@ -20,6 +20,17 @@
   import { clearSessionStores, refreshToken } from "@helpers/API";
   import { isAuth } from "@helpers/auth";
   import Results from "@components/Results.svelte";
+  import Ranking from "@components/Ranking.svelte";
+  import type { INotification } from "@interfaces";
+  import { NotificationService } from "@stores/notification.service";
+  import { onMount } from "svelte";
+  import Notification from "@components/Notification.svelte";
+  import { screen } from "@stores/screen.store";
+
+  let notifications: INotification[] = [];
+  const notService = NotificationService.getInstance();
+  const subService = notService.notificationSub;
+  const debug = false;
 
   if (localStorage.getItem("tokens") && localStorage.getItem("user")) {
     $tokenStore = JSON.parse(localStorage.getItem("tokens")!);
@@ -30,19 +41,35 @@
 
   (async () => {
     if (!isAuth($userStore)) {
-      console.log("Token does not exist or expired");
+      debug && console.log("Token does not exist or expired");
       clearSessionStores();
 
       if (await refreshToken()) {
-        console.log("Token updated app");
+        debug && console.log("Token updated app");
         location.reload();
         return;
       }
     } else {
-      console.log("IS AUTH");
+      debug && console.log("IS AUTH");
     }
   })();
+
+  function handleResize() {
+    $screen = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      isMobile: window.innerWidth < 768,
+    };
+  }
+
+  onMount(() => {
+    subService.subscribe(v => {
+      notifications = v;
+    });
+  });
 </script>
+
+<svelte:window on:resize={handleResize} />
 
 <Router>
   <NavbarComponent />
@@ -53,6 +80,7 @@
   <Route path="/contests" component={Contests} />
   <Route path="/contests/:name" component={Contest} />
   <Route path="/results" component={Results} />
+  <Route path="/rankings" component={Ranking} />
 
   <!-- Admin -->
   <!-- Done -->
@@ -74,3 +102,26 @@
 
   <FooterComponent />
 </Router>
+
+<div class="notification-container">
+  {#each notifications as nt (nt.key)}
+    <Notification {...nt} fixed={nt.fixed} />
+  {/each}
+</div>
+
+<style>
+  .notification-container {
+    max-width: 25rem;
+    position: fixed;
+    right: 0;
+    top: 3rem;
+    height: calc(100% - 3rem);
+    width: 100%;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    justify-content: center;
+    z-index: 50;
+  }
+</style>

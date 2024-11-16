@@ -4,7 +4,6 @@
   // @ts-ignore
   import { STATUS_ORDER, type CONTEST, type CONTEST_STATUS, type ROUND } from "@interfaces";
   import { getContest } from "@helpers/API";
-  import { sTimer, timer } from "@helpers/timer";
   import { getRoundsInfo } from "@helpers/statistics";
 
   // Icons
@@ -24,12 +23,6 @@
     Indicator,
     Span,
     Spinner,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
     Tooltip,
   } from "flowbite-svelte";
   import WcaCategory from "./wca/WCACategory.svelte";
@@ -42,6 +35,8 @@
   export let name: string;
 
   const size = "1.4rem";
+  const spanClass = "flex items-center gap-1 !text-green-200";
+
   let show404 = false;
   let contest: CONTEST;
   let section: number = 0;
@@ -70,7 +65,7 @@
         contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
         contest.inscriptionEnd = moment(contest.inscriptionEnd).format("YYYY-MM-DD");
 
-        console.log("CONTEST: ", res);
+        // console.log("CONTEST: ", res);
 
         let roundInfo = getRoundsInfo(contest.rounds);
 
@@ -117,74 +112,66 @@
     <ul class="grid gap-4 info-list">
       <!-- Lugar -->
       <li>
-        <Span class="flex items-center gap-1">
+        <Span class={spanClass}>
           <HomeIcon {size} /> Lugar:
         </Span>
-        <Span class="p-1 border-b-2 border-b-green-500">{contest.place}</Span>
+        <Span>{contest.place}</Span>
       </li>
 
       <!-- Fecha -->
       <li>
-        <Span class="flex items-center gap-1">
+        <Span class={spanClass}>
           <DateIcon {size} />Fecha:
         </Span>
-        <Span class="p-1 border-b-2 border-b-green-500"
-          >{moment(contest.date).format("DD/MM/YYYY")}</Span
-        >
+        <Span>{moment(contest.date).format("DD/MM/YYYY")}</Span>
       </li>
 
       <!-- Hora -->
       <li>
-        <Span class="flex items-center gap-1">
+        <Span class={spanClass}>
           <ClockIcon {size} />Hora:
         </Span>
-        <Span class="p-1 border-b-2 border-b-green-500"
-          >{moment(contest.date).format("hh:mm a")}</Span
-        >
+        <Span>{moment(contest.date).format("hh:mm a")}</Span>
       </li>
 
       {#if before("running")}
         <!-- Inscripcion (inicio) -->
         <li>
-          <Span class="flex items-center gap-1">
+          <Span class={spanClass}>
             <DateIcon {size} />Inicio de inscripción:
           </Span>
-          <Span class="p-1 border-b-2 border-b-green-500"
-            >{moment(contest.inscriptionStart).format("DD/MM/YYYY")}</Span
-          >
+          <Span>{moment(contest.inscriptionStart).format("DD/MM/YYYY")}</Span>
         </li>
 
         <!-- Inscripcion (fin) -->
         <li>
-          <Span class="flex items-center gap-1">
+          <Span class={spanClass}>
             <DateIcon {size} />Fin de inscripción:
           </Span>
-          <Span class="p-1 border-b-2 border-b-green-500"
-            >{moment(contest.inscriptionEnd).format("DD/MM/YYYY")}</Span
-          >
+          <Span>{moment(contest.inscriptionEnd).format("DD/MM/YYYY")}</Span>
         </li>
 
         <!-- Costo -->
         <li>
-          <Span class="flex items-center gap-1">
+          <Span class={spanClass}>
             <CurrencyIcon {size} />Costo de inscripción:
           </Span>
-          <Span class="p-1 border-b-2 border-b-green-500"
-            >{contest.inscriptionCost === 0
+          <Span>
+            {contest.inscriptionCost === 0
               ? "Gratis"
               : new Intl.NumberFormat("es-ES", {
                   style: "currency",
                   currency: "CUP",
-                }).format(contest.inscriptionCost)}</Span
-          >
+                }).format(contest.inscriptionCost)}
+          </Span>
         </li>
       {/if}
 
       <li>
-        <Span class="flex items-center gap-1">
+        <Span class={spanClass}>
           <PuzzleIcon {size} />Categorías:
         </Span>
-        <Span class="p-1 border-b-2 border-b-green-500 flex flex-wrap gap-2 max-w-[25rem]">
+        <Span class="flex flex-wrap gap-2 max-w-[25rem]">
           {#each contest.categories as ct}
             <WcaCategory icon={ct.category.scrambler} />
             <Tooltip>{ct.category.name}</Tooltip>
@@ -194,7 +181,7 @@
 
       <!-- Estado -->
       <li>
-        <Span class="flex items-center gap-1">
+        <Span class={spanClass}>
           <StateIcon {size} />Estado:
         </Span>
         <Span class="p-1 flex gap-2 items-center">
@@ -206,12 +193,10 @@
       <!-- Visible -->
       {#if checkProperty("visible")}
         <li>
-          <Span class="flex items-center gap-1">
+          <Span class={spanClass}>
             <EyeIcon {size} />Visible:
           </Span>
-          <Span class="p-1 border-b-2 border-b-green-500">
-            {contest.visible ? "Si" : "No"}
-          </Span>
+          <Span>{contest.visible ? "Si" : "No"}</Span>
         </li>
       {/if}
     </ul>

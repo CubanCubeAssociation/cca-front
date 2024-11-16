@@ -1,25 +1,25 @@
 <script lang="ts">
   import WcaCategory from "@components/wca/WCACategory.svelte";
+  import { getColorByName } from "@constants";
+  import { mod } from "@helpers/math";
   import { weakRandomUUID } from "@helpers/strings";
   import ExpandIcon from "@icons/ChevronDown.svelte";
+  import type { Placement, Side } from "@interfaces";
 
   import { Button, Dropdown, DropdownDivider, DropdownItem } from "flowbite-svelte";
-  import { createEventDispatcher, onMount } from "svelte";
-
-  type Side = "top" | "right" | "bottom" | "left";
-  type Alignment = "start" | "end";
-  type Placement = `${Side}-${Alignment}`;
+  import { createEventDispatcher, onMount, tick } from "svelte";
 
   let cl = "";
   export { cl as class };
+  export let type: "color" | "select" = "select";
   export let placeholder: string = "";
   export let value: any = placeholder;
   export let items: readonly any[];
   export let onChange = (item: any, pos: number, arr: readonly any[]) => {};
-  export let label = (item?: any) => (item || "").toString();
+  export let label = (item: any, pos: number): string => (item || "").toString();
   export let transform = (item: any, pos?: number, arr?: readonly any[]) => item.value;
   export let hasIcon: null | ((v: any) => any) = null;
-  export let disabled = (item: any, pos?: number, arr?: readonly any[]) => false;
+  export let disabled = (item: any, pos: number, arr?: readonly any[]) => false;
   export let placement: Side | Placement = "bottom";
   export let useFixed = false;
   export let iconComponent: any = WcaCategory;
@@ -32,6 +32,8 @@
 
   let showOptions = false;
   let mounted = false;
+  let gridW = 1;
+  let focused = 0;
 
   function findValuePosition() {
     for (let i = 0, maxi = items.length; i < maxi; i += 1) {
@@ -51,34 +53,121 @@
     let pos = findValuePosition();
 
     if (pos > -1) {
+      focused = pos;
       list.children[0].children[pos * 2].scrollIntoView({ block: "nearest" });
+      tick().then(() => focusElement(list));
     }
   }
 
   function emitStatus(st: boolean) {
     st && dispatch("open");
     !st && dispatch("close");
+
+    st && (focused = findValuePosition());
+  }
+
+  function updateGridW(list: readonly any[]) {
+    gridW = Math.ceil(Math.sqrt(list.length));
+  }
+
+  function focusElement(list: any) {
+    (
+      (list.children[0].children[focused * 2] as HTMLLIElement).firstChild as HTMLButtonElement
+    )?.focus();
+  }
+
+  function handleKeydown(ev: KeyboardEvent) {
+    if (!showOptions) return;
+    if (ev.code === "Escape") {
+      showOptions = false;
+      return;
+    }
+    
+    if (ev.code === "Space") {
+      ev.stopPropagation();
+      ev.preventDefault();
+      return;
+    }
+
+    if (!/^(Key[A-Z]|ArrowUp|ArrowDown|Digit|Numpat)/.test(ev.code)) return;
+
+    let list = document.querySelector(`#${selectID}`);
+    if (!list) return;
+
+    ev.preventDefault();
+
+    if (ev.code === "ArrowUp" || ev.code === "ArrowDown") {
+      focused = mod(
+        ev.code === "ArrowUp" ? focused - 1 : focused + 1,
+        list.children[0].children.length
+      );
+
+      tick().then(() => focusElement(list));
+      return;
+    }
+
+    let data = items.map((it, p) => ({
+      label: (label(it, p) || "").trim().toLowerCase(),
+      disabled: disabled(it, p, items),
+      value: transform(it, p, items),
+    }));
+
+    if (!data.length) return;
+
+    let letter = /^(Digit|Numpad)/.test(ev.code)
+      ? ev.code.slice(-1)
+      : ev.code.slice(3).toLowerCase();
+
+    let ini = mod(focused + 1, data.length);
+
+    for (let i = 0, maxi = data.length; i < maxi; i += 1) {
+      let p = mod(ini + i, data.length);
+
+      if (data[p].label.startsWith(letter)) {
+        focused = p;
+        tick().then(() => focusElement(list));
+        return;
+      }
+    }
   }
 
   onMount(() => (mounted = true));
 
   $: emitStatus(showOptions);
+  $: updateGridW(items);
 </script>
 
-<Button color="alternative" class={"gap-1 h-9 py-1 px-2 " + cl} on:click={handleClick}>
+<svelte:window on:keydown|capture={handleKeydown} />
+
+<Button
+  color="alternative"
+  class={"gap-1 h-9 py-1 px-2 " + cl}
+  on:click={handleClick}
+  {...$$restProps}
+>
   {#if items.some((a, p, i) => transform(a, p, i) === value)}
-    {@const item = items.find((e, p, i) => transform(e, p, i) === value)}
+    {@const item = items.reduce(
+      (acc, e, p, i) => (transform(e, p, i) === value ? [e, p] : acc),
+      [null, -1]
+    )}
 
     {#if hasIcon && iconComponent}
       {@const iconProps = Object.assign(iconSize ? { size: iconSize } : {}, {
-        [iconKey]: hasIcon(item),
+        [iconKey]: hasIcon(item[0]),
       })}
 
       <svelte:component this={iconComponent} {...iconProps} noFallback />
     {/if}
 
     {#if !(hasIcon && iconComponent && preferIcon)}
-      {label(item)}
+      {#if type === "color"}
+        <div
+          class="color w-4 h-4"
+          style={"background-color: " + getColorByName(label(item[0], item[1])) + ";"}
+        ></div>
+      {:else}
+        {label(item[0], item[1])}
+      {/if}
     {/if}
   {:else}
     {placeholder}
@@ -90,8 +179,13 @@
 <Dropdown
   bind:open={showOptions}
   id={selectID}
-  containerClass={"max-h-[20rem] overflow-y-auto z-50 w-max " + (useFixed ? "!fixed" : "")}
+  containerClass={"max-h-[20rem] overflow-y-auto z-50 w-max bg-backgroundLevel2 " +
+    (useFixed ? " !fixed " : "") +
+    (type === "color"
+      ? " [&>ul]:grid-cols-[repeat(var(--grid-w),1fr)] [&>ul]:grid [&>ul>div]:hidden  "
+      : "")}
   {placement}
+  style={"--grid-w: " + gridW}
 >
   {#each items as item, pos}
     {#if pos}
@@ -101,10 +195,12 @@
     <DropdownItem
       class={`flex items-center gap-2 py-2 px-2
         ` +
-        (disabled(item, pos, items) ? " text-gray-500 pointer-events-none select-none " : " ") +
+        (disabled(item, pos, items)
+          ? " text-gray-500 [&>div]:opacity-40 pointer-events-none select-none "
+          : " ") +
         (transform(item, pos, items) === value
-          ? "bg-primary-600 text-white dark:hover:bg-primary-400"
-          : "")}
+          ? " bg-primary-600 tx-text hover:bg-primary-400 "
+          : " ")}
       on:click={() => {
         if (disabled(item, pos, items)) return;
 
@@ -120,8 +216,15 @@
         <svelte:component this={iconComponent} {...iconProps} noFallback />
       {/if}
 
-      {#if label(item).trim()}
-        {label(item)}
+      {#if label(item, pos).trim()}
+        {#if type === "color"}
+          <div
+            class="color w-4 h-4"
+            style={"background-color: " + getColorByName(label(item, pos)) + ";"}
+          ></div>
+        {:else}
+          {label(item, pos)}
+        {/if}
       {:else}
         &nbsp;
       {/if}
