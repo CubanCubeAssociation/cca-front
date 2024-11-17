@@ -1,33 +1,17 @@
 {
-  "extends": "@tsconfig/svelte/tsconfig.json",
+  "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "target": "ESNext",
-    "types": [ "vite/client" ],
-    "useDefineForClassFields": true,
-    "module": "ESNext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
     "strict": true,
-    "jsx": "preserve",
-    "allowJs": true,
-    "checkJs": true,
-    "lib": [ "ESNext", "DOM" ],
-    "paths": {
-      "@classes/*": ["src/classes/*"],
-      "@components/*": ["src/components/*"],
-      "@constants": ["src/constants/index.ts"],
-      "@cstimer/*": ["src/cstimer/*"],
-      "@helpers/*": ["src/helpers/*"],
-      "@icons/*": ["node_modules/svelte-material-icons/*"],
-      "@interfaces": ["src/interfaces/index.ts"],
-      "@lang/*": ["src/lang/*"],
-      "@material/*": ["src/components/material/*"],
-      "@public/*": ["public/*"],
-      "@stores/*": ["src/stores/*"],
-      "@workers/*": ["src/workers/*"],
-    },
-  },
-  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
-  "exclude": ["public/*"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+    "moduleResolution": "bundler"
+  }
+  // Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
+  // except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
+  //
+  // If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
+  // from the referenced tsconfig.json - TypeScript does not merge them in
 }

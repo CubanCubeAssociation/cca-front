@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 @font-face {
   font-family: Ubuntu;
@@ -46,7 +46,7 @@ body {
 }
 
 th {
-  @apply bg-primary-500 dark:bg-[#040420] text-white;
+  @apply bg-primary-500 text-white dark:bg-[#040420];
 }
 
 footer {
@@ -55,8 +55,8 @@ footer {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: .8rem;
-  height: .8rem;
+  width: 0.8rem;
+  height: 0.8rem;
 }
 
 ::-webkit-scrollbar-track {
