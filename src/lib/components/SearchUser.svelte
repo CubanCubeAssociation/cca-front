@@ -21,6 +21,8 @@
     TableHeadCell,
   } from "flowbite-svelte";
 
+  type Callback = () => void;
+
   export let show = false;
   export let multiple = false;
   export let type: "dropdown" | "modal" = "modal";
@@ -35,13 +37,13 @@
   // let { signal } = controller;
   let searching = false;
 
-  function debounce(fn: Function, pre: Function = () => {}, pos: Function = () => {}, time = 500) {
-    let timerId: NodeJS.Timeout;
-    return (...args: any[]) => {
+  function debounce(fn: Callback, pre: Callback = () => {}, pos: Callback = () => {}, time = 500) {
+    let timerId: any;
+    return () => {
       pre();
       clearTimeout(timerId);
       timerId = setTimeout(() => {
-        fn(...args);
+        fn();
         pos();
       }, time);
     };
@@ -52,8 +54,6 @@
       let str = input.trim();
 
       if (str) {
-        console.log(`SEARCH: <${str}>`);
-
         searchUser(str).then(res => {
           userList = res;
           checks = userList.map(() => false);

@@ -1,7 +1,7 @@
 import type { LayoutServerLoad } from "./$types";
 
-export const load: LayoutServerLoad = ({ url, request }) => {
-  let { pathname } = url;
+export const load: LayoutServerLoad = ({ url }) => {
+  const { pathname } = url;
 
   const routes = [
     ["/contests", "Competencias", "Listado de todas las competencias de la CCA"],
