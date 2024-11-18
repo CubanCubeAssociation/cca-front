@@ -25,6 +25,7 @@
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
+  import { page } from "$app/stores";
 
   const HEADER = "Competencias";
   const ADD = "Añadir competencia";
@@ -52,6 +53,7 @@
         contests = res.results;
         pg.setTotal(res.totalResults);
         pg = pg;
+        goto($page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
       })
       .catch(() => (error = true))
       .finally(() => (loading = false));

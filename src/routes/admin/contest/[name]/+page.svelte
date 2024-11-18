@@ -437,6 +437,11 @@
 
 <svelte:head>
   <title>{contest.name} - CCA</title>
+  <title>
+    {name === "new"
+      ? (contest.name.trim() ? contest.name + " - " : "") + "Crear competencia"
+      : contest.name + " - Editar competencia"}
+  </title>
 </svelte:head>
 
 <PrivateRouteGuard>

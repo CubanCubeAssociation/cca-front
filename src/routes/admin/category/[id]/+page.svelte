@@ -62,7 +62,11 @@
 </script>
 
 <svelte:head>
-  <title>{category.name} - CCA</title>
+  <title>
+    {type === "create"
+      ? (category.name.trim() ? category.name + " - " : "") + "Crear categoría"
+      : category.name + " - Editar categoría"}
+  </title>
 </svelte:head>
 
 <PrivateRouteGuard>

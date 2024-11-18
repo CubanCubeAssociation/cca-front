@@ -141,7 +141,11 @@
 </script>
 
 <svelte:head>
-  <title>{user.name} - CCA</title>
+  <title>
+    {id === "new"
+      ? (user.name.trim() ? user.name + " - " : "") + "Crear usuario"
+      : user.name + " - Editar usuario"}
+  </title>
 </svelte:head>
 
 <PrivateRouteGuard>

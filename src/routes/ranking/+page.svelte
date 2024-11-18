@@ -178,7 +178,7 @@
     <Table hoverable shadow divClass="w-full relative overflow-x-auto">
       <TableHead>
         <TableHeadCell>#</TableHeadCell>
-        <TableHeadCell>Nombre {pg.start} - {pg.end}</TableHeadCell>
+        <TableHeadCell>Nombre</TableHeadCell>
         <TableHeadCell>{type === "Single" ? "Tiempo" : "Promedio"}</TableHeadCell>
         <TableHeadCell>Competencia</TableHeadCell>
       </TableHead>

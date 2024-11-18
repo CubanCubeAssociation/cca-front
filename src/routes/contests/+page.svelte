@@ -21,6 +21,8 @@
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import { Paginator } from "@classes/Paginator.svelte";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
+  import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
 
   let contestResults: CONTEST_RESULT = $state({
     limit: 0,
@@ -47,6 +49,7 @@
         contestResults = c;
         pg.setTotal(c.totalResults);
         pg = pg;
+        goto($page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
       })
       .catch(() => (error = true))
       .finally(() => (loading = false));

@@ -26,6 +26,7 @@
   import SearchUser from "$lib/components/SearchUser.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
+  import { page } from "$app/stores";
 
   const HEADER = "Usuarios";
   const ADD = "Añadir usuario";
@@ -91,6 +92,7 @@
 
         pg.setTotal(res.totalResults);
         pg = pg;
+        goto($page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
 
         if (users.length) {
           const HOP = Object.prototype.hasOwnProperty;
@@ -128,7 +130,7 @@
         {ADD}
       </Button>
 
-      <Button>Buscar</Button>
+      <Button color="purple">Buscar</Button>
       <SearchUser multiple={false} user={handleSearch} type="dropdown" />
     </div>
 
