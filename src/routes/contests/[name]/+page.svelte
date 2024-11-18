@@ -14,7 +14,20 @@
   import StateIcon from "@icons/StateMachine.svelte";
   import EyeIcon from "@icons/Eye.svelte";
   import PencilIcon from "@icons/Pencil.svelte";
-  import { Card, Heading, Indicator, Span, Spinner, Tooltip } from "flowbite-svelte";
+  import {
+    Card,
+    Heading,
+    Indicator,
+    Span,
+    Spinner,
+    Table,
+    TableBody,
+    TableBodyCell,
+    TableBodyRow,
+    TableHead,
+    TableHeadCell,
+    Tooltip,
+  } from "flowbite-svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { minRole } from "@helpers/auth";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
@@ -26,6 +39,7 @@
 
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 !text-green-200";
+  const TD_CLASS = "px-2 py-2 whitespace-nowrap font-medium ";
 
   let show404 = false;
   let contest: CONTEST;
@@ -79,11 +93,11 @@
   </Card>
 {:else if contest}
   <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-    <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">
+    <Heading tag="h1" class="text-center text-4xl flex justify-center gap-1">
       {contest.name}
 
       {#if minRole($userStore, "delegate")}
-        <a href={"/admin/contest/" + name}><PencilIcon size="1.2rem" /></a>
+        <a href={"/admin/contest/" + contest.name}><PencilIcon size="1.2rem" /></a>
       {/if}
     </Heading>
 
@@ -194,11 +208,55 @@
     </ul>
   </Card>
 
-  <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-    <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">Resultados</Heading>
+  <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
+    <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">Competidores</Heading>
 
-    <ResultView {roundGroup} />
+    <Table hoverable shadow divClass="w-full relative overflow-x-auto">
+      <TableHead>
+        <TableHeadCell padding="px-2 py-3">#</TableHeadCell>
+        <TableHeadCell padding="px-2 py-3">Nombre</TableHeadCell>
+        <TableHeadCell padding="px-2 py-3">Categorías</TableHeadCell>
+      </TableHead>
+
+      <TableBody>
+        {#each contest.contestants as c, p (c.user.username)}
+          <TableBodyRow>
+            <TableBodyCell tdClass={TD_CLASS}>{p + 1}</TableBodyCell>
+            <TableBodyCell tdClass={TD_CLASS}>{c.user.name}</TableBodyCell>
+            <TableBodyCell tdClass={TD_CLASS}>
+              <div class="w-full flex flex-wrap gap-2">
+                {#each c.categories as ct}
+                  <WcaCategory icon={ct.scrambler} size="1.5rem" />
+                  <Tooltip>{ct.name}</Tooltip>
+                {/each}
+              </div>
+            </TableBodyCell>
+          </TableBodyRow>
+        {/each}
+      </TableBody>
+    </Table>
   </Card>
+
+  {#if contest.status !== "pending" && contest.status !== "inscription"}
+    <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
+      <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">Resultados</Heading>
+
+      {#if contest.status === "running" || contest.status === "results"}
+        <p class="max-w-2xl text-sm">
+          {#if contest.status === "running"}
+            Se están añadiendo los resultados de la competencia. A medida que se vayan añadiendo,
+            aparecerán debajo (no se actualiza en tiempo real, debes recargar la página para obtener
+            las últimas actualizaciones).
+          {:else if contest.status === "results"}
+            Se están revisando detalladamente todos los resultados de la competencia antes de
+            publicarlos de manera oficial.
+          {/if}
+        </p>
+      {/if}
+
+      <ResultView {roundGroup} />
+    </Card>
+  {/if}
 {:else}
   <Card class="mt-4 max-w-3xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
     <Spinner size="10" />
