@@ -2,10 +2,12 @@
   import { userStore } from "@stores/user";
   import { tokenStore } from "@stores/token";
   import { redirectToLogin, refreshToken } from "@helpers/API";
+  import { browser } from "$app/environment";
 
   const debug = false;
 
   (async () => {
+    if (!browser) return;
     if (
       !$userStore ||
       !$tokenStore ||

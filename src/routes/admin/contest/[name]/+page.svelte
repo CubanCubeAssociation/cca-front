@@ -65,6 +65,7 @@
   import { NotificationService } from "@stores/notification.service";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
+  import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
 
   let name = "";
   const notification = NotificationService.getInstance();
@@ -438,298 +439,305 @@
   <title>{contest.name} - CCA</title>
 </svelte:head>
 
-<Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
-  <Heading class="text-3xl text-center"
-    >{name === "new" ? "Crear competencia" : `Editar "${contest.name}"`}</Heading
-  >
+<PrivateRouteGuard>
+  <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
+    <Heading class="text-3xl text-center"
+      >{name === "new" ? "Crear competencia" : `Editar "${contest.name}"`}</Heading
+    >
 
-  <form class="mt-8" onsubmit={save}>
-    <Tabs style="underline" contentClass="dark:bg-gray-800 mt-4">
-      <!-- Datos -->
-      <TabItem open>
-        <div slot="title" class="flex items-center gap-2">
-          <GridSolid size="sm" /> Datos
-        </div>
-        <div class="grid gap-4 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
-          <!-- Nombre -->
-          <div>
-            <Label for="name" class="mb-2">Nombre</Label>
-            <Input
-              bind:value={contest.name}
-              type="text"
-              id="name"
-              placeholder="Nombre..."
-              required
-            />
+    <form class="mt-8" onsubmit={save}>
+      <Tabs style="underline" contentClass="dark:bg-gray-800 mt-4">
+        <!-- Datos -->
+        <TabItem open>
+          <div slot="title" class="flex items-center gap-2">
+            <GridSolid size="sm" /> Datos
           </div>
-
-          <!-- Lugar -->
-          <div>
-            <Label for="place" class="mb-2">Lugar</Label>
-            <Input
-              bind:value={contest.place}
-              type="text"
-              id="place"
-              placeholder="Lugar..."
-              required
-            />
-          </div>
-
-          <!-- Fecha -->
-          <div>
-            <Label for="date" class="mb-2">Fecha</Label>
-            <Input bind:value={contest.date} type="datetime-local" id="date" required />
-          </div>
-
-          <!-- Inicio de inscripcion -->
-          <div>
-            <Label for="inscription-start" class="mb-2">Inscripción (inicio)</Label>
-            <Input
-              bind:value={contest.inscriptionStart}
-              type="date"
-              id="inscription-start"
-              required
-            />
-          </div>
-
-          <!-- Fin de inscripcion -->
-          <div>
-            <Label for="inscription-end" class="mb-2">Inscripción (fin)</Label>
-            <Input bind:value={contest.inscriptionEnd} type="date" id="inscription-end" required />
-          </div>
-
-          <!-- Costo de inscripcion -->
-          <div>
-            <Label for="inscription-cost" class="mb-2">Costo</Label>
-            <Input
-              bind:value={contest.inscriptionCost}
-              type="number"
-              min={0}
-              id="inscription-cost"
-              required
-            />
-          </div>
-
-          <!-- Estado -->
-          <div>
-            <Label class="mb-2">Estado</Label>
-
-            <Select
-              items={STATUS_ORDER}
-              bind:value={contest.status}
-              transform={e => e}
-              label={e => getStatus(e)}
-              hasIcon={e => getIndicatorColor(e)}
-              iconComponent={Indicator}
-              iconKey="color"
-              iconSize={null}
-            />
-          </div>
-
-          <!-- Categorias -->
-          <div>
-            <Label class="mb-2">Categorías</Label>
-
-            <div class="w-full flex flex-wrap gap-2">
-              {#each categories as ct}
-                <button onclick={() => toggleSelect(ct)}>
-                  <WcaCategory
-                    icon={ct.scrambler}
-                    class="cursor-pointer"
-                    selected={!!contest.categories.find(cat => cat.category.id === ct.id)}
-                  />
-                </button>
-                <Tooltip>{ct.name}</Tooltip>
-              {/each}
+          <div class="grid gap-4 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
+            <!-- Nombre -->
+            <div>
+              <Label for="name" class="mb-2">Nombre</Label>
+              <Input
+                bind:value={contest.name}
+                type="text"
+                id="name"
+                placeholder="Nombre..."
+                required
+              />
             </div>
-          </div>
 
-          <!-- Visible -->
-          <div class="flex items-center gap-2">
-            <Label for="visible" class="cursor-pointer select-none">Visible</Label>
-            <Toggle class="cursor-pointer" bind:checked={contest.visible} />
-          </div>
-
-          <!-- Rondas -->
-          <div class="col-span-full grid place-items-center">
-            <Label class="mb-2">Rondas</Label>
-
-            <div class="w-full flex flex-wrap gap-4 justify-center">
-              {#each contest.categories as ct}
-                <div class="grid place-items-center">
-                  <div>
-                    <WcaCategory icon={ct.category.scrambler} size="3rem" />
-                    <Tooltip>{ct.category.name}</Tooltip>
-                  </div>
-
-                  <div class="flex items-center justify-between border gap-2 rounded-md">
-                    <button
-                      class="p-1"
-                      type="button"
-                      onclick={() => (ct.rounds = Math.max(1, ct.rounds - 1))}>-</button
-                    >
-                    <Span>{ct.rounds}</Span>
-                    <button
-                      class="p-1"
-                      type="button"
-                      onclick={() => (ct.rounds = Math.min(5, ct.rounds + 1))}>+</button
-                    >
-                  </div>
-                </div>
-              {/each}
+            <!-- Lugar -->
+            <div>
+              <Label for="place" class="mb-2">Lugar</Label>
+              <Input
+                bind:value={contest.place}
+                type="text"
+                id="place"
+                placeholder="Lugar..."
+                required
+              />
             </div>
-          </div>
-        </div>
-      </TabItem>
 
-      <!-- Competidores -->
-      <TabItem>
-        <div slot="title" class="flex items-center gap-2">
-          <UserOutline size="sm" /> Competidores
-        </div>
+            <!-- Fecha -->
+            <div>
+              <Label for="date" class="mb-2">Fecha</Label>
+              <Input bind:value={contest.date} type="datetime-local" id="date" required />
+            </div>
 
-        <div class="w-full mb-4 flex items-center gap-2">
-          <Button on:click={() => (addDialog = true)}>
-            <PlusIcon /> Añadir competidor
-          </Button>
+            <!-- Inicio de inscripcion -->
+            <div>
+              <Label for="inscription-start" class="mb-2">Inscripción (inicio)</Label>
+              <Input
+                bind:value={contest.inscriptionStart}
+                type="date"
+                id="inscription-start"
+                required
+              />
+            </div>
 
-          {#if checked.some(e => e)}
-            <Select
-              bind:value={bundleAction}
-              items={["Agregar categoría", "Remover categoría"]}
-              transform={e => e}
-            />
-            <Select
-              bind:value={bundleCategory}
-              items={contest.categories}
-              transform={e => e}
-              label={e => e.category.name}
-            />
-            <Button
-              color="purple"
-              on:click={() => {
-                let users = contest.contestants.filter((_, p) => checked[p]);
+            <!-- Fin de inscripcion -->
+            <div>
+              <Label for="inscription-end" class="mb-2">Inscripción (fin)</Label>
+              <Input
+                bind:value={contest.inscriptionEnd}
+                type="date"
+                id="inscription-end"
+                required
+              />
+            </div>
 
-                if (bundleAction.startsWith("Agregar")) {
-                  users.forEach(user => {
-                    user.categories = [
-                      ...user.categories.filter(cat => cat.id != bundleCategory.category.id),
-                      bundleCategory.category,
-                    ];
-                  });
-                } else {
-                  users.forEach(user => {
-                    user.categories = user.categories.filter(
-                      cat => cat.id != bundleCategory.category.id
-                    );
-                  });
-                }
+            <!-- Costo de inscripcion -->
+            <div>
+              <Label for="inscription-cost" class="mb-2">Costo</Label>
+              <Input
+                bind:value={contest.inscriptionCost}
+                type="number"
+                min={0}
+                id="inscription-cost"
+                required
+              />
+            </div>
 
-                contest = contest;
-              }}>Aplicar</Button
-            >
-          {/if}
-        </div>
+            <!-- Estado -->
+            <div>
+              <Label class="mb-2">Estado</Label>
 
-        {#if contest.contestants.length}
-          <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-            <TableHead>
-              <TableHeadCell></TableHeadCell>
-              <TableHeadCell>Nombre</TableHeadCell>
-              <TableHeadCell>Usuario</TableHeadCell>
-              <TableHeadCell>Categorías</TableHeadCell>
-              <TableHeadCell>Pagó</TableHeadCell>
-              <TableHeadCell>Inscripción</TableHeadCell>
-              <TableHeadCell></TableHeadCell>
-            </TableHead>
+              <Select
+                items={STATUS_ORDER}
+                bind:value={contest.status}
+                transform={e => e}
+                label={e => getStatus(e)}
+                hasIcon={e => getIndicatorColor(e)}
+                iconComponent={Indicator}
+                iconKey="color"
+                iconSize={null}
+              />
+            </div>
 
-            <TableBody>
-              {#each contest.contestants as c, p (c.user.username)}
-                <TableBodyRow>
-                  <TableBodyCell
-                    ><Checkbox
-                      bind:checked={checked[p]}
-                      on:change={() => (checked = checked)}
-                    /></TableBodyCell
-                  >
-                  <TableBodyCell>{c.user.name}</TableBodyCell>
-                  <TableBodyCell>{c.user.username}</TableBodyCell>
-                  <TableBodyCell>
-                    <div class="w-full flex flex-wrap gap-2">
-                      {#each c.categories as ct}
-                        <WcaCategory icon={ct.scrambler} />
-                        <Tooltip>{ct.name}</Tooltip>
-                      {/each}
+            <!-- Categorias -->
+            <div>
+              <Label class="mb-2">Categorías</Label>
+
+              <div class="w-full flex flex-wrap gap-2">
+                {#each categories as ct}
+                  <button onclick={() => toggleSelect(ct)}>
+                    <WcaCategory
+                      icon={ct.scrambler}
+                      class="cursor-pointer"
+                      selected={!!contest.categories.find(cat => cat.category.id === ct.id)}
+                    />
+                  </button>
+                  <Tooltip>{ct.name}</Tooltip>
+                {/each}
+              </div>
+            </div>
+
+            <!-- Visible -->
+            <div class="flex items-center gap-2">
+              <Label for="visible" class="cursor-pointer select-none">Visible</Label>
+              <Toggle class="cursor-pointer" bind:checked={contest.visible} />
+            </div>
+
+            <!-- Rondas -->
+            <div class="col-span-full grid place-items-center">
+              <Label class="mb-2">Rondas</Label>
+
+              <div class="w-full flex flex-wrap gap-4 justify-center">
+                {#each contest.categories as ct}
+                  <div class="grid place-items-center">
+                    <div>
+                      <WcaCategory icon={ct.category.scrambler} size="3rem" />
+                      <Tooltip>{ct.category.name}</Tooltip>
                     </div>
-                  </TableBodyCell>
-                  <TableBodyCell>
-                    <Toggle bind:checked={c.paid} />
-                  </TableBodyCell>
-                  <TableBodyCell>
-                    <Input class="w-[4rem]" bind:value={c.paidAmount} />
-                  </TableBodyCell>
-                  <TableBodyCell>
-                    <Button class="p-2" on:click={() => editUser(c)}><EditIcon /></Button>
-                    <Tooltip>Editar categorías</Tooltip>
-                    <Button class="p-2" on:click={() => deleteContestant(c)} color="red"
-                      ><DeleteIcon /></Button
-                    >
-                    <Tooltip>Eliminar</Tooltip>
-                  </TableBodyCell>
-                </TableBodyRow>
-              {/each}
-            </TableBody>
-          </Table>
 
-          <div class="w-full mt-4">
+                    <div class="flex items-center justify-between border gap-2 rounded-md">
+                      <button
+                        class="p-1"
+                        type="button"
+                        onclick={() => (ct.rounds = Math.max(1, ct.rounds - 1))}>-</button
+                      >
+                      <Span>{ct.rounds}</Span>
+                      <button
+                        class="p-1"
+                        type="button"
+                        onclick={() => (ct.rounds = Math.min(5, ct.rounds + 1))}>+</button
+                      >
+                    </div>
+                  </div>
+                {/each}
+              </div>
+            </div>
+          </div>
+        </TabItem>
+
+        <!-- Competidores -->
+        <TabItem>
+          <div slot="title" class="flex items-center gap-2">
+            <UserOutline size="sm" /> Competidores
+          </div>
+
+          <div class="w-full mb-4 flex items-center gap-2">
             <Button on:click={() => (addDialog = true)}>
               <PlusIcon /> Añadir competidor
             </Button>
-          </div>
-        {/if}
-      </TabItem>
 
-      <!-- Resultados -->
-      {#if name != "new"}
-        <TabItem>
-          <div slot="title" class="flex items-center gap-2">
-            <ReceiptSolid size="sm" /> Resultados
+            {#if checked.some(e => e)}
+              <Select
+                bind:value={bundleAction}
+                items={["Agregar categoría", "Remover categoría"]}
+                transform={e => e}
+              />
+              <Select
+                bind:value={bundleCategory}
+                items={contest.categories}
+                transform={e => e}
+                label={e => e.category.name}
+              />
+              <Button
+                color="purple"
+                on:click={() => {
+                  let users = contest.contestants.filter((_, p) => checked[p]);
+
+                  if (bundleAction.startsWith("Agregar")) {
+                    users.forEach(user => {
+                      user.categories = [
+                        ...user.categories.filter(cat => cat.id != bundleCategory.category.id),
+                        bundleCategory.category,
+                      ];
+                    });
+                  } else {
+                    users.forEach(user => {
+                      user.categories = user.categories.filter(
+                        cat => cat.id != bundleCategory.category.id
+                      );
+                    });
+                  }
+
+                  contest = contest;
+                }}>Aplicar</Button
+              >
+            {/if}
           </div>
 
-          <div class="w-full mb-4">
-            <Button on:click={prepareResult}>
-              <PlusIcon /> Agregar resultado
-            </Button>
-          </div>
+          {#if contest.contestants.length}
+            <Table hoverable shadow divClass="w-full relative overflow-x-auto">
+              <TableHead>
+                <TableHeadCell></TableHeadCell>
+                <TableHeadCell>Nombre</TableHeadCell>
+                <TableHeadCell>Usuario</TableHeadCell>
+                <TableHeadCell>Categorías</TableHeadCell>
+                <TableHeadCell>Pagó</TableHeadCell>
+                <TableHeadCell>Inscripción</TableHeadCell>
+                <TableHeadCell></TableHeadCell>
+              </TableHead>
 
-          {#if roundGroup.length > 0}
-            <ResultView {roundGroup} on:edit={handleEditRound} allowEdit />
+              <TableBody>
+                {#each contest.contestants as c, p (c.user.username)}
+                  <TableBodyRow>
+                    <TableBodyCell
+                      ><Checkbox
+                        bind:checked={checked[p]}
+                        on:change={() => (checked = checked)}
+                      /></TableBodyCell
+                    >
+                    <TableBodyCell>{c.user.name}</TableBodyCell>
+                    <TableBodyCell>{c.user.username}</TableBodyCell>
+                    <TableBodyCell>
+                      <div class="w-full flex flex-wrap gap-2">
+                        {#each c.categories as ct}
+                          <WcaCategory icon={ct.scrambler} />
+                          <Tooltip>{ct.name}</Tooltip>
+                        {/each}
+                      </div>
+                    </TableBodyCell>
+                    <TableBodyCell>
+                      <Toggle bind:checked={c.paid} />
+                    </TableBodyCell>
+                    <TableBodyCell>
+                      <Input class="w-[4rem]" bind:value={c.paidAmount} />
+                    </TableBodyCell>
+                    <TableBodyCell>
+                      <Button class="p-2" on:click={() => editUser(c)}><EditIcon /></Button>
+                      <Tooltip>Editar categorías</Tooltip>
+                      <Button class="p-2" on:click={() => deleteContestant(c)} color="red"
+                        ><DeleteIcon /></Button
+                      >
+                      <Tooltip>Eliminar</Tooltip>
+                    </TableBodyCell>
+                  </TableBodyRow>
+                {/each}
+              </TableBody>
+            </Table>
 
             <div class="w-full mt-4">
-              <Button on:click={prepareResult}>
-                <PlusIcon /> Agregar resultado
+              <Button on:click={() => (addDialog = true)}>
+                <PlusIcon /> Añadir competidor
               </Button>
             </div>
           {/if}
         </TabItem>
-      {/if}
-    </Tabs>
 
-    <div class="col-span-full flex justify-center gap-2 mt-16">
-      {#if name != "new"}
-        <Button color="red" on:click={() => (deleteContestDialog = true)}>
-          <TrashBinSolid size="sm" />
-          <Span class="ml-1">Eliminar</Span>
+        <!-- Resultados -->
+        {#if name != "new"}
+          <TabItem>
+            <div slot="title" class="flex items-center gap-2">
+              <ReceiptSolid size="sm" /> Resultados
+            </div>
+
+            <div class="w-full mb-4">
+              <Button on:click={prepareResult}>
+                <PlusIcon /> Agregar resultado
+              </Button>
+            </div>
+
+            {#if roundGroup.length > 0}
+              <ResultView {roundGroup} on:edit={handleEditRound} allowEdit />
+
+              <div class="w-full mt-4">
+                <Button on:click={prepareResult}>
+                  <PlusIcon /> Agregar resultado
+                </Button>
+              </div>
+            {/if}
+          </TabItem>
+        {/if}
+      </Tabs>
+
+      <div class="col-span-full flex justify-center gap-2 mt-16">
+        {#if name != "new"}
+          <Button color="red" on:click={() => (deleteContestDialog = true)}>
+            <TrashBinSolid size="sm" />
+            <Span class="ml-1">Eliminar</Span>
+          </Button>
+        {/if}
+
+        <Button type="submit">
+          <SaveIcon size="1rem" />
+          <Span class="ml-1">{name === "new" ? "Crear" : "Guardar"}</Span>
         </Button>
-      {/if}
-
-      <Button type="submit">
-        <SaveIcon size="1rem" />
-        <Span class="ml-1">{name === "new" ? "Crear" : "Guardar"}</Span>
-      </Button>
-    </div>
-  </form>
-</Card>
+      </div>
+    </form>
+  </Card>
+</PrivateRouteGuard>
 
 <!-- ADD DIALOG -->
 <SearchUser multiple={true} user={handleUsers} bind:show={addDialog} />

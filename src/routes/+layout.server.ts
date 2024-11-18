@@ -1,6 +1,6 @@
 import type { LayoutServerLoad } from "./$types";
 
-export const load: LayoutServerLoad = ({ url }) => {
+export const load: LayoutServerLoad = ({ url, request }) => {
   let { pathname } = url;
 
   const routes = [

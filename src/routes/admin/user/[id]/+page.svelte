@@ -9,6 +9,7 @@
   import Select from "@components/Select.svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
+  import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
 
   let id = $state("");
 
@@ -143,120 +144,122 @@
   <title>{user.name} - CCA</title>
 </svelte:head>
 
-<Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
-  <Heading class="text-3xl text-center">
-    {id === "new" ? "Crear usuario" : `Editar "${user.name}"`}
-  </Heading>
+<PrivateRouteGuard>
+  <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
+    <Heading class="text-3xl text-center">
+      {id === "new" ? "Crear usuario" : `Editar "${user.name}"`}
+    </Heading>
 
-  <form
-    autocomplete="off"
-    class="mt-8 grid gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2"
-    onsubmit={save}
-  >
-    <div>
-      <Label for="name" class="mb-2">Nombre</Label>
-      <Input bind:value={user.name} type="text" id="name" placeholder="Nombre..." required />
-    </div>
-
-    <div>
-      <Label for="email" class="mb-2">Email</Label>
-      <Input
-        bind:value={user.email}
-        type="email"
-        id="email"
-        placeholder="email@email.com"
-        required
-      />
-    </div>
-
-    {#if id === "new"}
+    <form
+      autocomplete="off"
+      class="mt-8 grid gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2"
+      onsubmit={save}
+    >
       <div>
-        <Label for="password" class="mb-2">Contraseña</Label>
+        <Label for="name" class="mb-2">Nombre</Label>
+        <Input bind:value={user.name} type="text" id="name" placeholder="Nombre..." required />
+      </div>
+
+      <div>
+        <Label for="email" class="mb-2">Email</Label>
         <Input
-          bind:value={user.password}
-          type="password"
-          name="password"
-          id="password"
-          placeholder="contraseña"
-          autocomplete="off"
+          bind:value={user.email}
+          type="email"
+          id="email"
+          placeholder="email@email.com"
           required
         />
       </div>
-    {/if}
 
-    <div>
-      <Label for="ci" class="mb-2">CI</Label>
-      <Input bind:value={user.ci} type="text" id="ci" placeholder="########" required />
-    </div>
-
-    <div>
-      <Label for="sex" class="mb-2">Sexo</Label>
-      <div class="flex flex-wrap">
-        <Radio class="p-2 gap-1" bind:group={user.sex} value="M">Masculino</Radio>
-        <Radio class="p-2 gap-1" bind:group={user.sex} value="F">Femenino</Radio>
-      </div>
-    </div>
-
-    <div>
-      <Label for="username" class="mb-2">Usuario</Label>
-      <Input bind:value={user.username} type="text" id="username" required autocomplete="off" />
-    </div>
-
-    <div>
-      <Label class="mb-2">Provincia</Label>
-      <Select
-        items={PROVINCIAS}
-        transform={e => e.nombre}
-        label={e => e.nombre}
-        bind:value={user.province}
-        onChange={updateMunicipalities}
-        placement="right-start"
-      />
-    </div>
-
-    <div>
-      <Label class="mb-2">Municipio</Label>
-      <Select
-        items={municipios}
-        transform={e => e}
-        label={e => e}
-        bind:value={user.municipality}
-        placement="right-start"
-      />
-    </div>
-
-    <div>
-      <Label for="credit" class="mb-2">Crédito</Label>
-      <Input bind:value={user.credit} type="number" min={0} id="credit" required />
-    </div>
-
-    <div>
-      <Label class="mb-2">Rol</Label>
-      <Select
-        items={ROLES.slice(1)}
-        transform={e => e.value}
-        label={e => e.name}
-        bind:value={user.role}
-        placement="right-start"
-      />
-    </div>
-
-    <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
-      {#if id != "new"}
-        <Button color="red" on:click={() => (showModal = true)}>
-          <TrashBinSolid size="sm" />
-          <Span class="ml-1">Eliminar</Span>
-        </Button>
+      {#if id === "new"}
+        <div>
+          <Label for="password" class="mb-2">Contraseña</Label>
+          <Input
+            bind:value={user.password}
+            type="password"
+            name="password"
+            id="password"
+            placeholder="contraseña"
+            autocomplete="off"
+            required
+          />
+        </div>
       {/if}
 
-      <Button type="submit" class="gap-2"
-        ><SaveIcon size="1.2rem" /> {id === "new" ? "Crear" : "Guardar"}</Button
-      >
-    </div>
-  </form>
+      <div>
+        <Label for="ci" class="mb-2">CI</Label>
+        <Input bind:value={user.ci} type="text" id="ci" placeholder="########" required />
+      </div>
 
-  <!-- <Button class="w-fit mx-auto mt-4" on:click={ createGroup }>Crear grupo</Button> -->
-</Card>
+      <div>
+        <Label for="sex" class="mb-2">Sexo</Label>
+        <div class="flex flex-wrap">
+          <Radio class="p-2 gap-1" bind:group={user.sex} value="M">Masculino</Radio>
+          <Radio class="p-2 gap-1" bind:group={user.sex} value="F">Femenino</Radio>
+        </div>
+      </div>
+
+      <div>
+        <Label for="username" class="mb-2">Usuario</Label>
+        <Input bind:value={user.username} type="text" id="username" required autocomplete="off" />
+      </div>
+
+      <div>
+        <Label class="mb-2">Provincia</Label>
+        <Select
+          items={PROVINCIAS}
+          transform={e => e.nombre}
+          label={e => e.nombre}
+          bind:value={user.province}
+          onChange={updateMunicipalities}
+          placement="right-start"
+        />
+      </div>
+
+      <div>
+        <Label class="mb-2">Municipio</Label>
+        <Select
+          items={municipios}
+          transform={e => e}
+          label={e => e}
+          bind:value={user.municipality}
+          placement="right-start"
+        />
+      </div>
+
+      <div>
+        <Label for="credit" class="mb-2">Crédito</Label>
+        <Input bind:value={user.credit} type="number" min={0} id="credit" required />
+      </div>
+
+      <div>
+        <Label class="mb-2">Rol</Label>
+        <Select
+          items={ROLES.slice(1)}
+          transform={e => e.value}
+          label={e => e.name}
+          bind:value={user.role}
+          placement="right-start"
+        />
+      </div>
+
+      <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
+        {#if id != "new"}
+          <Button color="red" on:click={() => (showModal = true)}>
+            <TrashBinSolid size="sm" />
+            <Span class="ml-1">Eliminar</Span>
+          </Button>
+        {/if}
+
+        <Button type="submit" class="gap-2"
+          ><SaveIcon size="1.2rem" /> {id === "new" ? "Crear" : "Guardar"}</Button
+        >
+      </div>
+    </form>
+
+    <!-- <Button class="w-fit mx-auto mt-4" on:click={ createGroup }>Crear grupo</Button> -->
+  </Card>
+</PrivateRouteGuard>
 
 <Modal bind:open={showModal} outsideclose autoclose title="Eliminar usuario" size="xs">
   <div class="flex flex-col items-center justify-center">

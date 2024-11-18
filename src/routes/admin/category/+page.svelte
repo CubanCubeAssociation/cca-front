@@ -16,6 +16,7 @@
   } from "flowbite-svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { goto } from "$app/navigation";
+  import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
 
   const HEADER = "Categorías";
   const ADD = "Añadir categoría";
@@ -38,38 +39,9 @@
   });
 </script>
 
-<Card class="mt-4 max-w-lg w-[calc(100%-2rem)] mx-auto mb-8">
-  <Heading class="text-3xl text-center">{HEADER}</Heading>
-
-  <div class="actions">
-    <Button on:click={addCategory}>
-      <PlusIcon size="1.2rem" />
-      {ADD}
-    </Button>
-  </div>
-
-  {#if categories.length > 0}
-    <Table striped hoverable shadow>
-      <TableHead>
-        <TableHeadCell>Nombre</TableHeadCell>
-        <TableHeadCell>Ícono</TableHeadCell>
-        <TableHeadCell>Scrambler</TableHeadCell>
-      </TableHead>
-
-      <TableBody>
-        {#each categories as cat}
-          <TableBodyRow>
-            <TableBodyCell>
-              <a href={"/admin/category/" + cat.id}>{cat.name}</a>
-            </TableBodyCell>
-            <TableBodyCell>
-              <WcaCategory icon={cat.scrambler} />
-            </TableBodyCell>
-            <TableBodyCell>{cat.scrambler}</TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
+<PrivateRouteGuard>
+  <Card class="mt-4 max-w-lg w-[calc(100%-2rem)] mx-auto mb-8">
+    <Heading class="text-3xl text-center">{HEADER}</Heading>
 
     <div class="actions">
       <Button on:click={addCategory}>
@@ -77,8 +49,39 @@
         {ADD}
       </Button>
     </div>
-  {/if}
-</Card>
+
+    {#if categories.length > 0}
+      <Table striped hoverable shadow>
+        <TableHead>
+          <TableHeadCell>Nombre</TableHeadCell>
+          <TableHeadCell>Ícono</TableHeadCell>
+          <TableHeadCell>Scrambler</TableHeadCell>
+        </TableHead>
+
+        <TableBody>
+          {#each categories as cat}
+            <TableBodyRow>
+              <TableBodyCell>
+                <a href={"/admin/category/" + cat.id}>{cat.name}</a>
+              </TableBodyCell>
+              <TableBodyCell>
+                <WcaCategory icon={cat.scrambler} />
+              </TableBodyCell>
+              <TableBodyCell>{cat.scrambler}</TableBodyCell>
+            </TableBodyRow>
+          {/each}
+        </TableBody>
+      </Table>
+
+      <div class="actions">
+        <Button on:click={addCategory}>
+          <PlusIcon size="1.2rem" />
+          {ADD}
+        </Button>
+      </div>
+    {/if}
+  </Card>
+</PrivateRouteGuard>
 
 <style lang="postcss">
   .actions {
