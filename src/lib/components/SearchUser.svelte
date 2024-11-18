@@ -12,6 +12,7 @@
     Heading,
     Input,
     Modal,
+    Spinner,
     Table,
     TableBody,
     TableBodyCell,
@@ -30,26 +31,47 @@
   let checks: boolean[] = [];
   let checked = 0;
   let input = "";
-  let controller = new AbortController();
-  let { signal } = controller;
+  // let controller = new AbortController();
+  // let { signal } = controller;
+  let searching = false;
 
-  function handleInput() {
-    let str = input.trim();
-
-    if (str) {
-      controller.abort();
-
-      searchUser(str, signal).then(res => {
-        userList = res;
-        checks = userList.map(() => false);
-        checked = 0;
-      });
-    } else {
-      userList.length = 0;
-      checks.length = 0;
-      checked = 0;
-    }
+  function debounce(fn: Function, pre: Function = () => {}, pos: Function = () => {}, time = 500) {
+    let timerId: NodeJS.Timeout;
+    return (...args: any[]) => {
+      pre();
+      clearTimeout(timerId);
+      timerId = setTimeout(() => {
+        fn(...args);
+        pos();
+      }, time);
+    };
   }
+
+  const handleInput = debounce(
+    () => {
+      let str = input.trim();
+
+      if (str) {
+        console.log(`SEARCH: <${str}>`);
+
+        searchUser(str).then(res => {
+          userList = res;
+          checks = userList.map(() => false);
+          checked = 0;
+        });
+      } else {
+        userList.length = 0;
+        checks.length = 0;
+        checked = 0;
+      }
+    },
+    () => {
+      searching = true;
+    },
+    () => {
+      searching = false;
+    }
+  );
 
   // function addSelected(ev: MouseEvent) {
   //   ev.stopPropagation();
@@ -183,7 +205,7 @@
   <Dropdown
     placement="bottom"
     bind:open={show}
-    class={userList.length === 0 ? "hidden" : "max-h-[15rem] overflow-y-auto"}
+    class={userList.length === 0 && !searching ? "hidden" : "max-h-[15rem] overflow-y-auto grid"}
     classContainer="rounded-md shadow-md border border-[#fff4]"
   >
     <div slot="header" class="px-4 py-2">
@@ -194,14 +216,19 @@
         on:change={handleInput}
       />
     </div>
-    {#each userList as user}
-      <DropdownItem
-        on:click={() => {
-          show = false;
-          multiple = false;
-          sendUsers(user);
-        }}>{user.name}</DropdownItem
-      >
-    {/each}
+
+    {#if searching}
+      <Spinner size="5" class="mx-auto" />
+    {:else}
+      {#each userList as user}
+        <DropdownItem
+          on:click={() => {
+            show = false;
+            multiple = false;
+            sendUsers(user);
+          }}>{user.name}</DropdownItem
+        >
+      {/each}
+    {/if}
   </Dropdown>
 {/if}

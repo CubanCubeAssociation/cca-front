@@ -53,7 +53,6 @@
   }
 
   function updatePaginator() {
-    console.log("UPDATE PAGINATOR");
     pg = pg;
     refreshContestData();
   }

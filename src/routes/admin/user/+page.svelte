@@ -134,7 +134,7 @@
     <Spinner size="10" class="mx-auto" />
   {:else if users.length > 0}
     <PaginatorComponent {pg} update={updatePaginator} class="mb-4" />
-    <Table striped hoverable shadow>
+    <Table striped hoverable shadow divClass="w-full relative overflow-x-auto">
       <TableHead>
         <TableHeadCell>#</TableHeadCell>
         {#each columns as C}

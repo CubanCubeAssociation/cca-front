@@ -15,13 +15,14 @@
   import EyeIcon from "@icons/Eye.svelte";
   import PencilIcon from "@icons/Pencil.svelte";
   import { Card, Heading, Indicator, Span, Spinner, Tooltip } from "flowbite-svelte";
-  import WcaCategory from "./wca/WCACategory.svelte";
+  import WcaCategory from "@components/wca/WCACategory.svelte";
   import { minRole } from "@helpers/auth";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
   import { userStore } from "@stores/user";
-  import ResultView from "./ResultView.svelte";
+  import ResultView from "@components/ResultView.svelte";
+  import { page } from "$app/stores";
 
-  export let name: string;
+  let name: string = "";
 
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 !text-green-200";
@@ -47,6 +48,8 @@
   }
 
   onMount(() => {
+    let name = $page.params.name;
+
     getContest(name)
       .then(res => {
         contest = res;

@@ -62,10 +62,6 @@
       .finally(() => (loading = false));
   }
 
-  function updatePaginator() {
-    pg = pg;
-  }
-
   function handleUpdateCategory() {
     updateRanking(category ? category.id : "", type)
       .then(() => {
@@ -92,6 +88,10 @@
         });
       })
       .catch(err => console.log("ERROR: ", err));
+  }
+
+  function updatePaginator() {
+    pg = pg;
   }
 
   async function getRankingInfo(cId: string, tp: "Single" | "Media") {
@@ -170,15 +170,15 @@
   {:else if rankingResults.length > 0}
     <PaginatorComponent
       showNextPrev={!$screen.isMobile}
-      {pg}
-      update={updatePaginator}
+      bind:pg
       class="mb-4"
+      update={updatePaginator}
     />
 
     <Table hoverable shadow divClass="w-full relative overflow-x-auto">
       <TableHead>
         <TableHeadCell>#</TableHeadCell>
-        <TableHeadCell>Nombre</TableHeadCell>
+        <TableHeadCell>Nombre {pg.start} - {pg.end}</TableHeadCell>
         <TableHeadCell>{type === "Single" ? "Tiempo" : "Promedio"}</TableHeadCell>
         <TableHeadCell>Competencia</TableHeadCell>
       </TableHead>
@@ -216,20 +216,18 @@
       </TableBody>
     </Table>
 
-    <PaginatorComponent
-      showNextPrev={!$screen.isMobile}
-      {pg}
-      update={updatePaginator}
-      class="mt-4"
-    />
+    <PaginatorComponent showNextPrev={!$screen.isMobile} bind:pg class="mt-4" />
   {:else if error}
     <Span class="text-center !text-red-500">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
     </Span>
 
-    <Button class="mt-8 w-min" on:click={() => getRankingInfo(category?.id || "", type)}
-      >Recargar</Button
+    <Button
+      class="mt-8 w-min"
+      on:click={() => (category ? getRankingInfo(category.id || "", type) : refreshRankingData())}
     >
+      Recargar
+    </Button>
   {:else}
     <Span class="text-center">No hay resultados disponibles para {category?.name} {type}</Span>
   {/if}

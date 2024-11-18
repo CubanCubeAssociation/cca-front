@@ -12,8 +12,9 @@
   import { browser } from "$app/environment";
   import NavbarComponent from "@components/NavbarComponent.svelte";
   import FooterComponent from "@components/FooterComponent.svelte";
+  import type { LayoutServerData } from "./$types";
 
-  let { children } = $props();
+  let { children, data }: { children: any; data: LayoutServerData } = $props();
 
   let notifications: INotification[] = $state([]);
   const notService = NotificationService.getInstance();
@@ -57,6 +58,11 @@
     });
   });
 </script>
+
+<svelte:head>
+  <title>{data.title}</title>
+  <meta name="description" content={data.description} />
+</svelte:head>
 
 <svelte:window on:resize={handleResize} />
 

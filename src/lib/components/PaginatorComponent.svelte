@@ -5,25 +5,28 @@
   import ChevronDoubleLeftIcon from "@icons/ChevronDoubleLeft.svelte";
   import ChevronDoubleRightIcon from "@icons/ChevronDoubleRight.svelte";
 
-  let {
-    pg,
-    class: _cl,
-    showNextPrev = true,
-    showFirstLast = true,
-    update = () => {},
-  }: {
+  interface PageComponentProps {
     pg: Paginator;
-    class: string;
+    class?: string;
     showNextPrev?: boolean;
     showFirstLast?: boolean;
     update?: () => any;
-  } = $props();
+  }
+
+  let {
+    class: _cl = "",
+    pg = $bindable(),
+    showNextPrev = true,
+    showFirstLast = true,
+    update = () => {},
+  }: PageComponentProps = $props();
 
   function setPage(p: number) {
     if (p === -1) pg.nextPage();
     if (p === -2) pg.prevPage();
     if (p != -1 && p != -2) pg.setPage(p);
     update();
+    pg = pg;
   }
 </script>
 

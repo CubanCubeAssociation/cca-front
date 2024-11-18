@@ -60,6 +60,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>{category.name} - CCA</title>
+</svelte:head>
+
 <Card class="mt-4 max-w-sm w-[calc(100%-2rem)] mx-auto mb-8">
   <Heading class="text-3xl text-center"
     >{type === "update" ? `Editar "${category.name}"` : "Crear categoría"}</Heading

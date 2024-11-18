@@ -139,6 +139,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>{user.name} - CCA</title>
+</svelte:head>
+
 <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
   <Heading class="text-3xl text-center">
     {id === "new" ? "Crear usuario" : `Editar "${user.name}"`}

@@ -434,6 +434,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>{contest.name} - CCA</title>
+</svelte:head>
+
 <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
   <Heading class="text-3xl text-center"
     >{name === "new" ? "Crear competencia" : `Editar "${contest.name}"`}</Heading

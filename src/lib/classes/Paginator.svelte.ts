@@ -9,28 +9,20 @@ export class Paginator {
   private len: number;
   private width: number;
 
-  page = $state(0);
-  pages = $state(0);
-  start = $state(0);
-  limit = $state(0);
-  labels: number[] = $state([]);
+  page = 0;
+  pages = 0;
+  start = 0;
+  end = 0;
+  limit = 0;
+  labels: number[] = [];
 
   constructor(dt?: any[], limit?: number, paginatorWidth?: number) {
     this.data = Array.isArray(dt) ? dt : [];
     this.len = this.data.length;
-    this.limit = Math.abs(~~(limit || 0)) || 10;
-    this.start = 0;
-    this.page = 0;
-    this.pages = 0;
     this.width = paginatorWidth || 5;
-
-    this.labels = [];
+    this.limit = Math.abs(~~(limit || 0)) || 10;
 
     this.update(0);
-  }
-
-  get end(): number {
-    return this.start + this.limit;
   }
 
   private update(len: number) {
@@ -40,6 +32,7 @@ export class Paginator {
 
     this.page = between(this.page, 1, this.pages);
     this.start = (this.page - 1) * this.limit;
+    this.end = this.start + this.limit;
 
     const minL = Math.max(1, this.page - (this.width >> 1)); // min label
     const maxL = Math.min(this.pages, minL + this.width - 1); // max label
