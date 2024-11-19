@@ -66,6 +66,7 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
+  import UserField from "@components/UserField.svelte";
 
   let name = "";
   const notification = NotificationService.getInstance();
@@ -664,7 +665,9 @@
                         on:change={() => (checked = checked)}
                       /></TableBodyCell
                     >
-                    <TableBodyCell>{c.user.name}</TableBodyCell>
+                    <TableBodyCell>
+                      <UserField user={c.user} />
+                    </TableBodyCell>
                     <TableBodyCell>{c.user.username}</TableBodyCell>
                     <TableBodyCell>
                       <div class="w-full flex flex-wrap gap-2">

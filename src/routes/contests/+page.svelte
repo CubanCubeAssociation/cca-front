@@ -24,17 +24,18 @@
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
 
-  let contestResults: CONTEST_RESULT = $state({
+  const DEFAULT_RESULT = {
     limit: 0,
     page: 0,
     results: [],
     totalPages: 0,
     totalResults: 0,
-  });
+  };
 
   let loading = $state(false);
   let error = $state(false);
   let pg = $state(new Paginator([], 10));
+  let contestResults: CONTEST_RESULT = $state(DEFAULT_RESULT);
 
   function refreshContestData() {
     loading = true;
@@ -61,6 +62,7 @@
   }
 
   onMount(() => {
+    pg.page = Math.max(1, parseInt($page.url.searchParams.get("page") || "1", 10));
     refreshContestData();
   });
 </script>
@@ -107,7 +109,8 @@
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
     </Span>
 
-    <Button class="mt-8 w-min" on:click={refreshContestData}>Recargar</Button>
+    <!-- <Button class="mt-8 w-min" on:click={refreshContestData}>Recargar</Button> -->
+    <Button class="mt-8 w-min" on:click={() => window.location.reload()}>Recargar</Button>
   {:else}
     <Span class="text-center">No hay competencias disponibles</Span>
   {/if}

@@ -4,8 +4,6 @@
   import { getUsers } from "@helpers/API";
 
   import PlusIcon from "@icons/Plus.svelte";
-  import AdminIcon from "@icons/ShieldAccount.svelte";
-  import DelegateIcon from "@icons/Shield.svelte";
 
   import {
     Button,
@@ -27,6 +25,7 @@
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
   import { page } from "$app/stores";
+  import UserField from "@components/UserField.svelte";
 
   const HEADER = "Usuarios";
   const ADD = "Añadir usuario";
@@ -157,13 +156,7 @@
                 <TableBodyCell>
                   <a href={"/admin/user/" + u.id} class="flex items-center gap-2">
                     <Avatar alt={u.name} src={u.avatar} />
-                    {u.name}
-
-                    {#if u.role === "admin"}
-                      <AdminIcon size="1.1rem" class="text-primary-500 dark:text-primary-400" />
-                    {:else if u.role === "delegate"}
-                      <DelegateIcon class="text-green-500 dark:text-green-400" />
-                    {/if}
+                    <UserField user={u} />
                   </a>
                 </TableBodyCell>
               {/if}

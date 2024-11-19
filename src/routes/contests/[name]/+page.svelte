@@ -34,6 +34,7 @@
   import { userStore } from "@stores/user";
   import ResultView from "@components/ResultView.svelte";
   import { page } from "$app/stores";
+  import UserField from "@components/UserField.svelte";
 
   let name: string = "";
 
@@ -92,7 +93,7 @@
     <Heading tag="h4" class="text-center">No se encontró la competencia: "{name}"</Heading>
   </Card>
 {:else if contest}
-  <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
+  <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-4 flex flex-col items-center gap-4">
     <Heading tag="h1" class="text-center text-4xl flex justify-center gap-1">
       {contest.name}
 
@@ -208,7 +209,7 @@
     </ul>
   </Card>
 
-  <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
+  <Card class="max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
     <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">Competidores</Heading>
 
     <Table hoverable shadow divClass="w-full relative overflow-x-auto">
@@ -222,7 +223,7 @@
         {#each contest.contestants as c, p (c.user.username)}
           <TableBodyRow>
             <TableBodyCell tdClass={TD_CLASS}>{p + 1}</TableBodyCell>
-            <TableBodyCell tdClass={TD_CLASS}>{c.user.name}</TableBodyCell>
+            <TableBodyCell tdClass={TD_CLASS}><UserField user={c.user} /></TableBodyCell>
             <TableBodyCell tdClass={TD_CLASS}>
               <div class="w-full flex flex-wrap gap-2">
                 {#each c.categories as ct}

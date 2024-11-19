@@ -1,6 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { getCategories, getRanking, updateRanking, updateRankings } from "@helpers/API";
+  import {
+    getCategories,
+    getRanking,
+    redirectOnUnauthorized,
+    updateRanking,
+    updateRankings,
+  } from "@helpers/API";
   import type { CATEGORY, RANKING } from "@interfaces";
   import {
     Table,
@@ -27,6 +33,7 @@
   import { randomUUID } from "@helpers/strings";
   import LinkIcon from "@icons/OpenInNew.svelte";
   import Award from "@components/Award.svelte";
+  import UserField from "@components/UserField.svelte";
 
   const notification = NotificationService.getInstance();
   const debug = false;
@@ -74,6 +81,7 @@
       })
       .catch(err => {
         if (debug) console.log("ERROR: ", err);
+        redirectOnUnauthorized(err);
       });
   }
 
@@ -87,7 +95,10 @@
           timeout: 2000,
         });
       })
-      .catch(err => console.log("ERROR: ", err));
+      .catch(err => {
+        if (debug) console.log("ERROR: ", err);
+        redirectOnUnauthorized(err);
+      });
   }
 
   function updatePaginator() {
@@ -197,7 +208,10 @@
                 <span class="flex justify-center">{(pg.page - 1) * pg.limit + pos + 1}</span>
               {/if}
             </TableBodyCell>
-            <TableBodyCell>{r.contestant.name}</TableBodyCell>
+            <TableBodyCell>
+              <!-- {r.contestant.name} -->
+              <UserField user={r.contestant} />
+            </TableBodyCell>
             <TableBodyCell>
               <span class={type === "Single" ? "text-green-400" : "text-purple-400"}>
                 {r.time ? timer(r.time, true, true) : "DNF"}

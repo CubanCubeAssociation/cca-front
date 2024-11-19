@@ -13,6 +13,7 @@
   import { actualTime, sTimer, timer } from "@helpers/timer";
   import type { ROUND } from "@interfaces";
   import { userStore } from "@stores/user";
+  import UserField from "./UserField.svelte";
 
   export let allowEdit = false;
   export let rounds: ROUND[];
@@ -76,10 +77,14 @@
         {#if minRole($userStore, "admin")}
           <TableBodyCell
             class={TABLE_CELL_CLASS + (allowEdit ? " cursor-pointer" : "")}
-            on:click={() => editRound(rnd)}>{rnd.contestant.name}</TableBodyCell
+            on:click={() => editRound(rnd)}
           >
+            <UserField user={rnd.contestant} />
+          </TableBodyCell>
         {:else}
-          <TableBodyCell class={TABLE_CELL_CLASS}>{rnd.contestant.name}</TableBodyCell>
+          <TableBodyCell class={TABLE_CELL_CLASS}>
+            <UserField user={rnd.contestant} />
+          </TableBodyCell>
         {/if}
 
         {#each rndKeys as tp, p}

@@ -146,6 +146,7 @@ export interface RANKING {
   contestant: {
     name: string;
     username: string;
+    role: ROLE;
   };
   contest: string;
   time: number;

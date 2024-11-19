@@ -219,7 +219,9 @@
               {/if}
             </TableBodyCell>
             <TableBodyCell class="px-2 max-sm:grid">
-              <span class="text-sm">{nrs?.contestant.name}</span>
+              <span class="text-sm">
+                {nrs?.contestant.name}
+              </span>
               {#if nra && nra.time}
                 <span class="mt-2 text-sm sm:hidden">{nra.contestant.name}</span>
               {/if}
