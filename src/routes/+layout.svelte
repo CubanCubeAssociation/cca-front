@@ -13,13 +13,17 @@
   import NavbarComponent from "@components/NavbarComponent.svelte";
   import FooterComponent from "@components/FooterComponent.svelte";
   import type { LayoutServerData } from "./$types";
+  import { DOMAIN } from "@constants";
+  import { page } from "$app/stores";
 
   let { children, data }: { children: any; data: LayoutServerData } = $props();
 
-  let notifications: INotification[] = $state([]);
   const notService = NotificationService.getInstance();
   const subService = notService.notificationSub;
   const debug = false;
+
+  let notifications: INotification[] = $state([]);
+  let jsonld = $state("");
 
   if (browser) {
     if (localStorage.getItem("tokens") && localStorage.getItem("user")) {
@@ -44,6 +48,20 @@
     } else if (debug) console.log("IS AUTH");
   })();
 
+  function updateJSONLD(d: any) {
+    jsonld = `<${"script"} type="application/ld+json">${JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: d.title,
+      description: d.description,
+      applicationCategory: "Utility",
+      operatingSystem: "all",
+      url: `${DOMAIN}` + $page.url.pathname,
+    })}</${"script"}>`;
+  }
+
+  updateJSONLD(data);
+
   function handleResize() {
     $screen = {
       width: window.innerWidth,
@@ -57,11 +75,16 @@
       notifications = v;
     });
   });
+
+  $effect(() => {
+    updateJSONLD(data);
+  });
 </script>
 
 <svelte:head>
   <title>{data.title}</title>
   <meta name="description" content={data.description} />
+  {@html jsonld}
 </svelte:head>
 
 <svelte:window on:resize={handleResize} />

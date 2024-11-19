@@ -32,6 +32,7 @@ export default ts.config(
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "svelte/valid-compile": "off",
+      "svelte/no-at-html-tags": "off",
     },
   }
 );

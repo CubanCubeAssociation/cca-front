@@ -19,6 +19,15 @@ const config = {
     // See https://svelte.dev/docs/kit/adapters for more information about adapters.
     adapter: adapter(),
 
+    csp: {
+      directives: {
+        "script-src": ["self"],
+      },
+      reportOnly: {
+        "script-src": ["self"],
+      },
+    },
+
     alias: {
       "@icons": "./node_modules/svelte-material-icons",
       "@components": "./src/lib/components",
