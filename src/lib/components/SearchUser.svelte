@@ -23,19 +23,26 @@
 
   type Callback = () => void;
 
-  export let show = false;
-  export let multiple = false;
-  export let type: "dropdown" | "modal" = "modal";
-  export let user: (u: USER | USER[]) => any;
+  interface SearchUserProps {
+    user: (u: USER | USER[]) => any;
+    show?: boolean;
+    multiple?: boolean;
+    type?: "dropdown" | "modal";
+  }
 
-  let selected: USER[] = [];
-  let userList: USER[] = [];
-  let checks: boolean[] = [];
-  let checked = 0;
-  let input = "";
-  // let controller = new AbortController();
-  // let { signal } = controller;
-  let searching = false;
+  let {
+    show = $bindable(false),
+    multiple = $bindable(false),
+    type = "modal",
+    user,
+  }: SearchUserProps = $props();
+
+  let selected: USER[] = $state([]);
+  let userList: USER[] = $state([]);
+  let checks: boolean[] = $state([]);
+  let checked = $state(0);
+  let input = $state("");
+  let searching = $state(false);
 
   function debounce(fn: Callback, pre: Callback = () => {}, pos: Callback = () => {}, time = 500) {
     let timerId: any;
@@ -73,13 +80,11 @@
     }
   );
 
-  // function addSelected(ev: MouseEvent) {
-  //   ev.stopPropagation();
-
-  //   let temp = [...selected, ...userList.filter((_, p) => checks[p])];
-
-  //   selected = uniqueArray(temp, e => e.username);
-  // }
+  function addSelected(ev: MouseEvent) {
+    ev.stopPropagation();
+    let temp = [...selected, ...userList.filter((_, p) => checks[p])];
+    selected = uniqueArray(temp, e => e.username);
+  }
 
   // function updateChecked() {
   //   checked = checks.reduce((acc, e) => acc + (e ? 1 : 0), 0);
@@ -106,12 +111,7 @@
     autoclose
     outsideclose
   >
-    <Input
-      bind:value={input}
-      placeholder="Buscar..."
-      on:input={handleInput}
-      on:change={handleInput}
-    />
+    <Input bind:value={input} placeholder="Buscar..." on:input={handleInput} />
 
     {#if userList.length}
       <Table hoverable shadow divClass="w-full relative overflow-x-auto">
@@ -151,9 +151,9 @@
     {/if}
 
     {#if multiple}
-      <!-- {#if checked}
+      {#if checked}
         <Button on:click={addSelected}>Añadir ({checked})</Button>
-      {/if} -->
+      {/if}
 
       {#if selected.length}
         <Heading tag="h4" class="text-center">Seleccionados</Heading>
@@ -209,12 +209,7 @@
     classContainer="rounded-md shadow-md border border-[#fff4]"
   >
     <div slot="header" class="px-4 py-2">
-      <Input
-        bind:value={input}
-        placeholder="Buscar..."
-        on:input={handleInput}
-        on:change={handleInput}
-      />
+      <Input bind:value={input} placeholder="Buscar..." on:input={handleInput} />
     </div>
 
     {#if searching}
@@ -223,9 +218,9 @@
       {#each userList as user}
         <DropdownItem
           on:click={() => {
+            sendUsers(user);
             show = false;
             multiple = false;
-            sendUsers(user);
           }}>{user.name}</DropdownItem
         >
       {/each}

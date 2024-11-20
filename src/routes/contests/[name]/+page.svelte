@@ -88,6 +88,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Competencias - {contest.name}</title>
+</svelte:head>
+
 {#if show404}
   <Card class="mt-4 max-w-3xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
     <Heading tag="h4" class="text-center">No se encontró la competencia: "{name}"</Heading>

@@ -52,7 +52,7 @@
     id = $page.params.id;
     type = id != "new" ? "update" : "create";
 
-    if (id) {
+    if (id && id != "new") {
       getCategory(id).then(cat => {
         if (!cat) return;
         category = cat;

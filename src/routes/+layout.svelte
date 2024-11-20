@@ -2,51 +2,25 @@
   import { onMount } from "svelte";
   import "../app.css";
   import { screen } from "@stores/screen.store";
-  import { isAuth } from "@helpers/auth";
-  import { clearSessionStores, refreshToken } from "@helpers/API";
   import { NotificationService } from "@stores/notification.service";
   import type { INotification } from "@interfaces";
-  import { userStore } from "@stores/user";
-  import { tokenStore } from "@stores/token";
   import Notification from "@components/Notification.svelte";
-  import { browser } from "$app/environment";
   import NavbarComponent from "@components/NavbarComponent.svelte";
   import FooterComponent from "@components/FooterComponent.svelte";
   import type { LayoutServerData } from "./$types";
   import { DOMAIN } from "@constants";
   import { page } from "$app/stores";
+  import { checkAuth, initializeUserService } from "@stores/user.service";
 
   let { children, data }: { children: any; data: LayoutServerData } = $props();
 
   const notService = NotificationService.getInstance();
   const subService = notService.notificationSub;
-  const debug = false;
 
   let notifications: INotification[] = $state([]);
   let jsonld = $state("");
 
-  if (browser) {
-    if (localStorage.getItem("tokens") && localStorage.getItem("user")) {
-      $tokenStore = JSON.parse(localStorage.getItem("tokens")!);
-      $userStore = JSON.parse(localStorage.getItem("user")!);
-    } else {
-      clearSessionStores();
-    }
-  }
-
-  (async () => {
-    if (!browser) return;
-    if (!isAuth($userStore)) {
-      if (debug) console.log("Token does not exist or expired");
-      clearSessionStores();
-
-      if (await refreshToken()) {
-        if (debug) console.log("Token updated app");
-        location.reload();
-        return;
-      }
-    } else if (debug) console.log("IS AUTH");
-  })();
+  initializeUserService();
 
   function updateJSONLD(d: any) {
     jsonld = `<${"script"} type="application/ld+json">${JSON.stringify({
@@ -74,6 +48,8 @@
     subService.subscribe(v => {
       notifications = v;
     });
+
+    setInterval(() => checkAuth(), 60000);
   });
 
   $effect(() => {

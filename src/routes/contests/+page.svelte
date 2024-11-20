@@ -21,8 +21,9 @@
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import { Paginator } from "@classes/Paginator.svelte";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
-  import { page } from "$app/stores";
   import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
+  import SwordIcon from "@icons/Sword.svelte";
 
   const DEFAULT_RESULT = {
     limit: 0,
@@ -68,8 +69,8 @@
 </script>
 
 <Card class="mx-auto mb-8 mt-4 grid w-[calc(100%-2rem)] max-w-4xl place-items-center">
-  <Heading tag="h1" class="mb-8 flex justify-center gap-1 text-center text-4xl">
-    Competencias
+  <Heading tag="h1" class="mb-8 flex items-center justify-center gap-1 text-center text-4xl">
+    <SwordIcon size="2rem" class="text-red-600 dark:text-red-400" /> Competencias
   </Heading>
 
   {#if loading}

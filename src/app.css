@@ -20,6 +20,8 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   transition: all 200ms;
+  scroll-behavior: smooth;
+  scroll-padding: 5rem 0;
 }
 
 :root.dark {

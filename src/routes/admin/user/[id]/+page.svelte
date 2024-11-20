@@ -1,6 +1,17 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Button, Card, Heading, Input, Label, Modal, Radio, Span } from "flowbite-svelte";
+  import {
+    Button,
+    Card,
+    Dropzone,
+    Heading,
+    Input,
+    Label,
+    Modal,
+    Radio,
+    Span,
+    Tooltip,
+  } from "flowbite-svelte";
   import { ExclamationCircleOutline, TrashBinSolid } from "flowbite-svelte-icons";
   import { createUser, getUser, removeUser, updateUser } from "@helpers/API";
   import type { USER } from "@interfaces";
@@ -10,6 +21,14 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
+  import Cropper from "svelte-easy-crop";
+  import UploadIcon from "@icons/CloudUpload.svelte";
+  import DeleteIcon from "@icons/Delete.svelte";
+  import CropIcon from "@icons/Crop.svelte";
+  import { userStore } from "@stores/user";
+
+  const WIDTH = 200;
+  const HEIGHT = WIDTH;
 
   let id = $state("");
 
@@ -32,13 +51,25 @@
 
   let municipios: string[] = $state([]);
   let showModal = $state(false);
+  let cropData = {
+    x: 0,
+    y: 0,
+    width: WIDTH,
+    height: HEIGHT,
+  };
 
   function exit() {
+    if (user.id === $userStore?.id) {
+      $userStore = user;
+    }
+
     goto("/admin/user");
   }
 
   function save(ev: Event) {
     ev.preventDefault();
+
+    user.avatar = croppedData;
 
     if (id != "new") {
       updateUser(user)
@@ -115,6 +146,84 @@
     municipios = (PROVINCIAS.filter(p => p.nombre === province)[0] || {}).municipios || [];
   }
 
+  let tempAvatar = $state("");
+  let croppedData = $state("");
+  let showCropModal = $state(false);
+
+  function readImageFile(f: File) {
+    let reader = new FileReader();
+    let img = new Image();
+
+    reader.onload = () => {
+      img.onload = () => {
+        let cnv = document.createElement("canvas");
+        let ctx = cnv.getContext("2d");
+
+        cnv.width = img.width;
+        cnv.height = img.height;
+
+        ctx?.drawImage(img, 0, 0, img.width, img.height);
+
+        tempAvatar = cnv.toDataURL();
+        croppedData = tempAvatar;
+        showCropModal = true;
+      };
+
+      img.src = reader.result?.toString() || "";
+    };
+
+    reader.readAsDataURL(f);
+  }
+
+  function dropHandle(event: any) {
+    tempAvatar = "";
+    event.preventDefault();
+
+    if (event.dataTransfer.items) {
+      [...event.dataTransfer.items].forEach(item => {
+        if (item.kind === "file") {
+          readImageFile(item.getAsFile() as File);
+        }
+      });
+    }
+  }
+
+  function handleChange(event: any) {
+    const files = event.target.files;
+
+    if (files.length > 0) {
+      readImageFile(files[0]);
+    }
+  }
+
+  function cropImage() {
+    let img = new Image(WIDTH, HEIGHT);
+
+    img.onload = () => {
+      let cnv = document.createElement("canvas");
+      let ctx = cnv.getContext("2d");
+
+      cnv.width = WIDTH;
+      cnv.height = HEIGHT;
+
+      ctx?.drawImage(
+        img,
+        cropData.x,
+        cropData.y,
+        cropData.width,
+        cropData.height,
+        0,
+        0,
+        WIDTH,
+        HEIGHT
+      );
+
+      croppedData = cnv.toDataURL();
+    };
+
+    img.src = tempAvatar;
+  }
+
   onMount(() => {
     id = $page.params.id;
 
@@ -129,6 +238,8 @@
             return goto("/login");
           }
           user = u;
+          tempAvatar = user.avatar;
+          croppedData = user.avatar;
           municipios = PROVINCIAS.find(p => p.nombre === u.province)?.municipios || [];
         })
         .catch(err => console.log("ERROR: ", err));
@@ -156,9 +267,52 @@
 
     <form
       autocomplete="off"
-      class="mt-8 grid gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2"
+      class="mt-8 grid items-center gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2"
       onsubmit={save}
     >
+      <div class="grid">
+        <Dropzone
+          id="dropzone"
+          on:drop={dropHandle}
+          on:dragover={event => {
+            event.preventDefault();
+          }}
+          on:change={handleChange}
+          class="w-[7rem] h-[7rem] rounded-full relative mx-auto"
+          multiple={false}
+          accept="image/*"
+        >
+          {#if !tempAvatar}
+            <UploadIcon size="3rem" />
+            <p class="inline mb-2 text-xs text-gray-500 dark:text-gray-400 w-full px-1">
+              Click para subir o arrastre la imagen
+            </p>
+          {:else}
+            <img src={croppedData} class="w-full h-full rounded-full object-contain" alt="" />
+          {/if}
+        </Dropzone>
+
+        {#if tempAvatar || true}
+          <div class="flex gap-2 items-center justify-center mt-2">
+            <Button class="px-3" on:click={() => (showCropModal = true)}>
+              <CropIcon size="1.1rem" />
+            </Button>
+            <Tooltip>Recortar</Tooltip>
+
+            <Button
+              class="px-3"
+              color="red"
+              on:click={() => {
+                tempAvatar = croppedData = "";
+              }}
+            >
+              <DeleteIcon size="1.1rem" />
+            </Button>
+            <Tooltip>Eliminar</Tooltip>
+          </div>
+        {/if}
+      </div>
+
       <div>
         <Label for="name" class="mb-2">Nombre</Label>
         <Input bind:value={user.name} type="text" id="name" placeholder="Nombre..." required />
@@ -278,5 +432,21 @@
       </Button>
       <Button color="alternative">Cancelar</Button>
     </div>
+  </div>
+</Modal>
+
+<Modal bind:open={showCropModal} outsideclose autoclose title="Ajustar imagen" size="sm">
+  <div class="relative h-[20rem] w-full">
+    <Cropper
+      image={tempAvatar}
+      zoom={1}
+      aspect={1}
+      on:cropcomplete={e => (cropData = e.detail.pixels)}
+    />
+  </div>
+
+  <div class="flex gap-2 mt-4 justify-center">
+    <Button color="alternative">Cancelar</Button>
+    <Button color="primary" on:click={cropImage}>Recortar</Button>
   </div>
 </Modal>

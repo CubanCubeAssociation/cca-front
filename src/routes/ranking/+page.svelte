@@ -34,6 +34,7 @@
   import LinkIcon from "@icons/OpenInNew.svelte";
   import Award from "@components/Award.svelte";
   import UserField from "@components/UserField.svelte";
+  import RankingIcon from "@icons/SortNumericAscending.svelte";
 
   const notification = NotificationService.getInstance();
   const debug = false;
@@ -137,7 +138,9 @@
 </script>
 
 <Card class="mx-auto mb-8 mt-4 grid w-[calc(100%-2rem)] max-w-4xl place-items-center">
-  <Heading tag="h1" class="mb-4 flex justify-center gap-1 text-center text-4xl">Ranking</Heading>
+  <Heading tag="h1" class="mb-4 flex items-center justify-center gap-1 text-center text-4xl">
+    <RankingIcon size="2rem" class="text-green-400 dark:text-green-300" /> Ranking
+  </Heading>
 
   <div class="actions mb-8 flex flex-wrap justify-center gap-4">
     <Select

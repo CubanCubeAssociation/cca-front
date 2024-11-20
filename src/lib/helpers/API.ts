@@ -77,6 +77,23 @@ export async function login(email: string, password: string): Promise<LOGIN_DATA
   return null;
 }
 
+export async function logout() {
+  try {
+    await ky
+      .post(API + "/auth/logout", {
+        json: {
+          refreshToken: getRefreshToken(),
+        },
+      })
+      .json();
+    clearSessionStores();
+    goto("/");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function refreshToken() {
   if (debug) console.log("STORES: ", get(userStore), get(tokenStore));
 
