@@ -89,7 +89,7 @@
 </script>
 
 <svelte:head>
-  <title>Competencias - {contest.name}</title>
+  <title>Competencias - {contest?.name}</title>
 </svelte:head>
 
 {#if show404}
