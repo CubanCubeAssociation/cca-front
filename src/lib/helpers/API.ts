@@ -7,6 +7,7 @@ import type {
   LOGIN_DATA,
   RANKING,
   USER,
+  USER_PROFILE,
   USER_RESULT,
 } from "@interfaces";
 import { tokenStore } from "@stores/token";
@@ -65,6 +66,7 @@ export async function login(email: string, password: string): Promise<LOGIN_DATA
 
     userStore.set(loginData.user);
     tokenStore.set(loginData.tokens);
+    console.log("SETTING TOKENS: ", loginData);
 
     localStorage.setItem("user", JSON.stringify(loginData.user));
     localStorage.setItem("tokens", JSON.stringify(loginData.tokens));
@@ -111,6 +113,7 @@ export async function refreshToken() {
     if (debug) console.log("TOKENS: ", tokens);
 
     tokenStore.set(tokens);
+    localStorage.setItem("user", JSON.stringify(get(userStore)));
     localStorage.setItem("tokens", JSON.stringify(tokens));
     return true;
   } catch (err) {
@@ -187,6 +190,20 @@ export async function getUsers(page: number, limit = 10): Promise<USER_RESULT> {
 export async function getUser(id: string): Promise<USER> {
   if (tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + "/users/" + id, commonAuth()).json();
+}
+
+export async function getUserByUsername(username: string): Promise<USER> {
+  if (tokenNeedsRefresh()) await refreshToken();
+  return await ky.get(API + "/users/username/" + username, commonAuth()).json();
+}
+
+export async function getUserProfile(username: string): Promise<USER_PROFILE> {
+  if (tokenNeedsRefresh()) await refreshToken();
+  return await ky.get(API + "/users/profile/" + username, commonAuth()).json();
+}
+
+export function getAvatarRoute(username: string) {
+  return `${API}/users/avatar/${username}`;
 }
 
 export async function searchUser(text: string, signal?: AbortSignal): Promise<USER[]> {

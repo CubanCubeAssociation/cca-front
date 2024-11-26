@@ -19,11 +19,11 @@
     Tooltip,
   } from "flowbite-svelte";
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
-  import { Paginator } from "@classes/Paginator.svelte";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import SwordIcon from "@icons/Sword.svelte";
+  import { Paginator } from "@classes/Paginator.svelte";
 
   const DEFAULT_RESULT = {
     limit: 0,
@@ -58,7 +58,6 @@
   }
 
   function updatePaginator() {
-    pg = pg;
     refreshContestData();
   }
 

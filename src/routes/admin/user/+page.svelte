@@ -15,17 +15,16 @@
     TableBodyRow,
     TableHead,
     TableHeadCell,
-    Avatar,
     Span,
     Spinner,
   } from "flowbite-svelte";
-  import { Paginator } from "@classes/Paginator.svelte";
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import SearchUser from "$lib/components/SearchUser.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
   import { page } from "$app/stores";
   import UserField from "@components/UserField.svelte";
+  import { Paginator } from "@classes/Paginator.svelte";
 
   const HEADER = "Usuarios";
   const ADD = "Añadir usuario";
@@ -107,7 +106,6 @@
   }
 
   function updatePaginator() {
-    pg = pg;
     updateUsers();
   }
 
@@ -154,9 +152,8 @@
 
               {#if columns[0].show}
                 <TableBodyCell>
-                  <a href={"/admin/user/" + u.id} class="flex items-center gap-2">
-                    <Avatar alt={u.name} src={u.avatar} />
-                    <UserField user={u} />
+                  <a href={"/admin/user/" + u.id} class="flex items-center gap-2 text-ellipsis">
+                    <UserField user={u} showAvatar />
                   </a>
                 </TableBodyCell>
               {/if}

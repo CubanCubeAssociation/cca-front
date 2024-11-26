@@ -21,11 +21,11 @@
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
   import PlusIcon from "@icons/Plus.svelte";
-  import { Paginator } from "@classes/Paginator.svelte";
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
   import { page } from "$app/stores";
+  import { Paginator } from "@classes/Paginator.svelte";
 
   const HEADER = "Competencias";
   const ADD = "Añadir competencia";
@@ -60,7 +60,6 @@
   }
 
   function updatePaginator() {
-    pg = pg;
     refreshContestData();
   }
 

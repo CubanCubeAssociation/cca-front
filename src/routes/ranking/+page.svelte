@@ -20,9 +20,10 @@
     Span,
     Spinner,
     Button,
+    Dropdown,
+    DropdownItem,
   } from "flowbite-svelte";
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
-  import { Paginator } from "@classes/Paginator.svelte";
   import Select from "@components/Select.svelte";
   // import { PROVINCIAS } from "@constants";
   import { timer } from "@helpers/timer";
@@ -31,10 +32,12 @@
   import { userStore } from "@stores/user";
   import { screen } from "@stores/screen.store";
   import { randomUUID } from "@helpers/strings";
+  import { Paginator } from "@classes/Paginator.svelte";
   import LinkIcon from "@icons/OpenInNew.svelte";
   import Award from "@components/Award.svelte";
   import UserField from "@components/UserField.svelte";
   import RankingIcon from "@icons/SortNumericAscending.svelte";
+  import ReloadIcon from "@icons/Reload.svelte";
 
   const notification = NotificationService.getInstance();
   const debug = false;
@@ -102,10 +105,6 @@
       });
   }
 
-  function updatePaginator() {
-    pg = pg;
-  }
-
   async function getRankingInfo(cId: string, tp: "Single" | "Media") {
     if (debug) console.log("getRankingInfo");
     if (debug) console.trace();
@@ -123,7 +122,7 @@
         rankingResults = c;
         if (debug) console.log("RESULTS: ", rankingResults);
         pg.setData(rankingResults);
-        pg = pg;
+        pg.setPage(1);
       })
       .catch(err => {
         if (debug) console.log("ERROR: ", err);
@@ -150,7 +149,7 @@
       label={e => e.name}
       placement="right"
       hasIcon={e => e.scrambler}
-      onChange={e => getRankingInfo(e, type)}
+      onChange={e => getRankingInfo(e.id, type)}
     />
 
     <Select
@@ -172,22 +171,18 @@
     /> -->
 
     {#if minRole($userStore, "admin")}
-      <Button color="green" class="py-1" on:click={handleUpdateCategory}>
-        Actualizar Categoría
-      </Button>
-      <Button color="purple" class="py-1" on:click={handleUpdateRanking}>Actualizar General</Button>
+      <Button class="!p-1 w-9 h-9"><ReloadIcon size="1rem" /></Button>
+      <Dropdown trigger="hover">
+        <DropdownItem on:click={handleUpdateCategory}>Actualizar Categoría</DropdownItem>
+        <DropdownItem on:click={handleUpdateRanking}>Actualizar General</DropdownItem>
+      </Dropdown>
     {/if}
   </div>
 
   {#if loading}
     <Spinner size="10" />
   {:else if rankingResults.length > 0}
-    <PaginatorComponent
-      showNextPrev={!$screen.isMobile}
-      bind:pg
-      class="mb-4"
-      update={updatePaginator}
-    />
+    <PaginatorComponent showNextPrev={!$screen.isMobile} bind:pg class="mb-4" />
 
     <Table hoverable shadow divClass="w-full relative overflow-x-auto">
       <TableHead>

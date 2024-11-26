@@ -1,20 +1,16 @@
-function between(n: number, a: number, b: number): number {
-  const na = Math.min(a, b);
-  const nb = Math.max(a, b);
-  return Math.min(nb, Math.max(na, n));
-}
+import { between } from "@helpers/math";
 
 export class Paginator {
   private data: any[];
   private len: number;
   private width: number;
 
-  page = 0;
-  pages = 0;
-  start = 0;
-  end = 0;
+  page = $state(0);
+  pages = $state(0);
+  start = $state(0);
+  end = $state(0);
   limit = 0;
-  labels: number[] = [];
+  labels: number[] = $state([]);
 
   constructor(dt?: any[], limit?: number, paginatorWidth?: number) {
     this.data = Array.isArray(dt) ? dt : [];

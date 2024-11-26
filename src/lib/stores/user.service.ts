@@ -5,7 +5,7 @@ import { get } from "svelte/store";
 import { clearSessionStores, refreshToken } from "@helpers/API";
 import { isAuth } from "@helpers/auth";
 
-const debug = true;
+const debug = false;
 
 export async function checkAuth() {
   if (!isAuth(get(userStore))) {
@@ -23,6 +23,9 @@ export async function checkAuth() {
 
 export async function initializeUserService() {
   if (!browser) return;
+  // console.log(
+  //   `LOCAL_STORAGE: <${localStorage.getItem("tokens")}> <${localStorage.getItem("user")}>`
+  // );
 
   if (localStorage.getItem("tokens") && localStorage.getItem("user")) {
     tokenStore.set(JSON.parse(localStorage.getItem("tokens")!));

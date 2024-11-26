@@ -6,25 +6,35 @@
   type AwardType = "neutral" | "gold" | "silver" | "bronze" | "NR" | "ANR" | "PR" | "APR";
 
   export let type: AwardType = "neutral";
+  export let size = 1;
 </script>
 
 <div class="relative flex justify-center">
   {#if type === "neutral"}
-    <RecordIcon class="text-purple-400 absolute -top-1 -right-1 translate-x-full" size=".8rem" />
+    <RecordIcon
+      class="text-purple-400 absolute -top-1 -right-1 translate-x-full"
+      size={0.8 * size + "rem"}
+    />
   {:else if type === "gold"}
-    <PlaceIcon class="text-yellow-300" size="1.2rem" />
+    <PlaceIcon class="text-yellow-300" size={1.2 * size + "rem"} />
     <Tooltip>Primer lugar</Tooltip>
   {:else if type === "silver"}
-    <PlaceIcon class="text-zinc-200" size="1.1rem" />
+    <PlaceIcon class="text-zinc-200" size={1.1 * size + "rem"} />
     <Tooltip>Segundo lugar</Tooltip>
   {:else if type === "bronze"}
-    <PlaceIcon class="text-orange-400" size="1rem" />
+    <PlaceIcon class="text-orange-400" size={1 * size + "rem"} />
     <Tooltip>Tercer lugar</Tooltip>
   {:else if type === "NR"}
-    <RecordIcon class="text-purple-400 absolute -top-1 -right-1 translate-x-full" size=".8rem" />
+    <RecordIcon
+      class="text-purple-400 absolute -top-1 -right-1 translate-x-full"
+      size={0.8 * size + "rem"}
+    />
     <Tooltip>Récord Nacional</Tooltip>
   {:else if type === "PR"}
-    <RecordIcon class="text-purple-400 absolute -top-1 -right-1 translate-x-full" size=".8rem" />
+    <RecordIcon
+      class="text-purple-400 absolute -top-1 -right-1 translate-x-full"
+      size={0.8 * size + "rem"}
+    />
     <Tooltip>Récord Provincial</Tooltip>
   {/if}
 </div>

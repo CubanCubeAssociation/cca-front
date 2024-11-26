@@ -12,7 +12,6 @@ export interface USER {
   province: string;
   municipality: string;
   credit: number;
-  avatar: string;
   role: ROLE;
   isEmailVerified: boolean;
   age: number;
@@ -127,21 +126,6 @@ export interface CONTEST {
   rounds: ROUND[];
 }
 
-export interface USER {
-  name: string;
-  email: string;
-  password: string;
-  ci: string;
-  sex: SEX;
-  username: string;
-  province: string;
-  municipality: string;
-  credit: number;
-  avatar: string;
-  role: ROLE;
-  isEmailVerified: boolean;
-}
-
 export interface RANKING {
   contestant: {
     name: string;
@@ -219,4 +203,16 @@ export interface INotification {
   fixed?: boolean;
   timeout?: number;
   actions?: NotificationAction[];
+}
+
+interface PODIUM {
+  first: number[];
+  second: number[];
+  third: number[];
+  contestant: number[];
+}
+
+export interface USER_PROFILE {
+  user: USER;
+  podium: PODIUM;
 }

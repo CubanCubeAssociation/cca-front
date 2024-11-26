@@ -227,7 +227,7 @@
         {#each contest.contestants as c, p (c.user.username)}
           <TableBodyRow>
             <TableBodyCell tdClass={TD_CLASS}>{p + 1}</TableBodyCell>
-            <TableBodyCell tdClass={TD_CLASS}><UserField user={c.user} /></TableBodyCell>
+            <TableBodyCell tdClass={TD_CLASS}><UserField user={c.user} link /></TableBodyCell>
             <TableBodyCell tdClass={TD_CLASS}>
               <div class="w-full flex flex-wrap gap-2">
                 {#each c.categories as ct}

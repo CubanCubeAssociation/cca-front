@@ -13,12 +13,13 @@
     TableHeadCell,
   } from "flowbite-svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
-  import type { Scrambler } from "@interfaces";
+  import type { ROLE, Scrambler } from "@interfaces";
   import { timer } from "@helpers/timer";
   import { onMount } from "svelte";
   import { getResults } from "@helpers/API";
   import LinkIcon from "@icons/OpenInNew.svelte";
   import TrophyIcon from "@icons/Trophy.svelte";
+  import UserField from "@components/UserField.svelte";
 
   interface ISingleRecord {
     category: {
@@ -29,6 +30,7 @@
     contestant: {
       name: string;
       username: string;
+      role: ROLE;
     };
     contest: string;
     time: number;
@@ -40,6 +42,7 @@
       name: string;
       username: string;
       province: string;
+      role: ROLE;
     };
   }
 
@@ -220,10 +223,19 @@
             </TableBodyCell>
             <TableBodyCell class="px-2 max-sm:grid">
               <span class="text-sm">
-                {nrs?.contestant.name}
+                <!-- {nrs?.contestant.name} -->
+                <UserField
+                  link
+                  user={nrs?.contestant || { name: "", role: "user", username: "" }}
+                />
               </span>
               {#if nra && nra.time}
-                <span class="mt-2 text-sm sm:hidden">{nra.contestant.name}</span>
+                <span class="mt-2 text-sm sm:hidden">
+                  <UserField
+                    link
+                    user={nrs?.contestant || { name: "", role: "user", username: "" }}
+                  />
+                </span>
               {/if}
             </TableBodyCell>
 
@@ -237,7 +249,11 @@
                 </a>
               </TableBodyCell>
               <TableBodyCell class="px-2 max-sm:hidden">
-                <span class="text-sm">{nra.contestant.name}</span>
+                <!-- <span class="text-sm">{nra.contestant.name}</span> -->
+                <UserField
+                  link
+                  user={nra?.contestant || { name: "", role: "user", username: "" }}
+                />
               </TableBodyCell>
             {:else}
               <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>
@@ -308,12 +324,22 @@
                   {/if}
                 </TableBodyCell>
                 <TableBodyCell class="px-2">
-                  <span class="flex items-end text-sm">{prSingle?.contestant.name}</span>
+                  <span class="flex items-end text-sm">
+                    <!-- {prSingle?.contestant.name} -->
+                    <UserField
+                      link
+                      user={prSingle?.contestant || { name: "", role: "user", username: "" }}
+                    />
+                  </span>
 
                   {#if prMean && prMean.time}
-                    <span class="mt-2 flex items-center justify-between gap-2 text-sm sm:hidden"
-                      >{prMean.contestant.name}</span
-                    >
+                    <span class="mt-2 flex items-center justify-between gap-2 text-sm sm:hidden">
+                      <!-- {prMean.contestant.name} -->
+                      <UserField
+                        link
+                        user={prMean?.contestant || { name: "", role: "user", username: "" }}
+                      />
+                    </span>
                   {/if}
                 </TableBodyCell>
 
@@ -327,7 +353,13 @@
                     </a>
                   </TableBodyCell>
                   <TableBodyCell class="px-2 max-sm:hidden">
-                    <span class="text-sm">{prMean.contestant.name}</span>
+                    <span class="text-sm">
+                      <!-- {prMean.contestant.name} -->
+                      <UserField
+                        link
+                        user={prMean?.contestant || { name: "", role: "user", username: "" }}
+                      />
+                    </span>
                   </TableBodyCell>
                 {:else}
                   <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>

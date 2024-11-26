@@ -47,7 +47,7 @@
   params={{ x: 200 }}
   class="bg-backgroundLevel3 pointer-events-auto relative bottom-0 end-0 ml-auto mr-4 border border-[#fff1] shadow-lg"
   contentClass="flex items-center gap-4"
-  bind:open
+  bind:toastStatus={open}
   dismissable={fixed}
   position="bottom-right"
   on:close={close}
@@ -55,7 +55,7 @@
   <svelte:fragment slot="icon">
     {#if icon}
       {#if typeof icon === "string"}
-        <Avatar src={icon} class="bg-backgroundLevel1 tx-text aspect-square" />
+        <Avatar border src={icon} class="bg-backgroundLevel1 tx-text aspect-square" />
       {:else}
         <svelte:component
           this={icon}

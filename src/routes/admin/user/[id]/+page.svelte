@@ -13,7 +13,7 @@
     Tooltip,
   } from "flowbite-svelte";
   import { ExclamationCircleOutline, TrashBinSolid } from "flowbite-svelte-icons";
-  import { createUser, getUser, removeUser, updateUser } from "@helpers/API";
+  import { createUser, getAvatarRoute, getUser, removeUser, updateUser } from "@helpers/API";
   import type { USER } from "@interfaces";
   import { PROVINCIAS, ROLES } from "@constants";
   import SaveIcon from "@icons/Send.svelte";
@@ -238,8 +238,8 @@
             return goto("/login");
           }
           user = u;
-          tempAvatar = user.avatar;
-          croppedData = user.avatar;
+          tempAvatar = getAvatarRoute(u.username || "");
+          croppedData = getAvatarRoute(u.username || "");
           municipios = PROVINCIAS.find(p => p.nombre === u.province)?.municipios || [];
         })
         .catch(err => console.log("ERROR: ", err));

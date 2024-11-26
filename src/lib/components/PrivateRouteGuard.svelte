@@ -4,7 +4,7 @@
   import { redirectToLogin, refreshToken } from "@helpers/API";
   import { browser } from "$app/environment";
 
-  const debug = false;
+  const debug = true;
 
   (async () => {
     if (!browser) return;
