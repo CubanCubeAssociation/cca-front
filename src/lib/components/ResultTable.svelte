@@ -83,7 +83,7 @@
           </TableBodyCell>
         {:else}
           <TableBodyCell class={TABLE_CELL_CLASS}>
-            <UserField user={rnd.contestant} />
+            <UserField user={rnd.contestant} link />
           </TableBodyCell>
         {/if}
 

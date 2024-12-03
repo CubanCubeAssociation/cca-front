@@ -16,6 +16,8 @@ import { API } from "@constants";
 import { get } from "svelte/store";
 import { tokenNeedsRefresh } from "./auth";
 import { goto } from "$app/navigation";
+import { page } from "$app/stores";
+import { getReturnURL } from "./strings";
 
 const debug = false;
 
@@ -89,9 +91,11 @@ export async function logout() {
       })
       .json();
     clearSessionStores();
-    goto("/");
+    location.reload();
     return true;
   } catch {
+    clearSessionStores();
+    goto("/");
     return false;
   }
 }
@@ -132,7 +136,7 @@ export function clearSessionStores() {
 
 export function redirectToLogin() {
   clearSessionStores();
-  goto(encodeURI(`/login?returnTo=${window.location.pathname}`));
+  goto(encodeURI(`/login?returnTo=${getReturnURL(get(page).url)}`));
 }
 
 export function redirectOnUnauthorized(err: { response: Response }) {

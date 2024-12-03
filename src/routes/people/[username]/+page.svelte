@@ -1,8 +1,20 @@
 <script lang="ts">
-  import { getAvatarRoute, getUserProfile } from "@helpers/API";
-  import type { USER_PROFILE } from "@interfaces";
-  import { Avatar, Card, Heading } from "flowbite-svelte";
-  import { onMount } from "svelte";
+  import { getAvatarRoute, getCategories, getUserProfile } from "@helpers/API";
+  import type { CATEGORY, USER_PROFILE } from "@interfaces";
+  import {
+    Avatar,
+    Button,
+    Card,
+    Heading,
+    Table,
+    TableBody,
+    TableBodyCell,
+    TableBodyRow,
+    TableHead,
+    TableHeadCell,
+    Tooltip,
+  } from "flowbite-svelte";
+  import { onDestroy, onMount } from "svelte";
   import { page } from "$app/stores";
   import UserField from "@components/UserField.svelte";
   import { minRole } from "@helpers/auth";
@@ -11,41 +23,168 @@
   import VerifiedIcon from "@icons/CheckDecagramOutline.svelte";
   import Award from "@components/Award.svelte";
   import UnderConstruction from "@components/UnderConstruction.svelte";
+  import * as echarts from "echarts";
+  import { goto } from "$app/navigation";
+  import WcaCategory from "@components/wca/WCACategory.svelte";
 
-  const awardSize = 1.5;
+  const awardSize = 2;
+  const tooltipStyle: echarts.TooltipComponentOption = {
+    trigger: "axis",
+    axisPointer: {
+      type: "line",
+    },
+    textStyle: { color: "#a2a0a0" },
+    backgroundColor: "#1c1b2a",
+    confine: true,
+  };
+
+  const TABLE_HEAD_CLASS = "px-2 text-center";
+  const TABLE_CELL_CLASS =
+    "px-2 text-center [&:not(:first-child)]:border-l [&:not(:first-child)]:border-l-gray-600";
+
   // let loading = $state(false);
   // let error = $state(false);
 
   let profile: USER_PROFILE | null = $state(null);
+  let stepPercentSerie: HTMLDivElement;
+  let stepPercentChart: echarts.ECharts;
+  let ELO = $state(0);
+  let podium = $state([0, 0, 0]);
+  let groupedData: Record<string, Record<string, any[]>> = $state({});
+  let categories: CATEGORY[] = $state([]);
+  let selectedCategory: CATEGORY = $state({ id: "", name: "", scrambler: "333" });
+
+  function updateResults(p: USER_PROFILE) {
+    const { results } = p;
+
+    groupedData = {};
+
+    results.forEach(result => {
+      result.contests.forEach(contest => {
+        const { category, round } = contest;
+
+        if (!groupedData[category.name]) {
+          groupedData[category.name] = {};
+        }
+
+        if (!groupedData[category.name][contest.contestName]) {
+          groupedData[category.name][contest.contestName] = [];
+        }
+
+        groupedData[category.name][contest.contestName].push({
+          round: round,
+          place: result.place,
+        });
+      });
+    });
+
+    for (let category in groupedData) {
+      for (let contest in groupedData[category]) {
+        if (!Array.isArray(groupedData[category][contest])) continue;
+        groupedData[category][contest].sort((a: any, b: any) => a.round - b.round);
+      }
+    }
+
+    selectedCategory = categories.find(ct => ct.name in groupedData) || selectedCategory;
+  }
 
   function getData() {
-    // loading = true;
-    // error = false;
+    getCategories()
+      .then(cats => (categories = cats.results))
+      .catch(err => console.log("ERROR: ", err));
 
     getUserProfile($page.params.username).then(p => {
       if (!p) {
+        goto("/people", { replaceState: true });
         return;
       }
 
       profile = p;
+      updateResults(p);
+      updateCharts();
     });
-    // .catch(err => {
-    // console.log("ERROR: ", err);
-    // error = true;
-    // });
-    // .finally(() => {
-    //   loading = false;
-    // });
+  }
+
+  function updateCharts() {
+    if (!profile) return;
+    if (!stepPercentChart) {
+      stepPercentChart = echarts.init(stepPercentSerie, "dark", { renderer: "svg" });
+    }
+
+    const { results, records } = profile;
+
+    let summary: any[][] = results.reduce(
+      (acc: any[][], e) => {
+        acc[Math.min(3, e.place - 1)][1] += e.amount;
+        acc[Math.min(3, e.place - 1)][2] += e.points;
+
+        return acc;
+      },
+      [
+        ["1ro", 0, 0],
+        ["2do", 0, 0],
+        ["3ro", 0, 0],
+        ["4to+", 0, 0],
+      ]
+    );
+
+    podium = summary.slice(0, 3).map(e => e[1]);
+
+    summary.unshift(["PR", records.pr.results.length, records.pr.points]);
+    summary.unshift(["NR", records.nr.results.length, records.nr.points]);
+    summary.unshift(["WR", records.wr.results.length, records.wr.points]);
+
+    summary = summary.filter(e => e[1]);
+
+    // ELO = Math.round(summary.reduce((acc, e) => acc + e[2], 0) * getEloDecay(totalContests));
+    ELO = summary.reduce((acc, e) => acc + e[2], 0);
+
+    let stepOption: echarts.EChartsOption = {
+      series: [
+        {
+          name: "Logro",
+          data: summary.map(e => ({
+            value: e[2],
+            name: e[0],
+          })),
+          type: "pie",
+          radius: ["40%", "70%"],
+          itemStyle: { borderRadius: 10, borderWidth: 3, borderColor: "#fff1" },
+          top: "0%",
+          bottom: "5%",
+        },
+      ],
+      backgroundColor: "transparent",
+      tooltip: {
+        ...tooltipStyle,
+        trigger: "item",
+        valueFormatter(v, e) {
+          return `${v} (${summary[e][1]} ${summary[e][1] === 1 ? "vez" : "veces"})`;
+        },
+      },
+    };
+
+    stepPercentChart.setOption(stepOption);
+  }
+
+  function handleResize() {
+    stepPercentChart?.resize();
   }
 
   onMount(() => {
     getData();
   });
+
+  onDestroy(() => {
+    stepPercentChart?.dispose();
+  });
 </script>
+
+<svelte:window on:resize={handleResize} />
 
 <Card class="mx-auto mb-8 mt-4 flex w-[calc(100%-2rem)] max-w-6xl flex-col items-center gap-4">
   <section class="grid md:flex gap-4 w-full">
-    <aside class="w-full md:max-w-[16rem]">
+    <aside class="w-full md:max-w-[16rem] h-fit">
       <!-- Profile -->
       <section id="profile">
         <Avatar
@@ -62,7 +201,10 @@
                   : "")}
         />
         <h1 class="font-bold text-lg">
-          <UserField user={profile?.user || { username: "", name: "", role: "user" }} />
+          <UserField
+            class="!w-fit text-center text-black dark:text-white"
+            user={profile?.user || { username: "", name: "", role: "user" }}
+          />
         </h1>
         <span class="text-sm flex items-center gap-1">
           <LocationIcon size="1.1rem" class="text-yellow-200" />
@@ -94,9 +236,10 @@
       </section>
 
       <!-- ELO -->
-      <section>
-        <Heading tag="h2" class="text-center mb-4 text-2xl">ELO</Heading>
-        <UnderConstruction />
+      <section id="profile-elo">
+        <Heading tag="h2" class="text-center mb-4 text-2xl">ELO: {ELO}</Heading>
+
+        <div class="grid w-full h-[10rem]" bind:this={stepPercentSerie}></div>
       </section>
     </aside>
 
@@ -107,31 +250,147 @@
         <!-- <UnderConstruction /> -->
 
         <ul class="podium-list">
-          <li class="border-yellow-300 !shadow-yellow-400">
-            <Heading tag="h3" class="text-center text-xl flex items-center justify-center gap-2">
-              <Award type="gold" size={awardSize} /> Oro
+          <li class="first">
+            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
+              <Award variant="trophy" type="gold" size={awardSize} />
             </Heading>
-            <span>{profile?.podium.first[0]}</span>
+            <span>{podium[0]}</span>
           </li>
-          <li class="border-gray-300 !shadow-gray-400">
-            <Heading tag="h3" class="text-center text-xl flex items-center justify-center gap-2">
-              <Award type="silver" size={awardSize} /> Plata
+          <li class="second">
+            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
+              <Award variant="trophy" type="silver" size={awardSize * 0.9} />
             </Heading>
-            <span>{profile?.podium.second[0]}</span>
+            <span>{podium[1]}</span>
           </li>
-          <li class="border-orange-300 !shadow-orange-400">
-            <Heading tag="h3" class="text-center text-xl flex items-center justify-center gap-2">
-              <Award type="bronze" size={awardSize} /> Bronce
+          <li class="third">
+            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
+              <Award variant="trophy" type="bronze" size={awardSize * 0.8} />
             </Heading>
-            <span>{profile?.podium.third[0]}</span>
+            <span>{podium[2]}</span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Records -->
+      <section>
+        <Heading tag="h2" class="text-center mb-4 text-2xl">Récords</Heading>
+        <!-- <UnderConstruction /> -->
+
+        <ul class="podium-list">
+          <li class="first">
+            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
+              WR: {profile?.records.wr.results.length}
+            </Heading>
+            <Tooltip class="!text-gray-200">Récord Mundial</Tooltip>
+          </li>
+          <li class="second">
+            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
+              NR: {profile?.records.nr.results.length}
+            </Heading>
+            <Tooltip class="!text-gray-200">Récord Nacional</Tooltip>
+          </li>
+          <li class="third">
+            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
+              PR: {profile?.records.pr.results.length}
+            </Heading>
+            <Tooltip class="!text-gray-200">Récord Provincial</Tooltip>
           </li>
         </ul>
       </section>
 
       <!-- Results -->
       <section>
-        <Heading tag="h2" class="text-center mb-4 text-2xl">Resultados</Heading>
-        <UnderConstruction />
+        <Heading tag="h2" class="text-center mb-4 text-2xl"
+          >Resultados ({selectedCategory.name})</Heading
+        >
+
+        <ul class="w-full flex flex-wrap gap-2 justify-center mb-4">
+          {#each categories.filter(ct => ct.name in groupedData) as cat}
+            <Button color="alternative" class="!p-0" on:click={() => (selectedCategory = cat)}>
+              <WcaCategory
+                class={"cursor-pointer " +
+                  (selectedCategory.name === cat.name ? "text-green-300" : "")}
+                icon={cat.scrambler}
+              />
+            </Button>
+          {/each}
+        </ul>
+
+        {#if selectedCategory.name === "" || !profile}
+          No hay resultados que mostrar
+        {:else}
+          <Table shadow divClass="w-full relative overflow-x-auto">
+            <TableHead>
+              <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS}>Competencia</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS}>Ronda</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS}>Lugar</TableHeadCell>
+              <!-- <TableHeadCell class={TABLE_HEAD_CLASS}>Resultados</TableHeadCell> -->
+            </TableHead>
+
+            <TableBody>
+              {#if selectedCategory.name in groupedData}
+                {@const categoryData = groupedData[selectedCategory.name]}
+
+                <!-- {#each Object.keys(categoryData) as cnt, p}
+                  {@const contestData = categoryData[cnt]} -->
+                {#each profile.contests.filter(cnt => cnt.name in categoryData) as cnt, p}
+                  {@const contestData = categoryData[cnt.name]}
+
+                  {#each contestData as result, rp}
+                    <TableBodyRow
+                      class={"!border-t-gray-600 " +
+                        (p % 2 ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-700")}
+                    >
+                      {#if rp === 0}
+                        <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
+                          <span class="flex justify-center">{p + 1}</span>
+                        </TableBodyCell>
+                        <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
+                          <span class="flex justify-center">{cnt.name}</span>
+                        </TableBodyCell>
+                      {/if}
+
+                      <TableBodyCell
+                        class={TABLE_CELL_CLASS + (p ? " border-l border-l-gray-600" : "")}
+                      >
+                        <span class="flex justify-center">Ronda {result.round}</span>
+                      </TableBodyCell>
+                      <TableBodyCell class={TABLE_CELL_CLASS}>
+                        <span class="flex justify-center">
+                          {#if result.place === 1}
+                            <Award type="gold" />
+                          {:else if result.place === 2}
+                            <Award type="silver" />
+                          {:else if result.place === 3}
+                            <Award type="bronze" />
+                          {/if}
+
+                          {result.place}
+                        </span>
+                      </TableBodyCell>
+                      <!-- <TableBodyCell class={TABLE_CELL_CLASS}>
+                        <span class="flex justify-center">---</span>
+                      </TableBodyCell> -->
+                    </TableBodyRow>
+                  {/each}
+                {/each}
+              {/if}
+            </TableBody>
+          </Table>
+
+          <ul class="w-full flex flex-wrap gap-2 justify-center mt-8">
+            {#each categories.filter(ct => ct.name in groupedData) as cat}
+              <Button color="alternative" class="!p-0" on:click={() => (selectedCategory = cat)}>
+                <WcaCategory
+                  class={"cursor-pointer " +
+                    (selectedCategory.name === cat.name ? "text-green-300" : "")}
+                  icon={cat.scrambler}
+                />
+              </Button>
+            {/each}
+          </ul>
+        {/if}
       </section>
 
       <!-- Development -->
@@ -149,23 +408,41 @@
   }
 
   aside > section {
-    @apply border border-gray-700 py-4 px-2 rounded-md shadow-md 
-      bg-gray-700 text-gray-200 grid place-items-center;
+    @apply border border-gray-400 dark:border-gray-700 py-4 px-2 rounded-md shadow-md 
+      bg-[#fff1] grid place-items-center;
   }
 
   #profile {
-    @apply grid place-items-center gap-2;
+    @apply grid place-items-center gap-2 h-fit;
   }
 
   .podium-list {
-    @apply flex gap-2 justify-evenly w-full;
+    @apply flex justify-center w-full;
   }
 
   .podium-list li {
-    @apply border p-2 rounded-md grid place-items-center w-full shadow-sm;
+    @apply p-2 grid place-items-center w-full max-w-28;
+  }
+
+  .podium-list li.second {
+    @apply border-l border-l-gray-400;
+  }
+
+  .podium-list li.third {
+    @apply border-l border-l-gray-400;
   }
 
   .podium-list li span {
-    @apply text-2xl;
+    @apply text-3xl;
+  }
+
+  #profile-elo {
+    @apply h-fit;
+  }
+
+  :global(#profile-elo text) {
+    stroke: transparent;
+    fill: white;
+    filter: drop-shadow(-1px 1px 0.2px #0003);
   }
 </style>

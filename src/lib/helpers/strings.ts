@@ -65,3 +65,7 @@ export function randomUUID() {
 
   return res.map(s => s.join("")).join("-");
 }
+
+export function getReturnURL(url: URL): string {
+  return url.href.slice(url.origin.length);
+}

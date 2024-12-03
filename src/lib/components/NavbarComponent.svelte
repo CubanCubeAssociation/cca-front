@@ -30,6 +30,8 @@
   import SettingsIcon from "@icons/Cog.svelte";
   import PeopleIcon from "@icons/AccountGroup.svelte";
   import ChevronDownIcon from "@icons/ChevronDown.svelte";
+  import { getReturnURL } from "@helpers/strings";
+  import { page } from "$app/stores";
 
   const notification = NotificationService.getInstance();
   const UL_CLASS =
@@ -47,7 +49,7 @@
 
 <div class="relative py-10">
   <Navbar let:hidden let:toggle class="fixed left-0 top-0 z-10 w-full justify-between shadow-lg">
-    <NavBrand>
+    <NavBrand href="/">
       <CcaLogo size="2rem" />
       <Span class="ml-2 self-center whitespace-nowrap text-base font-semibold">CCA</Span>
     </NavBrand>
@@ -70,7 +72,7 @@
 
       <Dropdown trigger="hover">
         <DropdownItem
-          href="/ranking"
+          href="/results"
           class="flex items-center gap-1"
           onclick={() => checkMobile(toggle)}
         >
@@ -103,7 +105,10 @@
       </NavLi>
 
       {#if !isAuth($userStore)}
-        <NavLi href="/login" onclick={() => checkMobile(toggle)}>Entrar</NavLi>
+        <NavLi
+          href={encodeURI(`/login?returnTo=${getReturnURL($page.url)}`)}
+          onclick={() => checkMobile(toggle)}>Entrar</NavLi
+        >
       {:else}
         <NavLi>
           <div class="flex items-center gap-2">

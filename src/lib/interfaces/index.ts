@@ -205,14 +205,45 @@ export interface INotification {
   actions?: NotificationAction[];
 }
 
-interface PODIUM {
-  first: number[];
-  second: number[];
-  third: number[];
-  contestant: number[];
+interface USER_PROFILE_CONTEST {
+  round: number;
+  category: CATEGORY;
+  contestName: string;
+}
+
+interface USER_PROFILE_RESULT {
+  place: number;
+  amount: number;
+  points: number;
+  contests: USER_PROFILE_CONTEST[];
+}
+
+interface USER_RECORD_RESULT {
+  type: "media" | "single";
+  category: string;
+  time: number;
+  contest: string;
+}
+
+interface USER_RECORD {
+  nr: {
+    results: USER_RECORD_RESULT[];
+    points: number;
+  };
+  pr: {
+    results: USER_RECORD_RESULT[];
+    points: number;
+  };
+  wr: {
+    results: USER_RECORD_RESULT[];
+    points: number;
+  };
 }
 
 export interface USER_PROFILE {
   user: USER;
-  podium: PODIUM;
+  results: USER_PROFILE_RESULT[];
+  records: USER_RECORD;
+  contests: { name: string; date: Date }[];
+  totalContests: number;
 }

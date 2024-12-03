@@ -208,7 +208,7 @@
             </TableBodyCell>
             <TableBodyCell>
               <!-- {r.contestant.name} -->
-              <UserField user={r.contestant} />
+              <UserField user={r.contestant} link />
             </TableBodyCell>
             <TableBodyCell>
               <span class={type === "Single" ? "text-green-400" : "text-purple-400"}>

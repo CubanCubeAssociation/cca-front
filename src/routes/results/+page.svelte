@@ -31,6 +31,7 @@
       name: string;
       username: string;
       role: ROLE;
+      id: string;
     };
     contest: string;
     time: number;
@@ -43,6 +44,7 @@
       username: string;
       province: string;
       role: ROLE;
+      id: string;
     };
   }
 
