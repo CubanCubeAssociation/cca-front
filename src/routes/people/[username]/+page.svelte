@@ -26,6 +26,14 @@
   import * as echarts from "echarts";
   import { goto } from "$app/navigation";
   import WcaCategory from "@components/wca/WCACategory.svelte";
+  import { timer } from "@helpers/timer";
+
+  interface USER_CONTEST_RESULT {
+    round: number;
+    place: number;
+    average: number | null;
+    times: (number | null)[];
+  }
 
   const awardSize = 2;
   const tooltipStyle: echarts.TooltipComponentOption = {
@@ -50,7 +58,7 @@
   let stepPercentChart: echarts.ECharts;
   let ELO = $state(0);
   let podium = $state([0, 0, 0]);
-  let groupedData: Record<string, Record<string, any[]>> = $state({});
+  let groupedData: Record<string, Record<string, USER_CONTEST_RESULT[]>> = $state({});
   let categories: CATEGORY[] = $state([]);
   let selectedCategory: CATEGORY = $state({ id: "", name: "", scrambler: "333" });
 
@@ -61,7 +69,7 @@
 
     results.forEach(result => {
       result.contests.forEach(contest => {
-        const { category, round } = contest;
+        const { category, round, average, times } = contest;
 
         if (!groupedData[category.name]) {
           groupedData[category.name] = {};
@@ -72,8 +80,10 @@
         }
 
         groupedData[category.name][contest.contestName].push({
-          round: round,
+          round,
           place: result.place,
+          average,
+          times,
         });
       });
     });
@@ -169,6 +179,16 @@
 
   function handleResize() {
     stepPercentChart?.resize();
+  }
+
+  function isPos(times: (number | null)[], i: number, pos: number) {
+    let vals = times.map((s, p) => [s || Infinity, p]);
+    vals.sort((a, b) => (a[0] != b[0] ? a[0] - b[0] : a[1] - b[1]));
+    return vals[pos][1] === i;
+  }
+
+  function isMo3(category: CATEGORY) {
+    return ["666wca", "777wca"].indexOf(category.scrambler) > -1;
   }
 
   onMount(() => {
@@ -325,15 +345,17 @@
               <TableHeadCell class={TABLE_HEAD_CLASS}>Competencia</TableHeadCell>
               <TableHeadCell class={TABLE_HEAD_CLASS}>Ronda</TableHeadCell>
               <TableHeadCell class={TABLE_HEAD_CLASS}>Lugar</TableHeadCell>
-              <!-- <TableHeadCell class={TABLE_HEAD_CLASS}>Resultados</TableHeadCell> -->
+              <TableHeadCell class={TABLE_HEAD_CLASS}>Single</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS}>Media</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS} colspan={isMo3(selectedCategory) ? 3 : 5}>
+                Resultados
+              </TableHeadCell>
             </TableHead>
 
             <TableBody>
               {#if selectedCategory.name in groupedData}
                 {@const categoryData = groupedData[selectedCategory.name]}
 
-                <!-- {#each Object.keys(categoryData) as cnt, p}
-                  {@const contestData = categoryData[cnt]} -->
                 {#each profile.contests.filter(cnt => cnt.name in categoryData) as cnt, p}
                   {@const contestData = categoryData[cnt.name]}
 
@@ -347,7 +369,11 @@
                           <span class="flex justify-center">{p + 1}</span>
                         </TableBodyCell>
                         <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
-                          <span class="flex justify-center">{cnt.name}</span>
+                          <span class="flex justify-center">
+                            <a href={`/contests/` + cnt.name} class="hover:text-primary-300"
+                              >{cnt.name}</a
+                            >
+                          </span>
                         </TableBodyCell>
                       {/if}
 
@@ -369,9 +395,30 @@
                           {result.place}
                         </span>
                       </TableBodyCell>
-                      <!-- <TableBodyCell class={TABLE_CELL_CLASS}>
-                        <span class="flex justify-center">---</span>
-                      </TableBodyCell> -->
+                      <TableBodyCell class={TABLE_CELL_CLASS}>
+                        <span class="flex justify-center text-green-400">
+                          {timer(
+                            Math.min(...result.times.map(t => t || Infinity)) || Infinity,
+                            true
+                          )}
+                        </span>
+                      </TableBodyCell>
+                      <TableBodyCell class={TABLE_CELL_CLASS}>
+                        <span class="flex justify-center text-purple-400">
+                          {timer(result.average || Infinity, true)}
+                        </span>
+                      </TableBodyCell>
+
+                      {#each result.times as t, p1}
+                        <TableBodyCell class={TABLE_CELL_CLASS}>
+                          <span
+                            class="flex justify-center"
+                            class:best={isPos(result.times, p1, 0)}
+                            class:worst={isPos(result.times, p1, isMo3(selectedCategory) ? 2 : 4)}
+                            >{timer(t || Infinity, true)}</span
+                          >
+                        </TableBodyCell>
+                      {/each}
                     </TableBodyRow>
                   {/each}
                 {/each}
@@ -444,5 +491,13 @@
     stroke: transparent;
     fill: white;
     filter: drop-shadow(-1px 1px 0.2px #0003);
+  }
+
+  .best {
+    @apply text-green-400;
+  }
+
+  .worst {
+    @apply text-red-500;
   }
 </style>

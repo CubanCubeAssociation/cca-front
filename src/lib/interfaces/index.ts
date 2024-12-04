@@ -209,6 +209,8 @@ interface USER_PROFILE_CONTEST {
   round: number;
   category: CATEGORY;
   contestName: string;
+  average: number;
+  times: number[];
 }
 
 interface USER_PROFILE_RESULT {
