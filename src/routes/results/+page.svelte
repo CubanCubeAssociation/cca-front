@@ -105,25 +105,10 @@
         });
 
         NR_avg.forEach(sr => {
-          if (nrMap.has(sr.category.id)) {
-            const nr = nrMap.get(sr.category.id)!;
-            nr.mean = sr;
-          }
-          // else { // No tiene sentido tener una media sin single
-          //   nrMap.set(sr.category.id, { single: null, mean: sr });
-          // }
-        });
+          if (!nrMap.has(sr.category.id)) return;
 
-        PR_avg.forEach(pr => {
-          if (!prMap.has(pr.category.id)) {
-            prMap.set(pr.category.id, new Map());
-          }
-
-          const ctMap = prMap.get(pr.category.id)!;
-
-          pr.records.forEach(rec => {
-            ctMap.set(rec.contestant.province, { mean: rec, single: null });
-          });
+          const nr = nrMap.get(sr.category.id)!;
+          nr.mean = sr;
         });
 
         PR_single.forEach(pr => {
@@ -134,18 +119,26 @@
           const ctMap = prMap.get(pr.category.id)!;
 
           pr.records.forEach(rec => {
-            if (ctMap.has(rec.contestant.province)) {
-              const pr = ctMap.get(rec.contestant.province)!;
-              pr.single = rec;
-            } else {
-              ctMap.set(rec.contestant.province, { mean: rec, single: null });
+            if (!ctMap.has(rec.contestant.province)) {
+              ctMap.set(rec.contestant.province, { single: rec, mean: null });
             }
           });
         });
 
-        categoryMap = categoryMap;
-        categoryIcon = categoryIcon;
-        nrMap = nrMap;
+        PR_avg.forEach(pr => {
+          if (!prMap.has(pr.category.id)) return;
+
+          const ctMap = prMap.get(pr.category.id)!;
+
+          pr.records.forEach(rec => {
+            if (!ctMap.has(rec.contestant.province)) return;
+            const pr = ctMap.get(rec.contestant.province)!;
+            pr.mean = rec;
+            ctMap.set(rec.contestant.province, pr);
+          });
+        });
+
+        console.log(nrMap, categoryMap);
       })
       .catch(() => (error = true))
       .finally(() => (loading = false));
@@ -235,7 +228,7 @@
                 <span class="mt-2 text-sm sm:hidden">
                   <UserField
                     link
-                    user={nrs?.contestant || { name: "", role: "user", username: "" }}
+                    user={nra?.contestant || { name: "", role: "user", username: "" }}
                   />
                 </span>
               {/if}
@@ -251,7 +244,6 @@
                 </a>
               </TableBodyCell>
               <TableBodyCell class="px-2 max-sm:hidden">
-                <!-- <span class="text-sm">{nra.contestant.name}</span> -->
                 <UserField
                   link
                   user={nra?.contestant || { name: "", role: "user", username: "" }}
@@ -327,7 +319,6 @@
                 </TableBodyCell>
                 <TableBodyCell class="px-2">
                   <span class="flex items-end text-sm">
-                    <!-- {prSingle?.contestant.name} -->
                     <UserField
                       link
                       user={prSingle?.contestant || { name: "", role: "user", username: "" }}
@@ -336,7 +327,6 @@
 
                   {#if prMean && prMean.time}
                     <span class="mt-2 flex items-center justify-between gap-2 text-sm sm:hidden">
-                      <!-- {prMean.contestant.name} -->
                       <UserField
                         link
                         user={prMean?.contestant || { name: "", role: "user", username: "" }}
@@ -356,7 +346,6 @@
                   </TableBodyCell>
                   <TableBodyCell class="px-2 max-sm:hidden">
                     <span class="text-sm">
-                      <!-- {prMean.contestant.name} -->
                       <UserField
                         link
                         user={prMean?.contestant || { name: "", role: "user", username: "" }}
