@@ -1,17 +1,19 @@
 <script lang="ts">
   import { getAvatarRoute, getCategories, getUserProfile } from "@helpers/API";
-  import type { CATEGORY, USER_PROFILE } from "@interfaces";
+  import type { CATEGORY, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
   import {
     Avatar,
     Button,
     Card,
     Heading,
+    TabItem,
     Table,
     TableBody,
     TableBodyCell,
     TableBodyRow,
     TableHead,
     TableHeadCell,
+    Tabs,
     Tooltip,
   } from "flowbite-svelte";
   import { onDestroy, onMount } from "svelte";
@@ -27,12 +29,26 @@
   import { goto } from "$app/navigation";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { timer } from "@helpers/timer";
+  import moment from "moment";
 
   interface USER_CONTEST_RESULT {
     round: number;
     place: number;
     average: number | null;
     times: (number | null)[];
+  }
+
+  interface L_USER_RECORD_RESULT {
+    type: USER_RECORD_RESULT["type"];
+    category: CATEGORY | undefined;
+    time: USER_RECORD_RESULT["time"];
+    contest: { name: string; date: string };
+  }
+
+  interface USER_RECORD {
+    wr: { amount: number; results: L_USER_RECORD_RESULT[] };
+    nr: { amount: number; results: L_USER_RECORD_RESULT[] };
+    pr: { amount: number; results: L_USER_RECORD_RESULT[] };
   }
 
   const awardSize = 2;
@@ -61,9 +77,22 @@
   let groupedData: Record<string, Record<string, USER_CONTEST_RESULT[]>> = $state({});
   let categories: CATEGORY[] = $state([]);
   let selectedCategory: CATEGORY = $state({ id: "", name: "", scrambler: "333" });
+  let userRecords: USER_RECORD = $state({
+    wr: { amount: 0, results: [] },
+    nr: { amount: 0, results: [] },
+    pr: { amount: 0, results: [] },
+  });
+
+  function getContestIndex(contests: USER_PROFILE["contests"], name: string) {
+    for (let i = 0, maxi = contests.length; i < maxi; i += 1) {
+      if (contests[i].name === name) return i;
+    }
+
+    return -1;
+  }
 
   function updateResults(p: USER_PROFILE) {
-    const { results } = p;
+    const { results, records, contests } = p;
 
     groupedData = {};
 
@@ -96,14 +125,42 @@
     }
 
     selectedCategory = categories.find(ct => ct.name in groupedData) || selectedCategory;
+
+    const sortCmp = (a: L_USER_RECORD_RESULT, b: L_USER_RECORD_RESULT) => {
+      let diff =
+        getContestIndex(contests, a.contest?.name) - getContestIndex(contests, b.contest?.name);
+      if (diff) return diff;
+
+      if (!a.category || !b.category) return 0;
+
+      if (a.category.name != b.category.name) {
+        return a.category.name < b.category.name ? -1 : 1;
+      }
+
+      return a.type < b.type ? 1 : -1;
+    };
+
+    const resMap = (e: any): L_USER_RECORD_RESULT => ({
+      ...e,
+      category: categories.find(ct => ct.id === e.category),
+      contest: contests.find(ct => ct.name === e.contest) || contests[0],
+    });
+
+    userRecords.wr.results = records.wr.results.map(resMap);
+    userRecords.nr.results = records.nr.results.map(resMap);
+    userRecords.pr.results = records.pr.results.map(resMap);
+
+    userRecords.wr.results.sort(sortCmp);
+    userRecords.nr.results.sort(sortCmp);
+    userRecords.pr.results.sort(sortCmp);
   }
 
-  function getData() {
-    getCategories()
+  async function getData() {
+    await getCategories()
       .then(cats => (categories = cats.results))
       .catch(err => console.log("ERROR: ", err));
 
-    getUserProfile($page.params.username).then(p => {
+    await getUserProfile($page.params.username).then(p => {
       if (!p) {
         goto("/people", { replaceState: true });
         return;
@@ -191,6 +248,14 @@
     return ["666wca", "777wca"].indexOf(category.scrambler) > -1;
   }
 
+  function getRecords(ur: typeof userRecords) {
+    return [
+      { type: "WR", name: "récord mundial", results: ur.wr.results },
+      { type: "NR", name: "récord nacional", results: ur.nr.results },
+      { type: "PR", name: "récord provincial", results: ur.pr.results },
+    ];
+  }
+
   onMount(() => {
     getData();
   });
@@ -267,26 +332,25 @@
       <!-- Podium -->
       <section>
         <Heading tag="h2" class="text-center mb-4 text-2xl">Podios</Heading>
-        <!-- <UnderConstruction /> -->
 
         <ul class="podium-list">
           <li class="first">
             <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
               <Award variant="trophy" type="gold" size={awardSize} />
             </Heading>
-            <span>{podium[0]}</span>
+            <span class="text-gray-800 dark:text-white">{podium[0]}</span>
           </li>
           <li class="second">
             <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
               <Award variant="trophy" type="silver" size={awardSize * 0.9} />
             </Heading>
-            <span>{podium[1]}</span>
+            <span class="text-gray-800 dark:text-white">{podium[1]}</span>
           </li>
           <li class="third">
             <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
               <Award variant="trophy" type="bronze" size={awardSize * 0.8} />
             </Heading>
-            <span>{podium[2]}</span>
+            <span class="text-gray-800 dark:text-white">{podium[2]}</span>
           </li>
         </ul>
       </section>
@@ -294,28 +358,77 @@
       <!-- Records -->
       <section>
         <Heading tag="h2" class="text-center mb-4 text-2xl">Récords</Heading>
-        <!-- <UnderConstruction /> -->
 
-        <ul class="podium-list">
-          <li class="first">
-            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
-              WR: {profile?.records.wr.results.length}
-            </Heading>
-            <Tooltip class="!text-gray-200">Récord Mundial</Tooltip>
-          </li>
-          <li class="second">
-            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
-              NR: {profile?.records.nr.results.length}
-            </Heading>
-            <Tooltip class="!text-gray-200">Récord Nacional</Tooltip>
-          </li>
-          <li class="third">
-            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
-              PR: {profile?.records.pr.results.length}
-            </Heading>
-            <Tooltip class="!text-gray-200">Récord Provincial</Tooltip>
-          </li>
-        </ul>
+        {#if getRecords(userRecords).filter(rc => rc.results.length).length === 0}
+          El usuario no tiene ningún récord todavía
+        {:else}
+          <Tabs
+            tabStyle="full"
+            defaultClass="flex rounded-lg divide-x rtl:divide-x-reverse divide-gray-200
+            shadow dark:divide-gray-700 w-full max-w-[30rem]"
+            contentClass="w-full p-4 bg-gray-50 rounded-lg dark:bg-gray-800 mt-4"
+          >
+            {#each getRecords(userRecords).filter(rc => rc.results.length) as ur, p}
+              <TabItem class="w-full" open={p === 0}>
+                <span slot="title">{ur.type} ({ur.results.length})</span>
+
+                {#if ur.results.length === 0}
+                  <span>No ha realizado ningún {ur.name}</span>
+                {:else}
+                  <Table shadow divClass="w-full relative overflow-auto max-h-[30rem]">
+                    <TableHead>
+                      <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
+                      <TableHeadCell class={TABLE_HEAD_CLASS}>Record</TableHeadCell>
+                      <TableHeadCell class={TABLE_HEAD_CLASS}>Tiempo</TableHeadCell>
+                      <TableHeadCell class={TABLE_HEAD_CLASS}>Competencia</TableHeadCell>
+                      <TableHeadCell class={TABLE_HEAD_CLASS}>Fecha</TableHeadCell>
+                    </TableHead>
+
+                    <TableBody>
+                      {#each ur.results as res, p}
+                        <TableBodyRow
+                          class={p % 2
+                            ? "bg-gray-200 dark:bg-gray-800"
+                            : "bg-gray-100 dark:bg-gray-700"}
+                        >
+                          <TableBodyCell class={TABLE_CELL_CLASS}>
+                            {p + 1}
+                          </TableBodyCell>
+                          <TableBodyCell class={TABLE_CELL_CLASS}>
+                            <div class="flex items-center">
+                              <WcaCategory icon={res.category?.scrambler} size="1.5rem" />
+                              {res.category?.name} (<span
+                                class={res.type === "single"
+                                  ? " !text-green-400"
+                                  : " !text-purple-400"}
+                                >{res.type === "single" ? "Single" : "Media"}</span
+                              >)
+                            </div>
+                          </TableBodyCell>
+                          <TableBodyCell
+                            class={TABLE_CELL_CLASS +
+                              (res.type === "single" ? " !text-green-400" : " !text-purple-400")}
+                          >
+                            {timer(res.time || Infinity, true, true)}
+                          </TableBodyCell>
+                          <TableBodyCell class={TABLE_CELL_CLASS}>
+                            <a href={`/contests/` + res.contest.name} class="hover:text-primary-300"
+                              >{res.contest?.name}</a
+                            >
+                          </TableBodyCell>
+                          <TableBodyCell class={TABLE_CELL_CLASS}>
+                            {moment(res.contest?.date).format("DD/MM/YYYY")}
+                          </TableBodyCell>
+                        </TableBodyRow>
+                      {/each}
+                    </TableBody>
+                  </Table>
+                {/if}
+              </TabItem>
+              <Tooltip class="!text-gray-200 capitalize">{ur.name}</Tooltip>
+            {/each}
+          </Tabs>
+        {/if}
       </section>
 
       <!-- Results -->

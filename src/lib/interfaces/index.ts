@@ -220,7 +220,7 @@ interface USER_PROFILE_RESULT {
   contests: USER_PROFILE_CONTEST[];
 }
 
-interface USER_RECORD_RESULT {
+export interface USER_RECORD_RESULT {
   type: "media" | "single";
   category: string;
   time: number;
