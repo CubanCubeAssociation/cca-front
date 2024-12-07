@@ -40,6 +40,33 @@ export function median(values: number[]): number {
   return v1[cant >> 1];
 }
 
+export function stdDev(values: number[], avg: number): number {
+  const len = values.length;
+  return len > 0 ? Math.sqrt(values.reduce((acc, e) => acc + (e - avg) ** 2 / len, 0)) : 0;
+}
+
+export function trendLSV(values: number[][]): { m: number; n: number } {
+  const n = values.length;
+  let Sx = 0,
+    Sy = 0,
+    Sxx = 0,
+    Sxy = 0;
+
+  for (let i = 0; i < n; i += 1) {
+    const x = values[i][0],
+      y = values[i][1];
+    Sx += x;
+    Sy += y;
+    Sxx += x * x;
+    Sxy += x * y;
+  }
+
+  const beta = (n * Sxy - Sx * Sy) / (n * Sxx - Sx ** 2);
+  const alpha = (Sy - beta * Sx) / n;
+
+  return { m: beta, n: alpha };
+}
+
 export function adjustMillis(n: number, round = false): number {
   return (!round ? Math.floor : Math.round)(n / 10) * 10;
 }
@@ -52,10 +79,8 @@ export function getAverage(n: number, arr: number[]): (number | null)[] {
   let infP = 0;
   let sum = 0;
 
-  const getIndex = (i: number) => len - i;
-
   for (let i = 0, maxi = len; i <= maxi; i += 1) {
-    const t = arr[getIndex(i)];
+    const t = arr[i] || Infinity;
 
     set.add(t);
     infP += isFinite(t) ? 0 : 1;
@@ -82,7 +107,7 @@ export function getAverage(n: number, arr: number[]): (number | null)[] {
         res.push(adjustMillis(s / (n - 2 * d), true));
       }
 
-      const t1 = arr[getIndex(i - n + 1)];
+      const t1 = arr[i - n + 1] || Infinity;
       set.rem(t1);
       infP -= isFinite(t1) ? 0 : 1;
       sum -= isFinite(t1) ? t1 : 0;
@@ -163,4 +188,23 @@ export function getRoundsInfo(rnds: ROUND[]) {
   }
 
   return { rounds, roundGroup };
+}
+
+export function getBest(arr: number[]): number[][] {
+  let best = Infinity;
+  const bests = [];
+  const len = arr.length - 1;
+
+  for (let i = 0, maxi = len + 1; i < maxi; i += 1) {
+    if (!arr[i]) {
+      continue;
+    }
+
+    if (arr[i] < best) {
+      best = arr[i];
+      bests.push([i, best]);
+    }
+  }
+
+  return bests;
 }

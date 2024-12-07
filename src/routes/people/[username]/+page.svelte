@@ -4,16 +4,15 @@
   import {
     Avatar,
     Button,
+    ButtonGroup,
     Card,
     Heading,
-    TabItem,
     Table,
     TableBody,
     TableBodyCell,
     TableBodyRow,
     TableHead,
     TableHeadCell,
-    Tabs,
     Tooltip,
   } from "flowbite-svelte";
   import { onDestroy, onMount } from "svelte";
@@ -24,12 +23,12 @@
   import LocationIcon from "@icons/MapMarkerOutline.svelte";
   import VerifiedIcon from "@icons/CheckDecagramOutline.svelte";
   import Award from "@components/Award.svelte";
-  import UnderConstruction from "@components/UnderConstruction.svelte";
   import * as echarts from "echarts";
   import { goto } from "$app/navigation";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { timer } from "@helpers/timer";
   import moment from "moment";
+  import { getAverage, getBest, mean, stdDev, trendLSV } from "@helpers/statistics";
 
   interface USER_CONTEST_RESULT {
     round: number;
@@ -72,6 +71,8 @@
   let profile: USER_PROFILE | null = $state(null);
   let stepPercentSerie: HTMLDivElement;
   let stepPercentChart: echarts.ECharts;
+  let timeSerie: HTMLDivElement | null = $state(null);
+  let timeChart: echarts.ECharts | null = $state(null);
   let ELO = $state(0);
   let podium = $state([0, 0, 0]);
   let groupedData: Record<string, Record<string, USER_CONTEST_RESULT[]>> = $state({});
@@ -82,6 +83,8 @@
     nr: { amount: 0, results: [] },
     pr: { amount: 0, results: [] },
   });
+  let recordIndex = $state(0);
+  let userRecord: any = $state(null);
 
   function getContestIndex(contests: USER_PROFILE["contests"], name: string) {
     for (let i = 0, maxi = contests.length; i < maxi; i += 1) {
@@ -153,6 +156,13 @@
     userRecords.wr.results.sort(sortCmp);
     userRecords.nr.results.sort(sortCmp);
     userRecords.pr.results.sort(sortCmp);
+
+    recordIndex = 0;
+    const recs = getRecords(userRecords).filter(rc => rc.results.length);
+
+    if (recs.length) {
+      userRecord = recs[0];
+    }
   }
 
   async function getData() {
@@ -236,6 +246,7 @@
 
   function handleResize() {
     stepPercentChart?.resize();
+    timeChart?.resize();
   }
 
   function isPos(times: (number | null)[], i: number, pos: number) {
@@ -256,7 +267,231 @@
     ];
   }
 
+  $effect(() => {
+    if (!(selectedCategory.name in groupedData) || !profile || !timeChart) return;
+
+    const categoryData = groupedData[selectedCategory.name];
+    const solves: (number | null)[] = profile.contests
+      .reduce(
+        (acc, e) => [...(categoryData[e.name] || []).map(e1 => e1.times), ...acc],
+        [] as any[]
+      )
+      .flat(3);
+
+    // Best marks
+    let bestSerie: echarts.SeriesOption = {
+      data: getBest(solves.map(s => s || Infinity)),
+      type: "line",
+      name: "Mejor",
+      clip: false,
+      coordinateSystem: "cartesian2d",
+      lineStyle: {
+        type: "dashed",
+      },
+    };
+
+    // Trend
+    let trendSerie: echarts.SeriesOption[] = (() => {
+      if (solves.filter(s => s).length < 3) {
+        return [
+          { name: "Tendencia", data: [], type: "line" },
+          { name: "trend-low", data: [], type: "line" },
+          { name: "trend-high", data: [], type: "line" },
+        ];
+      }
+
+      const { m, n } = trendLSV(solves.map((s, p) => [p, s || Infinity]));
+      const nn = stdDev(
+        solves.map(s => s || Infinity),
+        mean(solves.map(s => s || Infinity))
+      );
+
+      console.log("M_N_DEV", m, n, nn);
+
+      return [
+        {
+          name: "Tendencia",
+          data: solves.map((_, p) => [p, m * p + n]),
+          type: "line",
+          showSymbol: false,
+          tooltip: { show: false },
+          lineStyle: { type: "dashed", color: "white" },
+        },
+        {
+          name: "trend-low",
+          data: solves.map((_, p) => [p, m * p + n - nn / 2]),
+          type: "line",
+          showSymbol: false,
+          stack: "trend-band",
+          lineStyle: { opacity: 0 },
+          tooltip: { show: false },
+        },
+        {
+          name: "trend-high",
+          data: solves.map((_, p) => [p, nn]),
+          type: "line",
+          showSymbol: false,
+          stack: "trend-band",
+          areaStyle: { color: "#fff4" },
+          lineStyle: { opacity: 0 },
+          tooltip: { show: false },
+        },
+      ];
+    })();
+
+    let options: echarts.EChartsOption = {
+      xAxis: {
+        type: "category",
+        data: solves.map((_, p) => p + 1),
+      },
+      yAxis: {
+        type: "value",
+        min: "dataMin",
+        max: "dataMax",
+        name: "Tiempo",
+        axisLabel: {
+          formatter: value => timer(value, false, true),
+        },
+      },
+      grid: {
+        right: "1%",
+      },
+      legend: {
+        data: ["Tiempos", "Mejor", "Ao5", "Tendencia"],
+        top: "6%",
+      },
+      dataZoom: [
+        {
+          type: "slider",
+          xAxisIndex: [0],
+        },
+        {
+          type: "inside",
+          minSpan: 0,
+          maxSpan: 100,
+        },
+      ],
+      series: [
+        {
+          data: solves.map(time => time),
+          type: "line",
+          connectNulls: false,
+          name: "Tiempos",
+          smooth: solves.length < 2000,
+        },
+        bestSerie,
+        {
+          data: getAverage(
+            5,
+            solves.map(time => time || Infinity)
+          ),
+          type: "line",
+          connectNulls: false,
+          name: "Ao5",
+          smooth: solves.length < 2000,
+        },
+        ...trendSerie,
+      ],
+      backgroundColor: "transparent",
+      tooltip: {
+        ...tooltipStyle,
+        axisPointer: {
+          type: "cross",
+          label: {
+            color: tooltipStyle.textStyle?.color,
+            backgroundColor: tooltipStyle.backgroundColor,
+            borderColor: "#ddff",
+            borderWidth: 2,
+            formatter({ axisDimension, value }: any) {
+              return axisDimension === "x"
+                ? +value.toString() + ""
+                : timer(+value.toString(), true, true);
+            },
+          },
+          animation: false,
+          animationDurationUpdate: 0,
+        },
+        formatter: function (params: any) {
+          let output = params[0].axisValueLabel + "<br/>";
+          let pos = +params[0].axisValueLabel;
+
+          output += '<table style="width: 100%;">';
+
+          params.forEach(function (param: any) {
+            const value = Array.isArray(param.data) ? param.data[1] : param.data;
+            const name: string = param.seriesName;
+
+            if ((name.startsWith("Ao") && pos < +name.slice(2)) || name.startsWith("anomaly")) {
+              return;
+            }
+
+            output += `<tr>
+              <td>${param.marker}</td>
+              <td>${name}</td>
+              <td style="text-align: right; font-weight: bold; padding-left: .5rem;">${timer(
+                +value || Infinity,
+                true,
+                true
+              )}</td>
+            </tr>`;
+          });
+
+          return output + "</table>";
+        },
+      },
+      animation: true,
+      animationDuration: 500,
+    };
+
+    timeChart.setOption(options);
+
+    timeChart.off("dataZoom");
+    timeChart.off("legendselectchanged");
+    timeChart.on("dataZoom", function (params: any) {
+      if (!timeChart) return;
+
+      let start = Math.round(
+        ((params.batch ? params.batch[0].start : params.start) * solves.length) / 100
+      );
+      let end = Math.round(
+        ((params.batch ? params.batch[0].start : params.start) * solves.length) / 100
+      );
+
+      timeChart.setOption({
+        series: (Array.isArray(options.series) ? options.series : [options.series]).map(() => ({
+          smooth: Math.abs(end - start) <= 800,
+        })),
+      });
+    });
+
+    timeChart.on("legendselectchanged", function (ev: any) {
+      let trendName = "Tendencia";
+      let hTrend: echarts.LineSeriesOption = trendSerie.filter(
+        s => s.name === "trend-high"
+      )[0] as any;
+
+      if (!ev.selected[trendName]) {
+        hTrend.areaStyle!.color = "transparent";
+      } else {
+        hTrend.areaStyle!.color = "#fff4";
+      }
+
+      timeChart?.setOption(options);
+    });
+
+    timeChart?.setOption(options);
+    timeChart?.resize();
+    console.log("SETOPTIONS");
+  });
+
   onMount(() => {
+    console.log(!!timeChart, !!timeSerie);
+
+    if (!timeChart && timeSerie) {
+      timeChart = echarts.init(timeSerie, "dark", { renderer: "svg" });
+      timeChart.resize();
+    }
+
     getData();
   });
 
@@ -362,72 +597,69 @@
         {#if getRecords(userRecords).filter(rc => rc.results.length).length === 0}
           El usuario no tiene ningún récord todavía
         {:else}
-          <Tabs
-            tabStyle="full"
-            defaultClass="flex rounded-lg divide-x rtl:divide-x-reverse divide-gray-200
-            shadow dark:divide-gray-700 w-full max-w-[30rem]"
-            contentClass="w-full p-4 bg-gray-50 rounded-lg dark:bg-gray-800 mt-4"
-          >
+          <ButtonGroup class="space-x-px mb-4">
             {#each getRecords(userRecords).filter(rc => rc.results.length) as ur, p}
-              <TabItem class="w-full" open={p === 0}>
-                <span slot="title">{ur.type} ({ur.results.length})</span>
-
-                {#if ur.results.length === 0}
-                  <span>No ha realizado ningún {ur.name}</span>
-                {:else}
-                  <Table shadow divClass="w-full relative overflow-auto max-h-[30rem]">
-                    <TableHead>
-                      <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
-                      <TableHeadCell class={TABLE_HEAD_CLASS}>Record</TableHeadCell>
-                      <TableHeadCell class={TABLE_HEAD_CLASS}>Tiempo</TableHeadCell>
-                      <TableHeadCell class={TABLE_HEAD_CLASS}>Competencia</TableHeadCell>
-                      <TableHeadCell class={TABLE_HEAD_CLASS}>Fecha</TableHeadCell>
-                    </TableHead>
-
-                    <TableBody>
-                      {#each ur.results as res, p}
-                        <TableBodyRow
-                          class={p % 2
-                            ? "bg-gray-200 dark:bg-gray-800"
-                            : "bg-gray-100 dark:bg-gray-700"}
-                        >
-                          <TableBodyCell class={TABLE_CELL_CLASS}>
-                            {p + 1}
-                          </TableBodyCell>
-                          <TableBodyCell class={TABLE_CELL_CLASS}>
-                            <div class="flex items-center">
-                              <WcaCategory icon={res.category?.scrambler} size="1.5rem" />
-                              {res.category?.name} (<span
-                                class={res.type === "single"
-                                  ? " !text-green-400"
-                                  : " !text-purple-400"}
-                                >{res.type === "single" ? "Single" : "Media"}</span
-                              >)
-                            </div>
-                          </TableBodyCell>
-                          <TableBodyCell
-                            class={TABLE_CELL_CLASS +
-                              (res.type === "single" ? " !text-green-400" : " !text-purple-400")}
-                          >
-                            {timer(res.time || Infinity, true, true)}
-                          </TableBodyCell>
-                          <TableBodyCell class={TABLE_CELL_CLASS}>
-                            <a href={`/contests/` + res.contest.name} class="hover:text-primary-300"
-                              >{res.contest?.name}</a
-                            >
-                          </TableBodyCell>
-                          <TableBodyCell class={TABLE_CELL_CLASS}>
-                            {moment(res.contest?.date).format("DD/MM/YYYY")}
-                          </TableBodyCell>
-                        </TableBodyRow>
-                      {/each}
-                    </TableBody>
-                  </Table>
-                {/if}
-              </TabItem>
+              <Button
+                on:click={() => {
+                  recordIndex = p;
+                  userRecord = ur;
+                }}
+                color={p === recordIndex ? "primary" : "alternative"}
+                class="text-black dark:text-white"
+                pill
+              >
+                {ur.type} ({ur.results.length})
+              </Button>
               <Tooltip class="!text-gray-200 capitalize">{ur.name}</Tooltip>
             {/each}
-          </Tabs>
+          </ButtonGroup>
+
+          {#if userRecord}
+            <Table shadow divClass="w-full relative overflow-auto max-h-[30rem]">
+              <TableHead>
+                <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
+                <TableHeadCell class={TABLE_HEAD_CLASS}>Record</TableHeadCell>
+                <TableHeadCell class={TABLE_HEAD_CLASS}>Tiempo</TableHeadCell>
+                <TableHeadCell class={TABLE_HEAD_CLASS}>Competencia</TableHeadCell>
+                <TableHeadCell class={TABLE_HEAD_CLASS}>Fecha</TableHeadCell>
+              </TableHead>
+
+              <TableBody>
+                {#each userRecord.results as res, p}
+                  <TableBodyRow
+                    class={p % 2 ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-700"}
+                  >
+                    <TableBodyCell class={TABLE_CELL_CLASS}>
+                      {p + 1}
+                    </TableBodyCell>
+                    <TableBodyCell class={TABLE_CELL_CLASS}>
+                      <div class="flex items-center">
+                        <WcaCategory icon={res.category?.scrambler} size="1.5rem" />
+                        {res.category?.name} (<span
+                          class={res.type === "single" ? " !text-green-400" : " !text-purple-400"}
+                          >{res.type === "single" ? "Single" : "Media"}</span
+                        >)
+                      </div>
+                    </TableBodyCell>
+                    <TableBodyCell
+                      class={TABLE_CELL_CLASS +
+                        (res.type === "single" ? " !text-green-400" : " !text-purple-400")}
+                    >
+                      {timer(res.time || Infinity, true, true)}
+                    </TableBodyCell>
+                    <TableBodyCell class={TABLE_CELL_CLASS}>
+                      <a href={`/contests/` + res.contest.name} class="hover:text-primary-300"
+                        >{res.contest?.name}</a
+                      >
+                    </TableBodyCell>
+                    <TableBodyCell class={TABLE_CELL_CLASS}>
+                      {moment(res.contest?.date).format("DD/MM/YYYY")}
+                    </TableBodyCell>
+                  </TableBodyRow>
+                {/each}
+              </TableBody>
+            </Table>
+          {/if}
         {/if}
       </section>
 
@@ -538,25 +770,28 @@
               {/if}
             </TableBody>
           </Table>
-
-          <ul class="w-full flex flex-wrap gap-2 justify-center mt-8">
-            {#each categories.filter(ct => ct.name in groupedData) as cat}
-              <Button color="alternative" class="!p-0" on:click={() => (selectedCategory = cat)}>
-                <WcaCategory
-                  class={"cursor-pointer " +
-                    (selectedCategory.name === cat.name ? "text-green-300" : "")}
-                  icon={cat.scrambler}
-                />
-              </Button>
-            {/each}
-          </ul>
         {/if}
       </section>
 
-      <!-- Development -->
+      <!-- Performance -->
       <section>
-        <Heading tag="h2" class="text-center mb-4 text-2xl">Desempeño</Heading>
-        <UnderConstruction />
+        <Heading tag="h2" class="text-center mb-4 text-2xl">
+          Desempeño ({selectedCategory.name})
+        </Heading>
+
+        <ul class="w-full flex flex-wrap gap-2 justify-center mb-4">
+          {#each categories.filter(ct => ct.name in groupedData) as cat}
+            <Button color="alternative" class="!p-0" on:click={() => (selectedCategory = cat)}>
+              <WcaCategory
+                class={"cursor-pointer " +
+                  (selectedCategory.name === cat.name ? "text-green-300" : "")}
+                icon={cat.scrambler}
+              />
+            </Button>
+          {/each}
+        </ul>
+
+        <div class="grid place-items-center h-[20rem] w-full" bind:this={timeSerie}></div>
       </section>
     </aside>
   </section>
