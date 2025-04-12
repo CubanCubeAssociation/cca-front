@@ -68,7 +68,9 @@ export async function login(email: string, password: string): Promise<LOGIN_DATA
 
     userStore.set(loginData.user);
     tokenStore.set(loginData.tokens);
-    console.log("SETTING TOKENS: ", loginData);
+
+    // document.cookie = `access_token=${loginData.tokens.access.token}; Path=/; Secure; HttpOnly`;
+    // document.cookie = `refresh_token=${loginData.tokens.refresh.token}; Path=/; Secure; HttpOnly`;
 
     localStorage.setItem("user", JSON.stringify(loginData.user));
     localStorage.setItem("tokens", JSON.stringify(loginData.tokens));
@@ -90,13 +92,16 @@ export async function logout() {
         },
       })
       .json();
-    clearSessionStores();
+
     location.reload();
     return true;
   } catch {
-    clearSessionStores();
     goto("/");
     return false;
+  } finally {
+    clearSessionStores();
+    document.cookie = `access_token=; Path=/; Max-Age=0; Secure; HttpOnly`;
+    document.cookie = `refresh_token=; Path=/; Max-Age=0; Secure; HttpOnly`;
   }
 }
 
@@ -275,6 +280,14 @@ export async function removeUser(u: USER) {
   return await ky.delete(API + "/users/" + u.id, {
     ...commonAuth(),
   });
+}
+
+export async function updateAllUserProfiles() {
+  return await ky
+    .get(API + "/users/profile/updateAll", {
+      ...commonAuth(),
+    })
+    .json();
 }
 
 // SOLVE

@@ -777,13 +777,13 @@
 <Modal title="Agregar resultado" bind:open={addResult}>
   <div class="flex items-center justify-center gap-2">
     {#if round.id}
-      <Button color="alternative" class={"gap-1 h-9 py-1 px-2"} disabled>
+      <Button color="alternative" class={"gap-1 h-9 py-1 px-2"} disabled role="button">
         {round.category.name}
       </Button>
-      <Button color="alternative" class={"gap-1 h-9 py-1 px-2"} disabled>
+      <Button color="alternative" class={"gap-1 h-9 py-1 px-2"} disabled role="button">
         {round.round}
       </Button>
-      <Button color="alternative" class={"gap-1 h-9 py-1 px-2"} disabled>
+      <Button color="alternative" class={"gap-1 h-9 py-1 px-2"} disabled role="button">
         {round.contestant.name}
       </Button>
     {:else}
@@ -842,11 +842,15 @@
   <svelte:fragment slot="footer">
     <div class="flex mx-auto justify-center gap-4">
       {#if round.id}
-        <Button on:click={() => (deleteRoundDialog = true)} color="red">Eliminar</Button>
+        <Button role="button" on:click={() => (deleteRoundDialog = true)} color="red">
+          Eliminar
+        </Button>
       {/if}
 
-      <Button on:click={() => (addResult = false)} color="alternative">Cancelar</Button>
-      <Button disabled={!validateRound(round)} on:click={saveResult}>Aceptar</Button>
+      <Button role="button" on:click={() => (addResult = false)} color="alternative">
+        Cancelar
+      </Button>
+      <Button role="button" disabled={!validateRound(round)} on:click={saveResult}>Aceptar</Button>
     </div>
   </svelte:fragment>
 </Modal>

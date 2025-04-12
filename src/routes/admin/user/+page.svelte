@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { USER } from "@interfaces";
-  import { getUsers } from "@helpers/API";
+  import { getUsers, updateAllUserProfiles } from "@helpers/API";
 
   import PlusIcon from "@icons/Plus.svelte";
 
@@ -114,6 +114,14 @@
     window.open(`/admin/user/${user.id}`, "_blank");
   }
 
+  function updateAllProfiles() {
+    updateAllUserProfiles()
+      .then(() => {
+        alert("done");
+      })
+      .catch(err => console.log("ERROR", err));
+  }
+
   onMount(updateUsers);
 </script>
 
@@ -129,6 +137,8 @@
 
       <Button color="purple">Buscar</Button>
       <SearchUser multiple={false} user={handleSearch} type="dropdown" />
+
+      <Button color="purple" on:click={updateAllProfiles}>Actualizar perfiles</Button>
     </div>
 
     {#if loading}

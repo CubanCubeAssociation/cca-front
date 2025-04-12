@@ -75,11 +75,15 @@
         </TableBodyCell>
 
         {#if minRole($userStore, "admin")}
-          <TableBodyCell
-            class={TABLE_CELL_CLASS + (allowEdit ? " cursor-pointer" : "")}
-            on:click={() => editRound(rnd)}
-          >
-            <UserField user={rnd.contestant} />
+          <TableBodyCell class={TABLE_CELL_CLASS}>
+            <UserField
+              class={allowEdit ? "cursor-pointer hover:text-yellow-300" : ""}
+              onclick={(ev: MouseEvent) => {
+                ev.stopPropagation();
+                editRound(rnd);
+              }}
+              user={rnd.contestant}
+            />
           </TableBodyCell>
         {:else}
           <TableBodyCell class={TABLE_CELL_CLASS}>

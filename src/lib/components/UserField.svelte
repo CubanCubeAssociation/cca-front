@@ -13,15 +13,23 @@
     class: cl = "",
     showAvatar = false,
     link = false,
+    onclick = () => {},
   }: {
     user: USER_LIKE;
     class?: string;
     showAvatar?: boolean;
     link?: boolean;
+    onclick?: (ev: MouseEvent) => void;
   } = $props();
 </script>
 
-<span class={"flex gap-2 items-center w-max " + cl}>
+<span
+  class={"flex gap-2 items-center w-max " + cl}
+  {onclick}
+  role="button"
+  tabindex="0"
+  onkeydown={() => {}}
+>
   {#if showAvatar}
     <Avatar
       border

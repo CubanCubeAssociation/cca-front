@@ -30,6 +30,8 @@
   import moment from "moment";
   import { getAverage, getBest, mean, stdDev, trendLSV } from "@helpers/statistics";
 
+  // const { data } = $props();
+
   interface USER_CONTEST_RESULT {
     round: number;
     place: number;
@@ -50,6 +52,18 @@
     pr: { amount: number; results: L_USER_RECORD_RESULT[] };
   }
 
+  interface RANK_ENTRY {
+    time: number;
+    rank: number;
+    contest: string;
+  }
+
+  interface RANK {
+    category: CATEGORY;
+    single: RANK_ENTRY;
+    average: RANK_ENTRY;
+  }
+
   const awardSize = 2;
   const tooltipStyle: echarts.TooltipComponentOption = {
     trigger: "axis",
@@ -65,10 +79,8 @@
   const TABLE_CELL_CLASS =
     "px-2 text-center [&:not(:first-child)]:border-l [&:not(:first-child)]:border-l-gray-600";
 
-  // let loading = $state(false);
-  // let error = $state(false);
-
   let profile: USER_PROFILE | null = $state(null);
+  let categories: CATEGORY[] = $state([]);
   let stepPercentSerie: HTMLDivElement;
   let stepPercentChart: echarts.ECharts;
   let timeSerie: HTMLDivElement | null = $state(null);
@@ -76,7 +88,6 @@
   let ELO = $state(0);
   let podium = $state([0, 0, 0]);
   let groupedData: Record<string, Record<string, USER_CONTEST_RESULT[]>> = $state({});
-  let categories: CATEGORY[] = $state([]);
   let selectedCategory: CATEGORY = $state({ id: "", name: "", scrambler: "333" });
   let userRecords: USER_RECORD = $state({
     wr: { amount: 0, results: [] },
@@ -85,6 +96,7 @@
   });
   let recordIndex = $state(0);
   let userRecord: any = $state(null);
+  let userRanks: RANK[] = $state([]);
 
   function getContestIndex(contests: USER_PROFILE["contests"], name: string) {
     for (let i = 0, maxi = contests.length; i < maxi; i += 1) {
@@ -95,7 +107,7 @@
   }
 
   function updateResults(p: USER_PROFILE) {
-    const { results, records, contests } = p;
+    const { results, records, contests, rankSummary } = p;
 
     groupedData = {};
 
@@ -163,29 +175,33 @@
     if (recs.length) {
       userRecord = recs[0];
     }
-  }
 
-  async function getData() {
-    await getCategories()
-      .then(cats => (categories = cats.results))
-      .catch(err => console.log("ERROR: ", err));
+    // Rankings
+    userRanks = categories
+      .map(cat => {
+        let sng = rankSummary.find(rs => rs.category === cat.id && rs.type === "Single");
+        let single = {
+          contest: sng?.contest || "",
+          rank: sng?.position || 0,
+          time: sng?.time || 0,
+        };
 
-    await getUserProfile($page.params.username).then(p => {
-      if (!p) {
-        goto("/people", { replaceState: true });
-        return;
-      }
+        let avg = rankSummary.find(rs => rs.category === cat.id && rs.type === "Media");
+        let average = {
+          contest: avg?.contest || "",
+          rank: avg?.position || 0,
+          time: avg?.time || 0,
+        };
 
-      profile = p;
-      updateResults(p);
-      updateCharts();
-    });
+        return { category: cat, single, average };
+      })
+      .filter(res => res.single.rank + res.average.rank);
   }
 
   function updateCharts() {
     if (!profile) return;
     if (!stepPercentChart) {
-      stepPercentChart = echarts.init(stepPercentSerie, "dark", { renderer: "svg" });
+      stepPercentChart = echarts.init(stepPercentSerie, "dark", { renderer: "canvas" });
     }
 
     const { results, records } = profile;
@@ -216,25 +232,50 @@
     // ELO = Math.round(summary.reduce((acc, e) => acc + e[2], 0) * getEloDecay(totalContests));
     ELO = summary.reduce((acc, e) => acc + e[2], 0);
 
+    summary.reverse();
+
+    const colors = [
+      "#5470c6",
+      "#91cc75",
+      "#fac858",
+      "#ee6666",
+      "#73c0de",
+      "#3ba272",
+      "#fc8452",
+      "#9a60b4",
+      "#ea7ccc",
+    ];
+
     let stepOption: echarts.EChartsOption = {
+      xAxis: {
+        type: "value",
+      },
+      yAxis: {
+        type: "category",
+        data: summary.map((e, p) => e[0]),
+      },
       series: [
         {
-          name: "Logro",
-          data: summary.map(e => ({
+          data: summary.map((e, p) => ({
             value: e[2],
-            name: e[0],
+            itemStyle: {
+              color: colors[p % colors.length],
+              barBorderRadius: [0, 4, 4, 0],
+            },
           })),
-          type: "pie",
-          radius: ["40%", "70%"],
-          itemStyle: { borderRadius: 10, borderWidth: 3, borderColor: "#fff1" },
-          top: "0%",
-          bottom: "5%",
+          type: "bar",
         },
       ],
+      grid: {
+        left: "20%",
+        right: "5%",
+        top: "0%",
+        bottom: "20%",
+      },
       backgroundColor: "transparent",
       tooltip: {
         ...tooltipStyle,
-        trigger: "item",
+        trigger: "axis",
         valueFormatter(v, e) {
           return `${v} (${summary[e][1]} ${summary[e][1] === 1 ? "vez" : "veces"})`;
         },
@@ -292,7 +333,9 @@
 
     // Trend
     let trendSerie: echarts.SeriesOption[] = (() => {
-      if (solves.filter(s => s).length < 3) {
+      const newSolves = solves.filter(s => s);
+
+      if (newSolves.length < 3) {
         return [
           { name: "Tendencia", data: [], type: "line" },
           { name: "trend-low", data: [], type: "line" },
@@ -300,13 +343,11 @@
         ];
       }
 
-      const { m, n } = trendLSV(solves.map((s, p) => [p, s || Infinity]));
+      const { m, n } = trendLSV(newSolves.map((s, p) => [p, s || Infinity]));
       const nn = stdDev(
-        solves.map(s => s || Infinity),
-        mean(solves.map(s => s || Infinity))
+        newSolves.map(s => s || Infinity),
+        mean(newSolves.map(s => s || Infinity))
       );
-
-      console.log("M_N_DEV", m, n, nn);
 
       return [
         {
@@ -481,18 +522,26 @@
 
     timeChart?.setOption(options);
     timeChart?.resize();
-    console.log("SETOPTIONS");
   });
 
   onMount(() => {
-    console.log(!!timeChart, !!timeSerie);
-
     if (!timeChart && timeSerie) {
-      timeChart = echarts.init(timeSerie, "dark", { renderer: "svg" });
+      timeChart = echarts.init(timeSerie, "dark", { renderer: "canvas" });
       timeChart.resize();
     }
 
-    getData();
+    Promise.all([getCategories(), getUserProfile($page.params.username)]).then(res => {
+      categories = res[0].results;
+      profile = res[1];
+
+      if (!profile) {
+        goto("/people", { replaceState: true });
+        return;
+      }
+
+      updateResults(profile);
+      updateCharts();
+    });
   });
 
   onDestroy(() => {
@@ -559,7 +608,7 @@
       <section id="profile-elo">
         <Heading tag="h2" class="text-center mb-4 text-2xl">ELO: {ELO}</Heading>
 
-        <div class="grid w-full h-[10rem]" bind:this={stepPercentSerie}></div>
+        <div class="grid w-full overflow-hidden h-[20rem]" bind:this={stepPercentSerie}></div>
       </section>
     </aside>
 
@@ -590,13 +639,75 @@
         </ul>
       </section>
 
-      <!-- Records -->
-      <section>
-        <Heading tag="h2" class="text-center mb-4 text-2xl">Récords</Heading>
+      <!-- Records personales -->
+      {#if userRanks.length}
+        <section>
+          <Heading tag="h2" class="text-center mb-4 text-2xl">Récords personales</Heading>
 
-        {#if getRecords(userRecords).filter(rc => rc.results.length).length === 0}
-          El usuario no tiene ningún récord todavía
-        {:else}
+          <Table shadow divClass="w-full relative overflow-auto max-h-[30rem]">
+            <TableHead>
+              <TableHeadCell class={TABLE_HEAD_CLASS}>Categoría</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS}>NR</TableHeadCell>
+              <!-- <TableHeadCell class={TABLE_HEAD_CLASS}>PR</TableHeadCell> -->
+              <TableHeadCell class={TABLE_HEAD_CLASS + " text-green-400"}>Single</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS + " text-purple-400"}>Media</TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS}>NR</TableHeadCell>
+              <!-- <TableHeadCell class={TABLE_HEAD_CLASS}>PR</TableHeadCell> -->
+            </TableHead>
+
+            <TableBody>
+              {#each userRanks as rank, p}
+                <TableBodyRow
+                  class={p % 2 ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-700"}
+                >
+                  <TableBodyCell class={TABLE_CELL_CLASS}>
+                    <div class="flex items-center">
+                      <WcaCategory icon={rank.category?.scrambler} size="1.5rem" />
+                      {rank.category?.name}
+                    </div>
+                  </TableBodyCell>
+                  <TableBodyCell
+                    class={TABLE_CELL_CLASS + (rank.single.rank === 1 ? " !text-red-500" : "")}
+                  >
+                    {rank.single.rank}
+                  </TableBodyCell>
+                  <TableBodyCell class={TABLE_CELL_CLASS + " !text-green-400"}>
+                    <a href={`/contests/` + rank.single.contest} class="hover:text-primary-300">
+                      {timer(rank.single.time || Infinity, true, true)}
+                    </a>
+                  </TableBodyCell>
+
+                  <!-- Average -->
+                  <TableBodyCell class={TABLE_CELL_CLASS + " !text-purple-400"}>
+                    {#if rank.average.rank}
+                      <a href={`/contests/` + rank.average.contest} class="hover:text-primary-300">
+                        {timer(rank.average.time || Infinity, true, true)}
+                      </a>
+                    {:else}
+                      -
+                    {/if}
+                  </TableBodyCell>
+                  <TableBodyCell
+                    class={TABLE_CELL_CLASS + (rank.average.rank === 1 ? " !text-red-500" : "")}
+                  >
+                    {#if rank.average.rank}
+                      {rank.average.rank}
+                    {:else}
+                      -
+                    {/if}
+                  </TableBodyCell>
+                </TableBodyRow>
+              {/each}
+            </TableBody>
+          </Table>
+        </section>
+      {/if}
+
+      <!-- Records locales y nacionales -->
+      {#if getRecords(userRecords).filter(rc => rc.results.length).length}
+        <section>
+          <Heading tag="h2" class="text-center mb-4 text-2xl">Récords locales y nacionales</Heading>
+
           <ButtonGroup class="space-x-px mb-4">
             {#each getRecords(userRecords).filter(rc => rc.results.length) as ur, p}
               <Button
@@ -648,9 +759,9 @@
                       {timer(res.time || Infinity, true, true)}
                     </TableBodyCell>
                     <TableBodyCell class={TABLE_CELL_CLASS}>
-                      <a href={`/contests/` + res.contest.name} class="hover:text-primary-300"
-                        >{res.contest?.name}</a
-                      >
+                      <a href={`/contests/` + res.contest.name} class="hover:text-primary-300">
+                        {res.contest?.name}
+                      </a>
                     </TableBodyCell>
                     <TableBodyCell class={TABLE_CELL_CLASS}>
                       {moment(res.contest?.date).format("DD/MM/YYYY")}
@@ -660,8 +771,8 @@
               </TableBody>
             </Table>
           {/if}
-        {/if}
-      </section>
+        </section>
+      {/if}
 
       <!-- Results -->
       <section>

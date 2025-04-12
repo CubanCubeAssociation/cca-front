@@ -242,10 +242,20 @@ interface USER_RECORD {
   };
 }
 
+interface RANK_SUMMARY {
+  category: string;
+  contest: string;
+  name: string;
+  position: number;
+  time: number;
+  type: "Single" | "Media";
+}
+
 export interface USER_PROFILE {
   user: USER;
   results: USER_PROFILE_RESULT[];
   records: USER_RECORD;
   contests: { name: string; date: Date }[];
   totalContests: number;
+  rankSummary: RANK_SUMMARY[];
 }
