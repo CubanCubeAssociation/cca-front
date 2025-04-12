@@ -58,9 +58,12 @@ export interface CATEGORY {
   scrambler: Scrambler;
 }
 
+type FORMAT = "Ao5" | "Mo3" | "Bo3" | "Bo2" | "Bo1";
+
 export interface CONTEST_CATEGORY {
   category: CATEGORY;
   rounds: number;
+  format: FORMAT;
 }
 
 export enum PENALTY {
