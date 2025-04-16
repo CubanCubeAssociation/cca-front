@@ -148,7 +148,7 @@
     if (cats.some(c => c.category.id === ct.id)) {
       contest.categories = cats.filter(c => c.category.id != ct.id);
     } else {
-      contest.categories = [...cats, { category: ct, rounds: 1 }];
+      contest.categories = [...cats, { category: ct, rounds: 1, format: "Ao5" }];
     }
   }
 
@@ -229,8 +229,8 @@
     editDialog = false;
   }
 
-  function handleEditRound(ev: any) {
-    round = { ...ev.detail };
+  function handleEditRound(rnd: ROUND) {
+    round = rnd;
     addResult = true;
   }
 
@@ -718,7 +718,7 @@
             </div>
 
             {#if roundGroup.length > 0}
-              <ResultView {roundGroup} on:edit={handleEditRound} allowEdit />
+              <ResultView {roundGroup} edit={handleEditRound} allowEdit />
 
               <div class="w-full mt-4">
                 <Button on:click={prepareResult}>

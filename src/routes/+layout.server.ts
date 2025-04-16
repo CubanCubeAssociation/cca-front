@@ -30,3 +30,5 @@ export const load: LayoutServerLoad = ({ url }) => {
       "La Asociación Cubana del Cubo se encarga de registrar todos los datos de las competencias de speedcubing en Cuba",
   };
 };
+
+export const ssr = false;

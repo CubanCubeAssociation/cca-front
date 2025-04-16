@@ -3,8 +3,10 @@
   import type { USER } from "@interfaces";
   import { twMerge } from "tailwind-merge";
 
+  type USER_LIKE = Pick<USER, "name" | "role" | "username"> & { avatar?: string };
+
   interface IAvatarProps {
-    user: USER | null | undefined;
+    user: USER_LIKE | null | undefined;
     showName?: boolean;
     size?: "xs" | "sm" | "md" | "lg" | "xl";
   }

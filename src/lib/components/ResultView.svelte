@@ -3,13 +3,15 @@
   import { Accordion, AccordionItem, Heading } from "flowbite-svelte";
   import WcaCategory from "./wca/WCACategory.svelte";
 
-  import { createEventDispatcher } from "svelte";
   import ResultTable from "./ResultTable.svelte";
 
-  export let roundGroup: ROUND[][][] = [];
-  export let allowEdit = false;
+  interface IResultViewProps {
+    roundGroup: ROUND[][][];
+    allowEdit?: boolean;
+    edit?: (round: ROUND) => void;
+  }
 
-  const dispatch = createEventDispatcher();
+  let { roundGroup, allowEdit = false, edit }: IResultViewProps = $props();
 </script>
 
 <Accordion class="w-full">
@@ -31,7 +33,7 @@
           </Heading>
         {/if}
 
-        <ResultTable {category} {rounds} {allowEdit} on:edit={ev => dispatch("edit", ev.detail)} />
+        <ResultTable {category} {rounds} {allowEdit} edit={rnd => edit?.(rnd)} />
       {/each}
     </AccordionItem>
   {/each}
