@@ -88,7 +88,7 @@
           <button on:click={() => selectIcon(I)} id={"ICON-" + I.scrambler} type="button">
             <WcaCategory icon={I.scrambler} selected={I.scrambler === category.scrambler} />
           </button>
-          <Tooltip class="!text-white" triggeredBy={"#ICON-" + I.scrambler}>{I.name}</Tooltip>
+          <Tooltip class="text-white!" triggeredBy={"#ICON-" + I.scrambler}>{I.name}</Tooltip>
         {/each}
       </div>
 

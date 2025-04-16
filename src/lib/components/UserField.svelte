@@ -36,11 +36,11 @@
       src={getAvatarRoute(user.username || "")}
       class={"p-0 " +
         (user.role === "root"
-          ? "!ring-purple-500 dark:!ring-purple-400"
+          ? "ring-purple-500! dark:ring-purple-400!"
           : user.role === "admin"
-            ? "!ring-primary-500 dark:!ring-primary-400"
+            ? "ring-primary-500! dark:ring-primary-400!"
             : user.role === "delegate"
-              ? "!ring-green-500 dark:!ring-green-400"
+              ? "ring-green-500! dark:ring-green-400!"
               : "")}
     />
   {/if}
@@ -55,12 +55,12 @@
 
   {#if user.role === "root"}
     <RootIcon size="1.1rem" class="text-purple-500 dark:text-purple-400" />
-    <Tooltip class="!text-purple-200">Superadmin</Tooltip>
+    <Tooltip class="text-purple-200!">Superadmin</Tooltip>
   {:else if user.role === "admin"}
     <AdminIcon size="1.1rem" class="text-primary-500 dark:text-primary-400" />
-    <Tooltip class="!text-blue-200">Administrador</Tooltip>
+    <Tooltip class="text-blue-200!">Administrador</Tooltip>
   {:else if user.role === "delegate"}
     <DelegateIcon class="text-green-500 dark:text-green-400" />
-    <Tooltip class="!text-green-200">Delegado</Tooltip>
+    <Tooltip class="text-green-200!">Delegado</Tooltip>
   {/if}
 </span>

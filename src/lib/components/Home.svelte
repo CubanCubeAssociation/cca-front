@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Button, Heading, P, Span } from "flowbite-svelte";
   import ChevronRight from "@icons/ChevronRight.svelte";
-  import { Link } from "svelte-routing";
   import WcaCategory from "./wca/WCACategory.svelte";
   import type { Scrambler } from "@interfaces";
 
@@ -22,7 +21,7 @@
     desarrollo mental de los niños y jóvenes.
   </P>
 
-  <Link to="/cca"><Button class="mt-4">Saber más <ChevronRight /></Button></Link>
+  <a href="/cca"><Button class="mt-4">Saber más <ChevronRight /></Button></a>
 </main>
 
 <section id="popular">
@@ -42,6 +41,8 @@
 </section>
 
 <style lang="postcss">
+  @reference "tailwindcss";
+
   #hero,
   #popular {
     @apply w-[min(100%,40rem)] mx-auto p-4 text-center;

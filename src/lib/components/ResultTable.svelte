@@ -23,8 +23,7 @@
 
   const rndKeys = ["t1", "t2", "t3", "t4", "t5"] as const;
   const TABLE_HEAD_CLASS = "px-2 text-center";
-  const TABLE_CELL_CLASS =
-    "px-2 text-center [&:not(:first-child)]:border-l [&:not(:first-child)]:border-l-gray-600";
+  const TABLE_CELL_CLASS = "px-2 text-center not-first:border-l not-first:border-l-gray-600";
 
   function isPos(round: ROUND, i: number, pos: number) {
     let vals = [round.t1, round.t2, round.t3, round.t4, round.t5].map((s, p) => [actualTime(s), p]);
@@ -61,7 +60,7 @@
 
   <TableBody>
     {#each rounds as rnd, p}
-      <TableBodyRow class="!bg-white !bg-opacity-5 !border-t-gray-600">
+      <TableBodyRow class="bg-white/5! border-t-gray-600!">
         <TableBodyCell class={TABLE_CELL_CLASS}>
           {#if p === 0}
             <Award type="gold" />
@@ -118,6 +117,8 @@
 </Table>
 
 <style lang="postcss">
+  @reference "../../app.css";
+
   .best {
     @apply text-green-500;
   }

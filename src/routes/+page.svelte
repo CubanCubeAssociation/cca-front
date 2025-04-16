@@ -41,6 +41,8 @@
 </section>
 
 <style lang="postcss">
+  @reference "tailwindcss";
+
   #hero,
   #popular {
     @apply mx-auto w-[min(100%,40rem)] p-4 text-center;

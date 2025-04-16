@@ -92,7 +92,7 @@
 
     <PaginatorComponent showNextPrev={!$screen.isMobile} update={updateData} bind:pg class="mb-4" />
   {:else if error}
-    <Span class="text-center !text-red-500">
+    <Span class="text-center text-red-500!">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
     </Span>
 

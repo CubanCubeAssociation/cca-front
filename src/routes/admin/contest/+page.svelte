@@ -24,9 +24,11 @@
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { Paginator } from "@classes/Paginator.svelte";
+  import { NotificationService } from "@stores/notification.service";
 
+  const notification = NotificationService.getInstance();
   const HEADER = "Competencias";
   const ADD = "Añadir competencia";
   const debug = false;
@@ -53,7 +55,7 @@
         contests = res.results;
         pg.setTotal(res.totalResults);
         pg = pg;
-        goto($page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
+        goto(page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
       })
       .catch(() => (error = true))
       .finally(() => (loading = false));
@@ -67,8 +69,19 @@
     updateResults()
       .then(res => {
         if (debug) console.log("RESULT: ", res);
+        notification.addNotification({
+          header: "Hecho",
+          text: "Datos actualizados correctamente.",
+          timeout: 2000,
+        });
       })
-      .catch(err => console.log("ERROR: ", err));
+      .catch(() =>
+        notification.addNotification({
+          header: "Error",
+          text: "No se pudieron actualizar los datos.",
+          timeout: 2000,
+        })
+      );
   }
 
   onMount(() => {
@@ -137,7 +150,7 @@
         </Button>
       </div>
     {:else if error}
-      <Span class="text-center !text-red-500">
+      <Span class="text-center text-red-500!">
         Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
       </Span>
 
@@ -149,6 +162,7 @@
 </PrivateRouteGuard>
 
 <style lang="postcss">
+  @reference "tailwindcss";
   .actions {
     @apply my-4 flex justify-start gap-2;
   }

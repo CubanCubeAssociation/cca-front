@@ -68,15 +68,19 @@
 </ul>
 
 <style lang="postcss">
+  @reference "../../app.css";
+  @reference "tailwindcss";
+
   .paginator-item {
     @apply rounded-md;
   }
 
   .paginator-item button {
-    @apply grid h-8 w-8 cursor-pointer select-none place-items-center rounded-md bg-violet-400 bg-opacity-30 shadow-md transition-all duration-300 hover:bg-opacity-40 hover:text-gray-300;
+    @apply grid h-8 w-8 cursor-pointer select-none place-items-center rounded-md bg-violet-400/30
+    shadow-md transition-all duration-300 hover:bg-violet-400/40 hover:text-gray-300;
   }
 
   .paginator-item.selected button {
-    @apply bg-violet-500 bg-opacity-60 text-gray-200 hover:bg-opacity-50;
+    @apply bg-violet-500/60 text-gray-200 hover:bg-violet-500/50;
   }
 </style>

@@ -75,6 +75,8 @@
 </div>
 
 <style lang="postcss">
+  @reference "../../../app.css";
+
   .container {
     @apply rounded-md p-1 grid place-items-center w-fit cursor-default;
   }

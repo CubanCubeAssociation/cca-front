@@ -22,7 +22,7 @@
   </a>
 </Card>
 
-<Card class="mx-auto mb-8 mt-4 grid w-[calc(100%-2rem)] max-w-4xl place-items-center hidden">
+<Card class="mx-auto mb-8 mt-4 hidden w-[calc(100%-2rem)] max-w-4xl place-items-center">
   <Heading tag="h2" class="mb-4 flex items-center justify-center gap-1 text-center text-3xl">
     Información complementaria
   </Heading>
@@ -138,8 +138,10 @@
 </Card>
 
 <style lang="postcss">
+  @reference "tailwindcss";
+
   section {
-    @apply bg-orange-200 bg-opacity-5 w-full border border-gray-400 my-2 p-2
+    @apply bg-orange-200/5 w-full border border-gray-400 my-2 p-2
       rounded-md shadow-md text-gray-200 max-w-2xl;
   }
 

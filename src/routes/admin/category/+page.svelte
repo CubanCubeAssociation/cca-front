@@ -84,6 +84,7 @@
 </PrivateRouteGuard>
 
 <style lang="postcss">
+  @reference "tailwindcss";
   .actions {
     @apply flex justify-start my-4;
   }

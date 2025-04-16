@@ -182,8 +182,8 @@
 <Dropdown
   bind:open={showOptions}
   id={selectID}
-  containerClass={"max-h-[20rem] overflow-y-auto z-50 w-max !bg-gray-700 [&>div]:hidden rounded-md " +
-    (useFixed ? " !fixed " : "") +
+  containerClass={"max-h-[20rem] overflow-y-auto z-50 w-max bg-gray-700! [&>div]:hidden rounded-md " +
+    (useFixed ? " fixed! " : "") +
     (type === "color"
       ? " [&>ul]:grid-cols-[repeat(var(--grid-w),1fr)] [&>ul]:grid [&>ul>div]:hidden  "
       : "")}

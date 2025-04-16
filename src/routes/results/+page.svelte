@@ -155,7 +155,7 @@
 
 <Card class="mx-auto mb-8 mt-4 flex w-[calc(100%-2rem)] max-w-4xl flex-col items-center gap-4">
   <Heading tag="h1" class="flex items-center justify-center gap-1 text-center text-4xl">
-    <TrophyIcon size="2rem" class="text-yellow-400 dark:text-yellow-300" /> Resultados
+    <TrophyIcon size="2rem" class="text-yellow-400 dark:text-yellow-300" /> Récords
   </Heading>
 
   {#if loading}
@@ -363,7 +363,7 @@
       {/if}
     {/each}
   {:else if error}
-    <Span class="text-center !text-red-500">
+    <Span class="text-center text-red-500!">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
     </Span>
 

@@ -22,10 +22,12 @@
   import SearchUser from "$lib/components/SearchUser.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import UserField from "@components/UserField.svelte";
   import { Paginator } from "@classes/Paginator.svelte";
+  import { NotificationService } from "@stores/notification.service";
 
+  const notification = NotificationService.getInstance();
   const HEADER = "Usuarios";
   const ADD = "Añadir usuario";
 
@@ -90,7 +92,7 @@
 
         pg.setTotal(res.totalResults);
         pg = pg;
-        goto($page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
+        goto(page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
 
         if (users.length) {
           const HOP = Object.prototype.hasOwnProperty;
@@ -117,7 +119,11 @@
   function updateAllProfiles() {
     updateAllUserProfiles()
       .then(() => {
-        alert("done");
+        notification.addNotification({
+          header: "Hecho",
+          text: "Datos de los usuarios actualizados.",
+          timeout: 2000,
+        });
       })
       .catch(err => console.log("ERROR", err));
   }
@@ -205,7 +211,7 @@
         </Button>
       </div>
     {:else if error}
-      <Span class="text-center !text-red-500">
+      <Span class="text-center text-red-500!">
         Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
       </Span>
 
@@ -217,6 +223,7 @@
 </PrivateRouteGuard>
 
 <style lang="postcss">
+  @reference "tailwindcss";
   .actions {
     @apply my-4 flex justify-start;
   }

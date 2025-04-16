@@ -1,17 +1,4 @@
 <script lang="ts">
-  import {
-    Avatar,
-    DarkMode,
-    Dropdown,
-    DropdownDivider,
-    DropdownItem,
-    NavBrand,
-    NavHamburger,
-    NavLi,
-    NavUl,
-    Navbar,
-    Span,
-  } from "flowbite-svelte";
   import { userStore } from "@stores/user";
   import { isAuth, minRole } from "@helpers/auth";
   import CcaLogo from "@components/CCALogo.svelte";
@@ -32,209 +19,207 @@
   import ChevronDownIcon from "@icons/ChevronDown.svelte";
   import { getReturnURL } from "@helpers/strings";
   import { page } from "$app/stores";
+  import { MenuIcon } from "lucide-svelte";
+  import { screen } from "@stores/screen.store";
+  import Avatar from "./Avatar.svelte";
 
   const notification = NotificationService.getInstance();
-  const UL_CLASS =
-    "flex flex-col p-3 mt-4 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:text-sm md:font-medium";
 
   let userDropdownOpen = $state(false);
-
-  function checkMobile(cb: any) {
-    userDropdownOpen = false;
-    if (window.innerWidth < 768) {
-      cb();
-    }
-  }
+  let avatarDropdownOpen = $state(false);
 </script>
 
-<div class="relative py-10">
-  <Navbar let:hidden let:toggle class="fixed left-0 top-0 z-10 w-full justify-between shadow-lg">
-    <NavBrand href="/">
-      <CcaLogo size="2rem" />
-      <Span class="ml-2 self-center whitespace-nowrap text-base font-semibold">CCA</Span>
-    </NavBrand>
+{#snippet userSnippet()}
+  <li>
+    <details class="dropdown dropdown-end">
+      <summary>
+        <Avatar size="xs" user={$userStore} showName />
+      </summary>
 
-    <div class="flex md:order-2">
-      <DarkMode />
-      <NavHamburger on:click={toggle} />
-    </div>
+      <ul class="menu menu-sm w-3xs dropdown-content bg-base-100 rounded-box z-1 mt-3 p-2 shadow">
+        <li>
+          <div class="flex gap-4 items-center cursor-default hover:bg-black px-4 py-1 rounded-md">
+            <Avatar size="lg" user={$userStore} />
 
-    <NavUl {hidden} class="order-1" ulClass={UL_CLASS}>
-      <NavLi href="/contests" class="flex items-center gap-1" onclick={() => checkMobile(toggle)}>
-        <SwordIcon class="text-red-600 dark:text-red-400" /> Competencias
-      </NavLi>
-
-      <NavLi class="flex items-center gap-1 cursor-pointer">
-        <TrophyIcon class="text-yellow-400 dark:text-yellow-300" />
-        Resultados
-        <ChevronDownIcon />
-      </NavLi>
-
-      <Dropdown trigger="hover">
-        <DropdownItem
-          href="/results"
-          class="flex items-center gap-1"
-          onclick={() => checkMobile(toggle)}
-        >
-          <TrophyIcon class="text-yellow-400 dark:text-yellow-300" /> Récords
-        </DropdownItem>
-
-        <DropdownItem
-          href="/ranking"
-          class="flex items-center gap-1"
-          onclick={() => checkMobile(toggle)}
-        >
-          <RankingIcon class="text-green-400 dark:text-green-300" /> Ranking
-        </DropdownItem>
-
-        <DropdownItem
-          href="/people"
-          class="flex items-center gap-1"
-          onclick={() => checkMobile(toggle)}
-        >
-          <PeopleIcon class="text-blue-400 dark:text-blue-300" /> Competidores
-        </DropdownItem>
-      </Dropdown>
-
-      <NavLi href="/rules" class="flex items-center gap-1" onclick={() => checkMobile(toggle)}>
-        <RulesIcon class="text-orange-400 dark:text-orange-300" /> Reglamento
-      </NavLi>
-
-      <NavLi href="/cca" class="flex items-center gap-1" onclick={() => checkMobile(toggle)}>
-        <CubeIcon class="text-primary-500 dark:text-primary-400" /> CCA
-      </NavLi>
-
-      {#if !isAuth($userStore)}
-        <NavLi
-          href={encodeURI(`/login?returnTo=${getReturnURL($page.url)}`)}
-          onclick={() => checkMobile(toggle)}>Entrar</NavLi
-        >
-      {:else}
-        <NavLi>
-          <div class="flex items-center gap-2">
-            <Avatar
-              border
-              size="xs"
-              src={getAvatarRoute($userStore?.username || "")}
-              class={"cursor-pointer p-0 " +
-                ($userStore?.role === "root"
-                  ? "!ring-purple-500 dark:!ring-purple-400"
-                  : $userStore?.role === "admin"
-                    ? "!ring-primary-500 dark:!ring-primary-400"
-                    : $userStore?.role === "delegate"
-                      ? "!ring-green-500 dark:!ring-green-400"
-                      : "")}
-            />
-            <span class="md:hidden">{$userStore?.name}</span>
-          </div>
-        </NavLi>
-
-        <Dropdown trigger="click" bind:open={userDropdownOpen}>
-          <svelte:element this={"slot"} slot="header">
-            <div
-              class="flex gap-4 items-center cursor-pointer hover:bg-black hover:bg-opacity-5 px-4 py-1 rounded-md"
-            >
-              <Avatar
-                border
-                size="sm"
-                src={getAvatarRoute($userStore?.username || "")}
-                class={"cursor-pointer p-0 " +
-                  ($userStore?.role === "root"
-                    ? "!ring-purple-500 dark:!ring-purple-400"
-                    : $userStore?.role === "admin"
-                      ? "!ring-primary-500 dark:!ring-primary-400"
-                      : $userStore?.role === "delegate"
-                        ? "!ring-green-500 dark:!ring-green-400"
-                        : "")}
-              />
-              <div class="grid">
-                <span class="block text-gray-900 dark:text-white text-base">
-                  {$userStore?.name}
-                </span>
-                <a
-                  href={`/people/${$userStore?.username || "#"}`}
-                  class="block truncate text-sm font-medium text-pink-400"
-                >
-                  CCA ID: {$userStore?.username}
-                </a>
-                <span
-                  class={$userStore?.role === "root"
-                    ? "text-purple-300"
-                    : $userStore?.role === "admin"
-                      ? "text-blue-300"
-                      : $userStore?.role === "delegate"
-                        ? "text-green-400"
-                        : "hidden"}
-                >
-                  {ROLES.find(r => r.value === $userStore?.role)?.name || "Usuario"}
-                </span>
-              </div>
-            </div>
-          </svelte:element>
-
-          <a href="/me/profile" onclick={() => checkMobile(toggle)}>
-            <DropdownItem class="flex items-center gap-1">
-              <UserIcon class="dark:text-green-400" /> Perfil
-            </DropdownItem>
-          </a>
-
-          <a href="/me/settings" onclick={() => checkMobile(toggle)}>
-            <DropdownItem class="flex items-center gap-1">
-              <SettingsIcon class="dark:text-gray-400" /> Configuración
-            </DropdownItem>
-          </a>
-
-          {#if minRole($userStore, "delegate")}
-            <DropdownDivider />
-            <a href="/admin/user" onclick={() => checkMobile(toggle)}>
-              <DropdownItem class="flex items-center gap-1">
-                <UsersIcon class="dark:text-blue-400" /> Usuarios
-              </DropdownItem>
-            </a>
-            <a href="/admin/contest" onclick={() => checkMobile(toggle)}>
-              <DropdownItem class="flex items-center gap-1">
-                <SwordIcon class="dark:text-red-400" /> Competencias
-              </DropdownItem>
-            </a>
-
-            {#if minRole($userStore, "admin")}
-              <a href="/admin/category" onclick={() => checkMobile(toggle)}>
-                <DropdownItem class="flex items-center gap-1">
-                  <WcaCategory
-                    icon="333"
-                    size=".7rem"
-                    class="text-yellow-400"
-                    buttonClass="!p-[.1rem]"
-                  /> Categorías
-                </DropdownItem>
+            <div class="grid">
+              <span class="block">
+                {$userStore?.name}
+              </span>
+              <a
+                href={`/people/${$userStore?.username || "#"}`}
+                class="block truncate font-medium text-pink-400"
+                onclick={() => (avatarDropdownOpen = false)}
+              >
+                CCA ID: {$userStore?.username}
               </a>
-            {/if}
+              <span
+                class={$userStore?.role === "root"
+                  ? "text-purple-300"
+                  : $userStore?.role === "admin"
+                    ? "text-blue-300"
+                    : $userStore?.role === "delegate"
+                      ? "text-green-400"
+                      : "hidden"}
+              >
+                {ROLES.find(r => r.value === $userStore?.role)?.name || "Usuario"}
+              </span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <a href="/me/profile" onclick={() => (avatarDropdownOpen = false)}>
+            <UserIcon class="text-green-400" /> Perfil
+          </a>
+        </li>
+
+        <li>
+          <a href="/me/settings" onclick={() => (avatarDropdownOpen = false)}>
+            <SettingsIcon class="text-gray-400" /> Configuración
+          </a>
+        </li>
+
+        {#if minRole($userStore, "delegate")}
+          <li>
+            <a href="/admin/user" onclick={() => (avatarDropdownOpen = false)}>
+              <UsersIcon class="text-blue-400" /> Usuarios
+            </a>
+          </li>
+
+          <li>
+            <a href="/admin/contest" onclick={() => (avatarDropdownOpen = false)}>
+              <SwordIcon class="text-red-400" /> Competencias
+            </a>
+          </li>
+
+          {#if minRole($userStore, "admin")}
+            <li>
+              <a href="/admin/category" onclick={() => (avatarDropdownOpen = false)}>
+                <WcaCategory
+                  icon="333"
+                  size=".7rem"
+                  class="text-yellow-400"
+                  buttonClass="p-[.1rem]!"
+                />
+                Categorías
+              </a>
+            </li>
           {/if}
-          <svelte:element this={"slot"} slot="footer">
-            <DropdownItem
-              class="flex items-center gap-1"
-              on:click={async () => {
-                if (await logout()) {
-                  notification.addNotification({
-                    header: "Hecho",
-                    text: "Sesión cerrada correctamente.",
-                    timeout: 2000,
-                  });
-                } else {
-                  notification.addNotification({
-                    header: "Error",
-                    text: "Error al intentar cerrar sesión.",
-                    timeout: 2000,
-                  });
-                }
-                checkMobile(toggle);
-              }}
-            >
-              <ExitIcon class="dark:text-red-400" /> Salir
-            </DropdownItem>
-          </svelte:element>
-        </Dropdown>
+        {/if}
+
+        <li>
+          <button
+            onclick={async () => {
+              if (await logout()) {
+                notification.addNotification({
+                  header: "Hecho",
+                  text: "Sesión cerrada correctamente.",
+                  timeout: 2000,
+                });
+              } else {
+                notification.addNotification({
+                  header: "Error",
+                  text: "Error al intentar cerrar sesión.",
+                  timeout: 2000,
+                });
+              }
+              avatarDropdownOpen = false;
+            }}
+          >
+            <ExitIcon class="text-red-400" /> Salir
+          </button>
+        </li>
+      </ul>
+    </details>
+  </li>
+{/snippet}
+
+{#snippet navlist()}
+  <li>
+    <a href="/contests">
+      <SwordIcon class="text-red-400" /> Competencias
+    </a>
+  </li>
+
+  <li>
+    <details bind:open={userDropdownOpen}>
+      <summary>
+        <TrophyIcon class="text-yellow-300" />
+        Resultados
+      </summary>
+
+      <ul>
+        <li>
+          <a href="/results" onclick={() => (userDropdownOpen = false)}>
+            <TrophyIcon class="text-yellow-300" /> Récords
+          </a>
+        </li>
+        <li>
+          <a href="/ranking" onclick={() => (userDropdownOpen = false)}>
+            <RankingIcon class="text-green-300" /> Ranking
+          </a>
+        </li>
+        <li>
+          <a href="/people" onclick={() => (userDropdownOpen = false)}>
+            <PeopleIcon class="text-blue-300" /> Competidores
+          </a>
+        </li>
+      </ul>
+    </details>
+  </li>
+
+  <li>
+    <a href="/rules" class="flex items-center gap-1">
+      <RulesIcon class="text-orange-300" /> Reglamento
+    </a>
+  </li>
+
+  <li>
+    <a href="/cca" class="flex items-center gap-1">
+      <CubeIcon class="text-primary-400" /> CCA
+    </a>
+  </li>
+
+  {#if !isAuth($userStore)}
+    <li>
+      <a
+        href={encodeURI(`/login?returnTo=${getReturnURL($page.url)}`)}
+        onclick={() => (userDropdownOpen = false)}
+      >
+        Entrar
+      </a>
+    </li>
+  {:else if !$screen.isMobile}
+    {@render userSnippet()}
+  {/if}
+{/snippet}
+
+<div class="navbar bg-base-100 shadow-sm fixed z-50 top-0 left-0 w-full">
+  <div class="navbar-start">
+    {#if $screen.isMobile}
+      <div class="dropdown">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+          <MenuIcon />
+        </div>
+
+        <ul class="menu dropdown-content bg-base-200 rounded-box w-56">
+          {@render navlist()}
+        </ul>
+      </div>
+    {/if}
+
+    <a href="/" class="btn btn-ghost text-xl">
+      <CcaLogo size="2rem" />
+      <span class="ml-2 self-center whitespace-nowrap text-base font-semibold">CCA</span>
+    </a>
+  </div>
+  <div class="navbar-end">
+    <ul class="menu menu-horizontal items-center">
+      {#if !$screen.isMobile}
+        {@render navlist()}
+      {:else}
+        {@render userSnippet()}
       {/if}
-    </NavUl>
-  </Navbar>
+    </ul>
+  </div>
 </div>

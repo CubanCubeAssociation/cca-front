@@ -171,7 +171,7 @@
     /> -->
 
     {#if minRole($userStore, "admin")}
-      <Button class="!p-1 w-9 h-9"><ReloadIcon size="1rem" /></Button>
+      <Button class="p-1! w-9 h-9"><ReloadIcon size="1rem" /></Button>
       <Dropdown trigger="hover">
         <DropdownItem on:click={handleUpdateCategory}>Actualizar Categoría</DropdownItem>
         <DropdownItem on:click={handleUpdateRanking}>Actualizar General</DropdownItem>
@@ -230,7 +230,7 @@
 
     <PaginatorComponent showNextPrev={!$screen.isMobile} bind:pg class="mt-4" />
   {:else if error}
-    <Span class="text-center !text-red-500">
+    <Span class="text-center text-red-500!">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
     </Span>
 

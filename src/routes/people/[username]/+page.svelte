@@ -2,7 +2,6 @@
   import { getAvatarRoute, getCategories, getUserProfile } from "@helpers/API";
   import type { CATEGORY, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
   import {
-    Avatar,
     Button,
     ButtonGroup,
     Card,
@@ -29,6 +28,7 @@
   import { timer } from "@helpers/timer";
   import moment from "moment";
   import { getAverage, getBest, mean, stdDev, trendLSV } from "@helpers/statistics";
+  import Avatar from "@components/Avatar.svelte";
 
   // const { data } = $props();
 
@@ -76,8 +76,7 @@
   };
 
   const TABLE_HEAD_CLASS = "px-2 text-center";
-  const TABLE_CELL_CLASS =
-    "px-2 text-center [&:not(:first-child)]:border-l [&:not(:first-child)]:border-l-gray-600";
+  const TABLE_CELL_CLASS = "px-2 text-center not-first:border-l not-first:border-l-gray-600";
 
   let profile: USER_PROFILE | null = $state(null);
   let categories: CATEGORY[] = $state([]);
@@ -556,22 +555,10 @@
     <aside class="w-full md:max-w-[16rem] h-fit">
       <!-- Profile -->
       <section id="profile">
-        <Avatar
-          size="lg"
-          src={getAvatarRoute(profile?.user.username || "")}
-          border
-          class={"p-0 " +
-            (profile?.user.role === "root"
-              ? "!ring-purple-500 dark:!ring-purple-400"
-              : profile?.user.role === "admin"
-                ? "!ring-primary-500 dark:!ring-primary-400"
-                : profile?.user.role === "delegate"
-                  ? "!ring-green-500 dark:!ring-green-400"
-                  : "")}
-        />
+        <Avatar size="xl" user={profile?.user || null} />
         <h1 class="font-bold text-lg">
           <UserField
-            class="!w-fit text-center text-black dark:text-white"
+            class="w-fit! text-center text-black dark:text-white"
             user={profile?.user || { username: "", name: "", role: "user" }}
           />
         </h1>
@@ -667,18 +654,18 @@
                     </div>
                   </TableBodyCell>
                   <TableBodyCell
-                    class={TABLE_CELL_CLASS + (rank.single.rank === 1 ? " !text-red-500" : "")}
+                    class={TABLE_CELL_CLASS + (rank.single.rank === 1 ? " text-red-500!" : "")}
                   >
                     {rank.single.rank}
                   </TableBodyCell>
-                  <TableBodyCell class={TABLE_CELL_CLASS + " !text-green-400"}>
+                  <TableBodyCell class={TABLE_CELL_CLASS + " text-green-400!"}>
                     <a href={`/contests/` + rank.single.contest} class="hover:text-primary-300">
                       {timer(rank.single.time || Infinity, true, true)}
                     </a>
                   </TableBodyCell>
 
                   <!-- Average -->
-                  <TableBodyCell class={TABLE_CELL_CLASS + " !text-purple-400"}>
+                  <TableBodyCell class={TABLE_CELL_CLASS + " text-purple-400!"}>
                     {#if rank.average.rank}
                       <a href={`/contests/` + rank.average.contest} class="hover:text-primary-300">
                         {timer(rank.average.time || Infinity, true, true)}
@@ -688,7 +675,7 @@
                     {/if}
                   </TableBodyCell>
                   <TableBodyCell
-                    class={TABLE_CELL_CLASS + (rank.average.rank === 1 ? " !text-red-500" : "")}
+                    class={TABLE_CELL_CLASS + (rank.average.rank === 1 ? " text-red-500!" : "")}
                   >
                     {#if rank.average.rank}
                       {rank.average.rank}
@@ -721,7 +708,7 @@
               >
                 {ur.type} ({ur.results.length})
               </Button>
-              <Tooltip class="!text-gray-200 capitalize">{ur.name}</Tooltip>
+              <Tooltip class="text-gray-200! capitalize">{ur.name}</Tooltip>
             {/each}
           </ButtonGroup>
 
@@ -747,14 +734,14 @@
                       <div class="flex items-center">
                         <WcaCategory icon={res.category?.scrambler} size="1.5rem" />
                         {res.category?.name} (<span
-                          class={res.type === "single" ? " !text-green-400" : " !text-purple-400"}
+                          class={res.type === "single" ? " text-green-400!" : " text-purple-400!"}
                           >{res.type === "single" ? "Single" : "Media"}</span
                         >)
                       </div>
                     </TableBodyCell>
                     <TableBodyCell
                       class={TABLE_CELL_CLASS +
-                        (res.type === "single" ? " !text-green-400" : " !text-purple-400")}
+                        (res.type === "single" ? " text-green-400!" : " text-purple-400!")}
                     >
                       {timer(res.time || Infinity, true, true)}
                     </TableBodyCell>
@@ -782,7 +769,7 @@
 
         <ul class="w-full flex flex-wrap gap-2 justify-center mb-4">
           {#each categories.filter(ct => ct.name in groupedData) as cat}
-            <Button color="alternative" class="!p-0" on:click={() => (selectedCategory = cat)}>
+            <Button color="alternative" class="p-0!" on:click={() => (selectedCategory = cat)}>
               <WcaCategory
                 class={"cursor-pointer " +
                   (selectedCategory.name === cat.name ? "text-green-300" : "")}
@@ -817,7 +804,7 @@
 
                   {#each contestData as result, rp}
                     <TableBodyRow
-                      class={"!border-t-gray-600 " +
+                      class={"border-t-gray-600! " +
                         (p % 2 ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-700")}
                     >
                       {#if rp === 0}
@@ -892,7 +879,7 @@
 
         <ul class="w-full flex flex-wrap gap-2 justify-center mb-4">
           {#each categories.filter(ct => ct.name in groupedData) as cat}
-            <Button color="alternative" class="!p-0" on:click={() => (selectedCategory = cat)}>
+            <Button color="alternative" class="p-0!" on:click={() => (selectedCategory = cat)}>
               <WcaCategory
                 class={"cursor-pointer " +
                   (selectedCategory.name === cat.name ? "text-green-300" : "")}
@@ -909,6 +896,8 @@
 </Card>
 
 <style lang="postcss">
+  @reference "tailwindcss";
+
   aside {
     @apply grid gap-4 w-full;
   }

@@ -39,7 +39,7 @@
   let name: string = "";
 
   const size = "1.4rem";
-  const spanClass = "flex items-center gap-1 !text-green-200";
+  const spanClass = "flex items-center gap-1 text-green-200!";
   const TD_CLASS = "px-2 py-2 whitespace-nowrap font-medium ";
 
   let show404 = false;
@@ -277,6 +277,6 @@
   }
 
   .info-list li {
-    @apply flex gap-2 items-center;
+    @apply flex items-center;
   }
 </style>
