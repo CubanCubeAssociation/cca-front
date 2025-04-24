@@ -1,8 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import moment from "moment";
-  import { STATUS_ORDER, type CONTEST, type CONTEST_STATUS, type ROUND } from "@interfaces";
-  import { getContest } from "@helpers/API";
+  import {
+    STATUS_ORDER,
+    type CONTEST,
+    type CONTEST_STATUS,
+    type FORMAT,
+    type ROUND,
+  } from "@interfaces";
+  import { getContest, getFormats } from "@helpers/API";
   import { getRoundsInfo } from "@helpers/statistics";
 
   // Icons
@@ -46,6 +52,7 @@
   let contest: CONTEST;
   // let section: number = 0;
   let roundGroup: ROUND[][][] = [];
+  let formats: FORMAT[] = [];
 
   function before(state: CONTEST_STATUS) {
     let idx = STATUS_ORDER.indexOf(contest.status);
@@ -65,16 +72,17 @@
   onMount(() => {
     let name = $page.params.name;
 
-    getContest(name)
+    Promise.all([getFormats(), getContest(name)])
       .then(res => {
-        contest = res;
+        formats = res[0];
+        contest = res[1];
         contest.date = moment.utc(contest.date).format("YYYY-MM-DDThh:mm");
         contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
         contest.inscriptionEnd = moment(contest.inscriptionEnd).format("YYYY-MM-DD");
 
         // console.log("CONTEST: ", res);
 
-        let roundInfo = getRoundsInfo(contest.rounds);
+        let roundInfo = getRoundsInfo(contest.rounds, contest.categories, formats);
 
         contest.rounds = roundInfo.rounds;
         roundGroup = roundInfo.roundGroup;
@@ -259,7 +267,7 @@
         </p>
       {/if}
 
-      <ResultView {roundGroup} />
+      <ResultView {roundGroup} {formats} categories={contest.categories} />
     </Card>
   {/if}
 {:else}

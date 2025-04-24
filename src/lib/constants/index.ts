@@ -2,94 +2,77 @@ import type { CATEGORY, PROVINCE, ROLE } from "../interfaces";
 
 export const CCA_ICON = "/cca_logo.svg";
 
-// export const API = "http://localhost:3500/v1";
+export const API = "http://localhost:3500/v1";
 // export const API = 'http://192.168.180.93:3500/v1';
-export const API = "https://cca-back.onrender.com/v1";
+// export const API = "https://cca-back.onrender.com/v1";
 export const DOMAIN = "https://cca-cuba.netlify.app";
 
-export const ICONS: CATEGORY[] = [
+export const ICONS: Partial<CATEGORY>[] = [
   {
-    id: "",
     name: "2x2x2",
     scrambler: "222so",
   },
   {
-    id: "",
     name: "3x3x3",
     scrambler: "333",
   },
   {
-    id: "",
     name: "3x3x3 FMC",
     scrambler: "333fm",
   },
   {
-    id: "",
     name: "3x3x3 BLD",
     scrambler: "333ni",
   },
   {
-    id: "",
     name: "3x3x3 MBLD",
     scrambler: "333mbf",
   },
   {
-    id: "",
     name: "3x3x3 OH",
     scrambler: "333oh",
   },
   {
-    id: "",
     name: "4x4x4 BLD",
     scrambler: "444bld",
   },
   {
-    id: "",
     name: "4x4x4",
     scrambler: "444wca",
   },
   {
-    id: "",
     name: "5x5x5",
     scrambler: "555wca",
   },
   {
-    id: "",
     name: "5x5x5 BLD",
     scrambler: "555bld",
   },
   {
-    id: "",
     name: "6x6x6",
     scrambler: "666wca",
   },
   {
-    id: "",
     name: "7x7x7",
     scrambler: "777wca",
   },
   {
-    id: "",
     name: "Clock",
     scrambler: "clkwca",
   },
   {
-    id: "",
     name: "Megaminx",
     scrambler: "mgmp",
   },
   {
-    id: "",
     name: "Pyraminx",
     scrambler: "pyrso",
   },
   {
-    id: "",
     name: "Skewb",
     scrambler: "skbso",
   },
   {
-    id: "",
     name: "Square-1",
     scrambler: "sqrs",
   },

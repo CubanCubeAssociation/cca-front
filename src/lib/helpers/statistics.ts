@@ -1,4 +1,4 @@
-import type { ROUND, SOLVE } from "../interfaces";
+import type { CONTEST_CATEGORY, FORMAT, ROUND, SOLVE } from "../interfaces";
 import { MultiSet } from "./multiset";
 import { checkPath, createPath } from "./object";
 import { infinitePenalty, stringToMillis } from "./timer";
@@ -117,14 +117,15 @@ export function getAverage(n: number, arr: number[]): (number | null)[] {
   return res;
 }
 
-export function getAverageS(n: number, arr: SOLVE[]): (number | null)[] {
-  return getAverage(
-    n,
-    arr.map(e => (infinitePenalty(e) ? Infinity : stringToMillis(e.time)))
-  );
+function getSolveTime(s: SOLVE): number {
+  return infinitePenalty(s) ? Infinity : stringToMillis(s.time);
 }
 
-export function getContestAverage(arr: SOLVE[], mode: "Ao5" | "Mo3" = "Ao5"): number {
+export function getAverageS(n: number, arr: SOLVE[]): (number | null)[] {
+  return getAverage(n, arr.map(getSolveTime));
+}
+
+export function getContestAverage(arr: SOLVE[], format: FORMAT): number {
   const solves: SOLVE[] = [];
 
   arr.sort((s1: SOLVE, s2: SOLVE) => {
@@ -136,8 +137,10 @@ export function getContestAverage(arr: SOLVE[], mode: "Ao5" | "Mo3" = "Ao5"): nu
     solves[arr[i].isExtra ? arr[i].extra - 1 : i] = arr[i];
   }
 
-  const n = mode === "Ao5" ? 5 : 3;
-  const avg = getAverageS(n, solves.slice(0, n))[n - 1];
+  let nSolves = solves.slice(0, format.amount);
+  nSolves.sort((a, b) => getSolveTime(a) - getSolveTime(b));
+  nSolves = nSolves.slice(format.lMargin, format.amount - format.rMargin);
+  const avg = mean(nSolves.map(getSolveTime));
 
   return avg ? avg : Infinity;
 }
@@ -160,11 +163,27 @@ function sortSolves(rnd: ROUND[]) {
   });
 }
 
-export function getRoundsInfo(rnds: ROUND[]) {
+export function getRoundsInfo(rnds: ROUND[], categories: CONTEST_CATEGORY[], formats: FORMAT[]) {
   rnds.forEach(rnd => {
+    let ct = categories.find(c => c.category.id === rnd.category.id);
+
+    if (!ct) {
+      throw new ReferenceError(
+        `Category ${rnd.category.id} not found in categories ${categories.map(c => c.category.id).join(", ")}`
+      );
+    }
+
+    let format = formats.find(f => f.name === ct.format);
+
+    if (!format) {
+      throw new ReferenceError(
+        `Format ${ct.format} not found in formats ${formats.map(f => f.name).join(", ")}`
+      );
+    }
+
     rnd.average = getContestAverage(
       [rnd.t1, rnd.t2, rnd.t3, rnd.t4, rnd.t5, rnd.e1, rnd.e2],
-      rnd.category.scrambler === "666wca" || rnd.category.scrambler === "777wca" ? "Mo3" : "Ao5"
+      format
     );
   });
 

@@ -4,6 +4,7 @@ import type {
   CATEGORY_RESULT,
   CONTEST,
   CONTEST_RESULT,
+  FORMAT,
   LOGIN_DATA,
   RANKING,
   USER,
@@ -301,6 +302,11 @@ export async function getCategories(): Promise<CATEGORY_RESULT> {
 export async function getCategory(id: string): Promise<CATEGORY> {
   if (tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + "/categories/" + id, commonAuth()).json();
+}
+
+export async function getFormats(): Promise<FORMAT[]> {
+  if (tokenNeedsRefresh()) await refreshToken();
+  return await ky.get(API + "/categories/formats", commonAuth()).json();
 }
 
 export async function createCategory(c: CATEGORY) {

@@ -78,9 +78,9 @@ export function fromModel(obj: any, model: MODEL) {
 
     const md = RMODEL.find(md => isModel(md, k));
 
-    if (model === "round" && (k === "Ao5" || k === "Mo3")) {
-      continue;
-    } else if (md) {
+    if (k === "format") console.log(k, v, md);
+
+    if (md) {
       const p = md.startsWith("$") ? md.slice(1) : md.split(":");
 
       if (Array.isArray(p)) {
@@ -140,4 +140,11 @@ export function clone(obj: any): any {
     acc[e[0]] = clone(e[1]);
     return acc;
   }, {});
+}
+
+export function preventDefault(cb: Function) {
+  return (ev: Event) => {
+    ev.preventDefault();
+    cb(ev);
+  };
 }

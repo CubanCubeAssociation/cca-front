@@ -56,14 +56,20 @@ export interface CATEGORY {
   id: string;
   name: string;
   scrambler: Scrambler;
+  formats: string[];
 }
 
-type FORMAT = "Ao5" | "Mo3" | "Bo3" | "Bo2" | "Bo1";
+export interface FORMAT {
+  name: string;
+  amount: number;
+  lMargin: number;
+  rMargin: number;
+}
 
 export interface CONTEST_CATEGORY {
   category: CATEGORY;
   rounds: number;
-  format: FORMAT;
+  format: string;
 }
 
 export enum PENALTY {

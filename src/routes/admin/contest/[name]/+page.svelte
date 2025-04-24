@@ -11,12 +11,14 @@
     PENALTY,
     STATUS_ORDER,
     type CONTEST_CATEGORY,
+    type FORMAT,
   } from "@interfaces";
 
   import {
     createContest,
     getCategories,
     getContest,
+    getFormats,
     redirectOnUnauthorized,
     removeContest,
     updateContest,
@@ -27,7 +29,7 @@
   import SaveIcon from "@icons/Send.svelte";
   import EditIcon from "@icons/Pencil.svelte";
   import { getIndicatorColor, getStatus, randomUUID } from "@helpers/strings";
-  import { clone, fromModel, uniqueArray } from "@helpers/object";
+  import { clone, fromModel, preventDefault, uniqueArray } from "@helpers/object";
   import SearchUser from "$lib/components/SearchUser.svelte";
   import {
     Button,
@@ -90,6 +92,7 @@
   let round: ROUND;
 
   let categories: CATEGORY[] = [];
+  let formats: FORMAT[] = [];
 
   let editDialog = false;
   let addDialog = false;
@@ -148,7 +151,16 @@
     if (cats.some(c => c.category.id === ct.id)) {
       contest.categories = cats.filter(c => c.category.id != ct.id);
     } else {
-      contest.categories = [...cats, { category: ct, rounds: 1, format: "Ao5" }];
+      contest.categories = [
+        ...cats,
+        {
+          category: ct,
+          rounds: 1,
+          format: formats.find(fm => fm.name === ct.formats[0])?.name || formats[0].name || "Ao5",
+        },
+      ];
+
+      console.log(formats, formats.find(fm => fm.name === ct.formats[0]) || formats[0]);
     }
   }
 
@@ -202,7 +214,7 @@
 
   function handleDeleteRound() {
     contest.rounds = contest.rounds.filter(rnd => rnd.id != round.id);
-    updateRoundInfo(contest.rounds);
+    updateRoundInfo(contest.rounds, contest.categories);
     addResult = false;
     deleteRoundDialog = false;
   }
@@ -382,8 +394,8 @@
     return podium.map(p => contest.contestants.find(cnt => cnt.user.id === p.contestant.id)!);
   }
 
-  function updateRoundInfo(rnds: ROUND[]) {
-    let roundInfo = getRoundsInfo(rnds);
+  function updateRoundInfo(rnds: ROUND[], categories: CONTEST_CATEGORY[]) {
+    let roundInfo = getRoundsInfo(rnds, categories, formats);
     contest.rounds = roundInfo.rounds;
     roundGroup = roundInfo.roundGroup;
   }
@@ -397,7 +409,7 @@
       rnds = [...contest.rounds, clone(round)];
     }
 
-    updateRoundInfo(rnds);
+    updateRoundInfo(rnds, contest.categories);
     addResult = false;
   }
 
@@ -422,15 +434,15 @@
           contest.inscriptionEnd = moment(contest.inscriptionEnd).format("YYYY-MM-DD");
           checked = contest.contestants.map(() => false);
 
-          updateRoundInfo(contest.rounds);
+          updateRoundInfo(contest.rounds, contest.categories);
         })
         .catch(err => console.log("ERROR: ", err));
     }
 
-    getCategories()
+    Promise.all([getCategories(), getFormats()])
       .then(res => {
-        if (!res) return;
-        categories = res.results.sort((a, b) => (a.name < b.name ? -1 : 1));
+        categories = res[0].results.sort((a, b) => (a.name < b.name ? -1 : 1));
+        formats = res[1];
       })
       .catch(redirectOnUnauthorized);
   });
@@ -545,7 +557,7 @@
 
               <div class="w-full flex flex-wrap gap-2">
                 {#each categories as ct}
-                  <button onclick={() => toggleSelect(ct)}>
+                  <button onclick={preventDefault(() => toggleSelect(ct))}>
                     <WcaCategory
                       icon={ct.scrambler}
                       class="cursor-pointer"
@@ -563,31 +575,58 @@
               <Toggle class="cursor-pointer" bind:checked={contest.visible} />
             </div>
 
-            <!-- Rondas -->
+            <!-- Configuración de categorías -->
             <div class="col-span-full grid place-items-center">
-              <Label class="mb-2">Rondas</Label>
+              <Label class="mb-2">Configuración de categorías</Label>
 
               <div class="w-full flex flex-wrap gap-4 justify-center">
                 {#each contest.categories as ct}
-                  <div class="grid place-items-center">
+                  {@const cnts = contest.contestants.filter(cnt =>
+                    cnt.categories.find(ct1 => ct1.id === ct.category.id)
+                  ).length}
+                  {@const ctFormats = formats.filter(f => ct.category.formats.includes(f.name))}
+
+                  <div class="grid place-items-center border rounded-md p-2 grid-cols-2">
                     <div>
                       <WcaCategory icon={ct.category.scrambler} size="3rem" />
-                      <Tooltip>{ct.category.name}</Tooltip>
+                      <span class="flex justify-center">{ct.category.name}</span>
                     </div>
 
-                    <div class="flex items-center justify-between border gap-2 rounded-md">
+                    <div class="grid">
+                      <label class="text-sm" for="">Rondas</label>
+                      <Select
+                        bind:value={ct.rounds}
+                        items={[1, 2, 3, 4].slice(
+                          0,
+                          cnts <= 7 ? 1 : cnts <= 15 ? 2 : cnts < 99 ? 3 : 4
+                        )}
+                        transform={e => e}
+                        placement="right"
+                      />
+                      <Select
+                        bind:value={ct.format}
+                        items={ctFormats}
+                        transform={e => e.name}
+                        label={e => e.name}
+                        placement="right"
+                        onChange={() => updateRoundInfo(contest.rounds, contest.categories)}
+                      />
+                    </div>
+                    <!-- <div class="flex items-center justify-between border gap-2 rounded-md">
                       <button
                         class="p-1"
                         type="button"
-                        onclick={() => (ct.rounds = Math.max(1, ct.rounds - 1))}>-</button
+                        onclick={preventDefault(() => (ct.rounds = Math.max(1, ct.rounds - 1)))}
+                        >-</button
                       >
                       <Span>{ct.rounds}</Span>
                       <button
                         class="p-1"
                         type="button"
-                        onclick={() => (ct.rounds = Math.min(5, ct.rounds + 1))}>+</button
+                        onclick={preventDefault(() => (ct.rounds = Math.min(5, ct.rounds + 1)))}
+                        >+</button
                       >
-                    </div>
+                    </div> -->
                   </div>
                 {/each}
               </div>
@@ -718,7 +757,13 @@
             </div>
 
             {#if roundGroup.length > 0}
-              <ResultView {roundGroup} edit={handleEditRound} allowEdit />
+              <ResultView
+                {roundGroup}
+                {formats}
+                categories={contest.categories}
+                edit={handleEditRound}
+                allowEdit
+              />
 
               <div class="w-full mt-4">
                 <Button on:click={prepareResult}>

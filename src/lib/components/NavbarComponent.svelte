@@ -195,7 +195,7 @@
 {/snippet}
 
 <div class="navbar bg-base-100 shadow-sm fixed z-50 top-0 left-0 w-full">
-  <div class="navbar-start">
+  <div class="navbar-start w-min">
     {#if $screen.isMobile}
       <div class="dropdown">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
@@ -213,7 +213,7 @@
       <span class="ml-2 self-center whitespace-nowrap text-base font-semibold">CCA</span>
     </a>
   </div>
-  <div class="navbar-end">
+  <div class="navbar-end w-auto ml-auto">
     <ul class="menu menu-horizontal items-center">
       {#if !$screen.isMobile}
         {@render navlist()}
