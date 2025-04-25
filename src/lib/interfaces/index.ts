@@ -220,6 +220,7 @@ interface USER_PROFILE_CONTEST {
   contestName: string;
   average: number;
   times: number[];
+  format: string;
 }
 
 interface USER_PROFILE_RESULT {

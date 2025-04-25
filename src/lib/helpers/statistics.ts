@@ -140,7 +140,7 @@ export function getContestAverage(arr: SOLVE[], format: FORMAT): number {
   let nSolves = solves.slice(0, format.amount);
   nSolves.sort((a, b) => getSolveTime(a) - getSolveTime(b));
   nSolves = nSolves.slice(format.lMargin, format.amount - format.rMargin);
-  const avg = mean(nSolves.map(getSolveTime));
+  const avg = adjustMillis(mean(nSolves.map(getSolveTime)), true);
 
   return avg ? avg : Infinity;
 }
@@ -173,13 +173,7 @@ export function getRoundsInfo(rnds: ROUND[], categories: CONTEST_CATEGORY[], for
       );
     }
 
-    let format = formats.find(f => f.name === ct.format);
-
-    if (!format) {
-      throw new ReferenceError(
-        `Format ${ct.format} not found in formats ${formats.map(f => f.name).join(", ")}`
-      );
-    }
+    let format = formats.find(f => f.name === ct.format) || formats[0];
 
     rnd.average = getContestAverage(
       [rnd.t1, rnd.t2, rnd.t3, rnd.t4, rnd.t5, rnd.e1, rnd.e2],

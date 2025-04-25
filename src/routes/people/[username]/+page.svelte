@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { getAvatarRoute, getCategories, getUserProfile } from "@helpers/API";
-  import type { CATEGORY, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
+  import { getCategories, getFormats, getUserProfile } from "@helpers/API";
+  import type { CATEGORY, FORMAT, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
   import {
     Button,
     ButtonGroup,
@@ -15,7 +15,7 @@
     Tooltip,
   } from "flowbite-svelte";
   import { onDestroy, onMount } from "svelte";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import UserField from "@components/UserField.svelte";
   import { minRole } from "@helpers/auth";
   import { userStore } from "$lib/stores/user";
@@ -37,6 +37,7 @@
     place: number;
     average: number | null;
     times: (number | null)[];
+    format: string;
   }
 
   interface L_USER_RECORD_RESULT {
@@ -87,7 +88,7 @@
   let ELO = $state(0);
   let podium = $state([0, 0, 0]);
   let groupedData: Record<string, Record<string, USER_CONTEST_RESULT[]>> = $state({});
-  let selectedCategory: CATEGORY = $state({ id: "", name: "", scrambler: "333" });
+  let selectedCategory: CATEGORY = $state({ id: "", name: "", scrambler: "333", formats: [] });
   let userRecords: USER_RECORD = $state({
     wr: { amount: 0, results: [] },
     nr: { amount: 0, results: [] },
@@ -96,6 +97,7 @@
   let recordIndex = $state(0);
   let userRecord: any = $state(null);
   let userRanks: RANK[] = $state([]);
+  let formats: FORMAT[] = $state([]);
 
   function getContestIndex(contests: USER_PROFILE["contests"], name: string) {
     for (let i = 0, maxi = contests.length; i < maxi; i += 1) {
@@ -112,7 +114,7 @@
 
     results.forEach(result => {
       result.contests.forEach(contest => {
-        const { category, round, average, times } = contest;
+        const { category, round, average, times, format } = contest;
 
         if (!groupedData[category.name]) {
           groupedData[category.name] = {};
@@ -127,6 +129,7 @@
           place: result.place,
           average,
           times,
+          format,
         });
       });
     });
@@ -228,7 +231,6 @@
 
     summary = summary.filter(e => e[1]);
 
-    // ELO = Math.round(summary.reduce((acc, e) => acc + e[2], 0) * getEloDecay(totalContests));
     ELO = summary.reduce((acc, e) => acc + e[2], 0);
 
     summary.reverse();
@@ -295,10 +297,6 @@
     return vals[pos][1] === i;
   }
 
-  function isMo3(category: CATEGORY) {
-    return ["666wca", "777wca"].indexOf(category.scrambler) > -1;
-  }
-
   function getRecords(ur: typeof userRecords) {
     return [
       { type: "WR", name: "récord mundial", results: ur.wr.results },
@@ -311,12 +309,25 @@
     if (!(selectedCategory.name in groupedData) || !profile || !timeChart) return;
 
     const categoryData = groupedData[selectedCategory.name];
+    let averageData: number[][] = [];
+    let averageX = 0;
     const solves: (number | null)[] = profile.contests
       .reduce(
-        (acc, e) => [...(categoryData[e.name] || []).map(e1 => e1.times), ...acc],
+        (acc, e) => [
+          ...(categoryData[e.name] || []).map(e1 => {
+            let fm = formats.find(fm => fm.name === e1.format)?.amount || 5;
+            averageData.push([averageX, e1.average || 0]);
+            averageX += fm;
+            return e1.times.slice(0, fm);
+          }),
+          ...acc,
+        ],
         [] as any[]
       )
       .flat(3);
+
+    let total = solves.length;
+    averageData = averageData.map(e => [total - e[0] - 1, e[1]]);
 
     // Best marks
     let bestSerie: echarts.SeriesOption = {
@@ -397,7 +408,7 @@
         right: "1%",
       },
       legend: {
-        data: ["Tiempos", "Mejor", "Ao5", "Tendencia"],
+        data: ["Tiempos", "Mejor", "Media", "Tendencia"],
         top: "6%",
       },
       dataZoom: [
@@ -421,13 +432,10 @@
         },
         bestSerie,
         {
-          data: getAverage(
-            5,
-            solves.map(time => time || Infinity)
-          ),
+          data: averageData,
           type: "line",
           connectNulls: false,
-          name: "Ao5",
+          name: "Media",
           smooth: solves.length < 2000,
         },
         ...trendSerie,
@@ -453,7 +461,6 @@
         },
         formatter: function (params: any) {
           let output = params[0].axisValueLabel + "<br/>";
-          let pos = +params[0].axisValueLabel;
 
           output += '<table style="width: 100%;">';
 
@@ -461,13 +468,9 @@
             const value = Array.isArray(param.data) ? param.data[1] : param.data;
             const name: string = param.seriesName;
 
-            if ((name.startsWith("Ao") && pos < +name.slice(2)) || name.startsWith("anomaly")) {
-              return;
-            }
-
             output += `<tr>
               <td>${param.marker}</td>
-              <td>${name}</td>
+              <td>${name === "Tiempos" ? "Tiempo" : name}</td>
               <td style="text-align: right; font-weight: bold; padding-left: .5rem;">${timer(
                 +value || Infinity,
                 true,
@@ -529,9 +532,10 @@
       timeChart.resize();
     }
 
-    Promise.all([getCategories(), getUserProfile($page.params.username)]).then(res => {
+    Promise.all([getCategories(), getUserProfile(page.params.username), getFormats()]).then(res => {
       categories = res[0].results;
       profile = res[1];
+      formats = res[2];
 
       if (!profile) {
         goto("/people", { replaceState: true });
@@ -781,7 +785,9 @@
 
         {#if selectedCategory.name === "" || !profile}
           No hay resultados que mostrar
-        {:else}
+        {:else if selectedCategory.name in groupedData}
+          {@const categoryData = groupedData[selectedCategory.name]}
+
           <Table shadow divClass="w-full relative overflow-x-auto">
             <TableHead>
               <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
@@ -790,82 +796,79 @@
               <TableHeadCell class={TABLE_HEAD_CLASS}>Lugar</TableHeadCell>
               <TableHeadCell class={TABLE_HEAD_CLASS}>Single</TableHeadCell>
               <TableHeadCell class={TABLE_HEAD_CLASS}>Media</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS} colspan={isMo3(selectedCategory) ? 3 : 5}>
-                Resultados
-              </TableHeadCell>
+              <TableHeadCell class={TABLE_HEAD_CLASS} colspan={5}>Resultados</TableHeadCell>
             </TableHead>
 
             <TableBody>
-              {#if selectedCategory.name in groupedData}
-                {@const categoryData = groupedData[selectedCategory.name]}
+              {#each profile.contests.filter(cnt => cnt.name in categoryData) as cnt, p}
+                {@const contestData = categoryData[cnt.name]}
 
-                {#each profile.contests.filter(cnt => cnt.name in categoryData) as cnt, p}
-                  {@const contestData = categoryData[cnt.name]}
+                {#each contestData as result, rp}
+                  {@const format = formats.find(fm => fm.name === result.format) || formats[0]}
 
-                  {#each contestData as result, rp}
-                    <TableBodyRow
-                      class={"border-t-gray-600! " +
-                        (p % 2 ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-700")}
-                    >
-                      {#if rp === 0}
-                        <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
-                          <span class="flex justify-center">{p + 1}</span>
-                        </TableBodyCell>
-                        <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
-                          <span class="flex justify-center">
-                            <a href={`/contests/` + cnt.name} class="hover:text-primary-300"
-                              >{cnt.name}</a
-                            >
-                          </span>
-                        </TableBodyCell>
-                      {/if}
-
-                      <TableBodyCell
-                        class={TABLE_CELL_CLASS + (p ? " border-l border-l-gray-600" : "")}
-                      >
-                        <span class="flex justify-center">Ronda {result.round}</span>
+                  <TableBodyRow
+                    class={"border-t-gray-600! " +
+                      (p % 2 ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-700")}
+                  >
+                    {#if rp === 0}
+                      <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
+                        <span class="flex justify-center">{p + 1}</span>
                       </TableBodyCell>
-                      <TableBodyCell class={TABLE_CELL_CLASS}>
+                      <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
                         <span class="flex justify-center">
-                          {#if result.place === 1}
-                            <Award type="gold" />
-                          {:else if result.place === 2}
-                            <Award type="silver" />
-                          {:else if result.place === 3}
-                            <Award type="bronze" />
-                          {/if}
-
-                          {result.place}
-                        </span>
-                      </TableBodyCell>
-                      <TableBodyCell class={TABLE_CELL_CLASS}>
-                        <span class="flex justify-center text-green-400">
-                          {timer(
-                            Math.min(...result.times.map(t => t || Infinity)) || Infinity,
-                            true
-                          )}
-                        </span>
-                      </TableBodyCell>
-                      <TableBodyCell class={TABLE_CELL_CLASS}>
-                        <span class="flex justify-center text-purple-400">
-                          {timer(result.average || Infinity, true)}
-                        </span>
-                      </TableBodyCell>
-
-                      {#each result.times as t, p1}
-                        <TableBodyCell class={TABLE_CELL_CLASS}>
-                          <span
-                            class="flex justify-center"
-                            class:best={isPos(result.times, p1, 0)}
-                            class:worst={isPos(result.times, p1, isMo3(selectedCategory) ? 2 : 4)}
-                            >{timer(t || Infinity, true)}</span
+                          <a href={`/contests/` + cnt.name} class="hover:text-primary-300"
+                            >{cnt.name}</a
                           >
-                        </TableBodyCell>
-                      {/each}
-                    </TableBodyRow>
-                  {/each}
+                        </span>
+                      </TableBodyCell>
+                    {/if}
+
+                    <TableBodyCell
+                      class={TABLE_CELL_CLASS + (p ? " border-l border-l-gray-600" : "")}
+                    >
+                      <span class="flex justify-center">Ronda {result.round}</span>
+                    </TableBodyCell>
+                    <TableBodyCell class={TABLE_CELL_CLASS}>
+                      <span class="flex justify-center">
+                        {#if result.place === 1}
+                          <Award type="gold" />
+                        {:else if result.place === 2}
+                          <Award type="silver" />
+                        {:else if result.place === 3}
+                          <Award type="bronze" />
+                        {/if}
+
+                        {result.place}
+                      </span>
+                    </TableBodyCell>
+                    <TableBodyCell class={TABLE_CELL_CLASS}>
+                      <span class="flex justify-center text-green-400">
+                        {timer(Math.min(...result.times.map(t => t || Infinity)) || Infinity, true)}
+                      </span>
+                    </TableBodyCell>
+                    <TableBodyCell class={TABLE_CELL_CLASS}>
+                      <span class="flex justify-center text-purple-400">
+                        {timer(result.average || Infinity, true)}
+                      </span>
+                    </TableBodyCell>
+
+                    {#each result.times.slice(0, format.amount) as t, p1}
+                      <TableBodyCell class={TABLE_CELL_CLASS}>
+                        <span
+                          class="flex justify-center"
+                          class:best={isPos(result.times, p1, 0)}
+                          class:worst={isPos(result.times, p1, format.amount - 1)}
+                          >{timer(t || Infinity, true)}</span
+                        >
+                      </TableBodyCell>
+                    {/each}
+
+                    {#each [1, 2, 3, 4, 5].slice(0, 5 - format.amount) as _}
+                      <TableBodyCell class={TABLE_CELL_CLASS}></TableBodyCell>
+                    {/each}
+                  </TableBodyRow>
                 {/each}
-              {/if}
+              {/each}
             </TableBody>
           </Table>
         {/if}

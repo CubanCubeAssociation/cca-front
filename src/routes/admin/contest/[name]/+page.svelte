@@ -423,6 +423,13 @@
   onMount(() => {
     name = $page.params.name;
 
+    Promise.all([getCategories(), getFormats()])
+      .then(res => {
+        categories = res[0].results.sort((a, b) => (a.name < b.name ? -1 : 1));
+        formats = res[1];
+      })
+      .catch(redirectOnUnauthorized);
+
     if (name != "new") {
       getContest(name)
         .then(res => {
@@ -438,13 +445,6 @@
         })
         .catch(err => console.log("ERROR: ", err));
     }
-
-    Promise.all([getCategories(), getFormats()])
-      .then(res => {
-        categories = res[0].results.sort((a, b) => (a.name < b.name ? -1 : 1));
-        formats = res[1];
-      })
-      .catch(redirectOnUnauthorized);
   });
 </script>
 
