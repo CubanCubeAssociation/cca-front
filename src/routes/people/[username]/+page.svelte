@@ -27,10 +27,9 @@
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { timer } from "@helpers/timer";
   import moment from "moment";
-  import { getAverage, getBest, mean, stdDev, trendLSV } from "@helpers/statistics";
+  import { getBest, mean, stdDev, trendLSV } from "@helpers/statistics";
   import Avatar from "@components/Avatar.svelte";
-
-  // const { data } = $props();
+  import { contestNameToLink } from "@helpers/routing";
 
   interface USER_CONTEST_RESULT {
     round: number;
@@ -253,7 +252,7 @@
       },
       yAxis: {
         type: "category",
-        data: summary.map((e, p) => e[0]),
+        data: summary.map(e => e[0]),
       },
       series: [
         {
@@ -653,7 +652,7 @@
                 >
                   <TableBodyCell class={TABLE_CELL_CLASS}>
                     <div class="flex items-center">
-                      <WcaCategory icon={rank.category?.scrambler} size="1.5rem" />
+                      <WcaCategory icon={rank.category.scrambler} size="1.5rem" />
                       {rank.category?.name}
                     </div>
                   </TableBodyCell>
@@ -663,7 +662,14 @@
                     {rank.single.rank}
                   </TableBodyCell>
                   <TableBodyCell class={TABLE_CELL_CLASS + " text-green-400!"}>
-                    <a href={`/contests/` + rank.single.contest} class="hover:text-primary-300">
+                    <a
+                      href={contestNameToLink(rank.single.contest, {
+                        category: rank.category.name,
+                        time: rank.single.time,
+                        username: profile?.user.username,
+                      })}
+                      class="hover:text-primary-300"
+                    >
                       {timer(rank.single.time || Infinity, true, true)}
                     </a>
                   </TableBodyCell>
@@ -671,7 +677,15 @@
                   <!-- Average -->
                   <TableBodyCell class={TABLE_CELL_CLASS + " text-purple-400!"}>
                     {#if rank.average.rank}
-                      <a href={`/contests/` + rank.average.contest} class="hover:text-primary-300">
+                      <a
+                        href={contestNameToLink(rank.average.contest, {
+                          category: rank.category.name,
+                          time: rank.average.time,
+                          username: profile?.user.username,
+                          type: "avg",
+                        })}
+                        class="hover:text-primary-300"
+                      >
                         {timer(rank.average.time || Infinity, true, true)}
                       </a>
                     {:else}
@@ -747,10 +761,20 @@
                       class={TABLE_CELL_CLASS +
                         (res.type === "single" ? " text-green-400!" : " text-purple-400!")}
                     >
-                      {timer(res.time || Infinity, true, true)}
+                      <a
+                        href={contestNameToLink(res.contest.name, {
+                          category: res.category?.name,
+                          time: res.time,
+                          username: profile?.user.username,
+                          type: res.type === "single" ? "single" : "avg",
+                        })}
+                        class="hover:text-primary-300"
+                      >
+                        {timer(res.time || Infinity, true, true)}
+                      </a>
                     </TableBodyCell>
                     <TableBodyCell class={TABLE_CELL_CLASS}>
-                      <a href={`/contests/` + res.contest.name} class="hover:text-primary-300">
+                      <a href={contestNameToLink(res.contest.name)} class="hover:text-primary-300">
                         {res.contest?.name}
                       </a>
                     </TableBodyCell>
@@ -816,7 +840,7 @@
                       </TableBodyCell>
                       <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
                         <span class="flex justify-center">
-                          <a href={`/contests/` + cnt.name} class="hover:text-primary-300"
+                          <a href={contestNameToLink(cnt.name)} class="hover:text-primary-300"
                             >{cnt.name}</a
                           >
                         </span>
@@ -842,29 +866,61 @@
                       </span>
                     </TableBodyCell>
                     <TableBodyCell class={TABLE_CELL_CLASS}>
-                      <span class="flex justify-center text-green-400">
-                        {timer(Math.min(...result.times.map(t => t || Infinity)) || Infinity, true)}
-                      </span>
+                      <a
+                        href={contestNameToLink(cnt.name, {
+                          category: selectedCategory.name,
+                          time: Math.min(...result.times.map(t => t || Infinity)) || Infinity,
+                          username: profile?.user.username,
+                        })}
+                        class="hover:text-primary-300"
+                      >
+                        <span class="flex justify-center text-green-400">
+                          {timer(
+                            Math.min(...result.times.map(t => t || Infinity)) || Infinity,
+                            true
+                          )}
+                        </span>
+                      </a>
                     </TableBodyCell>
                     <TableBodyCell class={TABLE_CELL_CLASS}>
-                      <span class="flex justify-center text-purple-400">
-                        {timer(result.average || Infinity, true)}
-                      </span>
+                      <a
+                        href={contestNameToLink(cnt.name, {
+                          category: selectedCategory.name,
+                          time: result.average || Infinity,
+                          username: profile?.user.username,
+                          type: "avg",
+                        })}
+                        class="hover:text-primary-300"
+                      >
+                        <span class="flex justify-center text-purple-400">
+                          {timer(result.average || Infinity, true)}
+                        </span>
+                      </a>
                     </TableBodyCell>
 
                     {#each result.times.slice(0, format.amount) as t, p1}
                       <TableBodyCell class={TABLE_CELL_CLASS}>
-                        <span
-                          class="flex justify-center"
-                          class:best={isPos(result.times, p1, 0)}
-                          class:worst={isPos(result.times, p1, format.amount - 1)}
-                          >{timer(t || Infinity, true)}</span
+                        <a
+                          href={contestNameToLink(cnt.name, {
+                            category: selectedCategory.name,
+                            time: t || Infinity,
+                            username: profile?.user.username,
+                          })}
+                          class="hover:text-primary-300"
                         >
+                          <span
+                            class="flex justify-center"
+                            class:best={isPos(result.times, p1, 0)}
+                            class:worst={isPos(result.times, p1, format.amount - 1)}
+                          >
+                            {timer(t || Infinity, true)}
+                          </span>
+                        </a>
                       </TableBodyCell>
                     {/each}
 
                     {#each [1, 2, 3, 4, 5].slice(0, 5 - format.amount) as _}
-                      <TableBodyCell class={TABLE_CELL_CLASS}></TableBodyCell>
+                      <TableBodyCell class={TABLE_CELL_CLASS} data-number={_}></TableBodyCell>
                     {/each}
                   </TableBodyRow>
                 {/each}

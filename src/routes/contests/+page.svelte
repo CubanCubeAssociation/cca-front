@@ -21,9 +21,10 @@
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
   import { goto } from "$app/navigation";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import SwordIcon from "@icons/Sword.svelte";
   import { Paginator } from "@classes/Paginator.svelte";
+  import { contestNameToLink } from "@helpers/routing";
 
   const DEFAULT_RESULT = {
     limit: 0,
@@ -51,7 +52,7 @@
         contestResults = c;
         pg.setTotal(c.totalResults);
         pg = pg;
-        goto($page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
+        goto(page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
       })
       .catch(() => (error = true))
       .finally(() => (loading = false));
@@ -62,7 +63,7 @@
   }
 
   onMount(() => {
-    pg.page = Math.max(1, parseInt($page.url.searchParams.get("page") || "1", 10));
+    pg.page = Math.max(1, parseInt(page.url.searchParams.get("page") || "1", 10));
     refreshContestData();
   });
 </script>
@@ -90,7 +91,7 @@
           <TableBodyRow>
             <TableBodyCell>{(pg.page - 1) * pg.limit + pos + 1}</TableBodyCell>
             <TableBodyCell>
-              <a href={"/contests/" + r.name} class="flex items-center gap-2">
+              <a href={contestNameToLink(r.name)} class="flex items-center gap-2">
                 <Indicator color={getIndicatorColor(r.status)} />
                 <Tooltip>{getStatus(r.status)}</Tooltip>
                 {r.name}

@@ -5,6 +5,7 @@
   import type { CONTEST_CATEGORY, FORMAT, ROUND } from "@interfaces";
   import { userStore } from "@stores/user";
   import UserField from "./UserField.svelte";
+  import { page } from "$app/state";
 
   interface IResultTableProps {
     rounds: ROUND[];
@@ -40,9 +41,41 @@
     categoryInfo = categories.find(ct => ct.category.id === round.category.id) || categories[0];
     format = formats.find(f => f.name === categoryInfo?.format) || formats[0];
   });
+
+  $effect(() => {
+    let urlTime = "";
+    let urlUsername = "";
+    let urlCategory = "";
+    let urlType = "single";
+
+    page.url.searchParams.forEach((value, key) => {
+      if (key === "time") {
+        urlTime = value;
+      } else if (key === "username") {
+        urlUsername = value;
+      } else if (key === "category") {
+        urlCategory = value;
+      } else if (key === "type") {
+        urlType = value === "avg" ? "avg" : "single";
+      }
+    });
+
+    let elem = document.querySelector(
+      `td[data-user="${urlUsername}"][data-time="${urlTime}"][data-category="${urlCategory}"][data-type="${urlType}"]`
+    ) as HTMLTableCellElement | null;
+
+    if (elem) {
+      elem.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      setTimeout(() => {
+        elem.classList.add("highlighted");
+        setTimeout(() => elem.classList.remove("highlighted"), 2000);
+      }, 700);
+    }
+  });
 </script>
 
-<div class="overflow-x-auto">
+<div class="overflow-x-auto result-table">
   <table class="table table-zebra">
     <!-- head -->
     <thead>
@@ -90,9 +123,14 @@
           {/if}
 
           {#each rndKeys.slice(0, format.amount) as tp, p}
-            <td>
+            <td
+              data-user={rnd.contestant.username}
+              data-time={rnd[tp].timeMillis}
+              data-category={round.category.name}
+              data-type="single"
+            >
               <span
-                class="flex justify-center"
+                class="flex justify-center text-base-content"
                 class:best={isPos(rnd, p, 0)}
                 class:worst={isPos(rnd, p, format.amount - 1)}
               >
@@ -101,7 +139,12 @@
             </td>
           {/each}
 
-          <td>
+          <td
+            data-user={rnd.contestant.username}
+            data-time={rnd.average}
+            data-category={round.category.name}
+            data-type="avg"
+          >
             <span class="flex justify-center dark:text-primary-400 text-primary-600">
               {timer(rnd.average, true)}
             </span>
@@ -116,10 +159,18 @@
   @reference "../../app.css";
 
   .best {
-    @apply text-green-500;
+    @apply text-green-400;
   }
 
   .worst {
-    @apply text-red-500;
+    @apply text-red-400;
+  }
+
+  .result-table span {
+    @apply transition-all duration-200;
+  }
+
+  .result-table :global(.highlighted span) {
+    @apply outline outline-primary-400 bg-black/50 py-2 -my-2 rounded-lg grid place-items-center;
   }
 </style>

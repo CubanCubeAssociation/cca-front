@@ -39,8 +39,9 @@
   import { getIndicatorColor, getStatus } from "@helpers/strings";
   import { userStore } from "@stores/user";
   import ResultView from "@components/ResultView.svelte";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import UserField from "@components/UserField.svelte";
+  import { contestParamName } from "@helpers/routing";
 
   let name: string = "";
 
@@ -70,7 +71,7 @@
   }
 
   onMount(() => {
-    let name = $page.params.name;
+    let name = contestParamName(page.params.name);
 
     Promise.all([getFormats(), getContest(name)])
       .then(res => {

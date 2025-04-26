@@ -165,7 +165,7 @@ function sortSolves(rnd: ROUND[]) {
 
 export function getRoundsInfo(rnds: ROUND[], categories: CONTEST_CATEGORY[], formats: FORMAT[]) {
   rnds.forEach(rnd => {
-    let ct = categories.find(c => c.category.id === rnd.category.id);
+    const ct = categories.find(c => c.category.id === rnd.category.id);
 
     if (!ct) {
       throw new ReferenceError(
@@ -173,7 +173,7 @@ export function getRoundsInfo(rnds: ROUND[], categories: CONTEST_CATEGORY[], for
       );
     }
 
-    let format = formats.find(f => f.name === ct.format) || formats[0];
+    const format = formats.find(f => f.name === ct.format) || formats[0];
 
     rnd.average = getContestAverage(
       [rnd.t1, rnd.t2, rnd.t3, rnd.t4, rnd.t5, rnd.e1, rnd.e2],

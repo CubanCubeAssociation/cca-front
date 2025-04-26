@@ -1,11 +1,8 @@
 <script lang="ts">
-  import type { USER } from "@interfaces";
   import RootIcon from "@icons/ShieldCrownOutline.svelte";
   import AdminIcon from "@icons/ShieldAccount.svelte";
   import DelegateIcon from "@icons/Shield.svelte";
   import Avatar from "./Avatar.svelte";
-
-  // type USER_LIKE = Pick<USER, "name" | "role" | "username"> & { avatar?: string };
 
   interface IUserFieldProps {
     user: any;
@@ -25,7 +22,7 @@
 </script>
 
 <span
-  class={"flex gap-2 items-center w-max " + cl}
+  class={"flex gap-2 items-center w-max text-base-content " + cl}
   role="button"
   tabindex="0"
   {onclick}

@@ -19,6 +19,8 @@
   } from "flowbite-svelte";
   import { screen } from "@stores/screen.store";
   import UserField from "@components/UserField.svelte";
+  import { goto } from "$app/navigation";
+  import { page } from "$app/state";
 
   let error = $state(false);
   let loading = $state(false);
@@ -41,6 +43,7 @@
         pg.setPage(res.page);
         users = res.results;
         error = false;
+        goto(page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
       })
       .catch(err => {
         console.log("ERROR: ", err);
@@ -52,6 +55,7 @@
   }
 
   onMount(() => {
+    pg.page = Math.max(1, parseInt(page.url.searchParams.get("page") || "1", 10));
     updateData();
   });
 </script>

@@ -84,6 +84,7 @@ export interface SOLVE {
   extra: number;
   reconstruction: string;
   time: string;
+  timeMillis: string;
   penaltyType: PENALTY;
   penaltyDetails: string;
 }

@@ -142,7 +142,7 @@ export function clone(obj: any): any {
   }, {});
 }
 
-export function preventDefault(cb: Function) {
+export function preventDefault(cb: (ev: Event) => any) {
   return (ev: Event) => {
     ev.preventDefault();
     cb(ev);

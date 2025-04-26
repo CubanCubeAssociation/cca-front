@@ -33,11 +33,12 @@
   import { screen } from "@stores/screen.store";
   import { randomUUID } from "@helpers/strings";
   import { Paginator } from "@classes/Paginator.svelte";
-  import LinkIcon from "@icons/OpenInNew.svelte";
   import Award from "@components/Award.svelte";
   import UserField from "@components/UserField.svelte";
   import RankingIcon from "@icons/SortNumericAscending.svelte";
   import ReloadIcon from "@icons/Reload.svelte";
+  import { contestNameToLink } from "@helpers/routing";
+  import { twMerge } from "tailwind-merge";
 
   const notification = NotificationService.getInstance();
   const debug = false;
@@ -207,20 +208,31 @@
               {/if}
             </TableBodyCell>
             <TableBodyCell>
-              <!-- {r.contestant.name} -->
               <UserField user={r.contestant} link />
             </TableBodyCell>
             <TableBodyCell>
-              <span class={type === "Single" ? "text-green-400" : "text-purple-400"}>
-                {r.time ? timer(r.time, true, true) : "DNF"}
-              </span>
+              <a
+                href={contestNameToLink(r.contest, {
+                  category: category?.name,
+                  time: r.time,
+                  type: type === "Single" ? "single" : "avg",
+                  username: r.contestant.username,
+                })}
+                target="_blank"
+              >
+                <span
+                  class={twMerge(
+                    "flex items-center justify-between gap-2",
+                    type === "Single" ? "text-green-400" : "text-purple-400"
+                  )}
+                >
+                  {r.time ? timer(r.time, true, true) : "DNF"}
+                </span>
+              </a>
             </TableBodyCell>
             <TableBodyCell>
-              <a href={"/contests/" + r.contest} target="_blank">
-                <span class="flex items-center justify-between gap-2 text-blue-300">
-                  {r.contest}
-                  <LinkIcon size="1.2rem" />
-                </span>
+              <a class="text-blue-300" href={contestNameToLink(r.contest)} target="_blank">
+                {r.contest}
               </a>
             </TableBodyCell>
           </TableBodyRow>

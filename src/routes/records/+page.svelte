@@ -20,6 +20,7 @@
   import LinkIcon from "@icons/OpenInNew.svelte";
   import TrophyIcon from "@icons/Trophy.svelte";
   import UserField from "@components/UserField.svelte";
+  import { contestNameToLink } from "@helpers/routing";
 
   interface ISingleRecord {
     category: {
@@ -39,6 +40,7 @@
 
   interface IAverageResult {
     time: number;
+    contest: string;
     contestant: {
       name: string;
       username: string;
@@ -137,8 +139,6 @@
             ctMap.set(rec.contestant.province, pr);
           });
         });
-
-        console.log(nrMap, categoryMap);
       })
       .catch(() => (error = true))
       .finally(() => (loading = false));
@@ -201,14 +201,28 @@
             </TableBodyCell>
 
             <TableBodyCell class="gap-4 px-2">
-              <a href={"/contests/" + nrs?.contest}>
+              <a
+                href={contestNameToLink(nrs?.contest || "", {
+                  category: nrs?.category.name,
+                  username: nrs?.contestant.username,
+                  time: nrs?.time,
+                })}
+              >
                 <span class="flex items-center justify-between gap-2 text-green-400">
                   {timer(nrs?.time || 0, true, true)}
                   <LinkIcon size="1.2rem" />
                 </span>
               </a>
               {#if nra && nra.time}
-                <a href={"/contests/" + nra.contest} class="sm:hidden">
+                <a
+                  href={contestNameToLink(nra.contest, {
+                    category: nra?.category.name,
+                    username: nra?.contestant.username,
+                    time: nra?.time,
+                    type: "avg",
+                  })}
+                  class="sm:hidden"
+                >
                   <span class="mt-2 flex items-center justify-between gap-2 text-purple-400">
                     {timer(nra.time, true, true)}
                     <LinkIcon size="1.2rem" />
@@ -218,7 +232,6 @@
             </TableBodyCell>
             <TableBodyCell class="px-2 max-sm:grid">
               <span class="text-sm">
-                <!-- {nrs?.contestant.name} -->
                 <UserField
                   link
                   user={nrs?.contestant || { name: "", role: "user", username: "" }}
@@ -236,7 +249,14 @@
 
             {#if nra && nra.time}
               <TableBodyCell class="px-2 max-sm:hidden">
-                <a href={"/contests/" + nra.contest}>
+                <a
+                  href={contestNameToLink(nra.contest, {
+                    category: nra?.category.name,
+                    username: nra?.contestant.username,
+                    time: nra?.time,
+                    type: "avg",
+                  })}
+                >
                   <span class="flex items-center justify-between gap-2 text-purple-400">
                     {timer(nra.time, true, true)}
                     <LinkIcon size="1.2rem" />
@@ -301,7 +321,13 @@
                 <TableBodyCell class="px-2">{prRes[0]}</TableBodyCell>
 
                 <TableBodyCell class="px-2">
-                  <a href={"/contests/"}>
+                  <a
+                    href={contestNameToLink(prSingle?.contest || "", {
+                      category: cats[1],
+                      username: prSingle?.contestant.username,
+                      time: prSingle?.time,
+                    })}
+                  >
                     <span class="flex items-center justify-between gap-2 text-green-400">
                       {timer(prSingle?.time || 0, true, true)}
                       <LinkIcon size="1.2rem" />
@@ -309,7 +335,15 @@
                   </a>
 
                   {#if prMean && prMean.time}
-                    <a href={"/contests/"} class="sm:hidden">
+                    <a
+                      href={contestNameToLink(prMean.contest, {
+                        category: cats[1],
+                        username: prMean?.contestant.username,
+                        time: prMean?.time,
+                        type: "avg",
+                      })}
+                      class="sm:hidden"
+                    >
                       <span class="mt-2 flex items-center justify-between gap-2 text-purple-400">
                         {timer(prMean.time, true, true)}
                         <LinkIcon size="1.2rem" />
@@ -337,7 +371,14 @@
 
                 {#if prMean && prMean.time}
                   <TableBodyCell class="px-2 max-sm:hidden">
-                    <a href={"/contests/"}>
+                    <a
+                      href={contestNameToLink(prMean.contest, {
+                        category: cats[1],
+                        username: prMean?.contestant.username,
+                        time: prMean?.time,
+                        type: "avg",
+                      })}
+                    >
                       <span class="flex items-center justify-between gap-2 text-purple-400">
                         {timer(prMean.time, true, true)}
                         <LinkIcon size="1.2rem" />

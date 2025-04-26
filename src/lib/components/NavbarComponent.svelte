@@ -3,7 +3,7 @@
   import { isAuth, minRole } from "@helpers/auth";
   import CcaLogo from "@components/CCALogo.svelte";
   import WcaCategory from "./wca/WCACategory.svelte";
-  import { getAvatarRoute, logout } from "@helpers/API";
+  import { logout } from "@helpers/API";
   import { NotificationService } from "@stores/notification.service";
   import { ROLES } from "@constants";
   import SwordIcon from "@icons/Sword.svelte";
@@ -16,9 +16,8 @@
   import ExitIcon from "@icons/ExitToApp.svelte";
   import SettingsIcon from "@icons/Cog.svelte";
   import PeopleIcon from "@icons/AccountGroup.svelte";
-  import ChevronDownIcon from "@icons/ChevronDown.svelte";
   import { getReturnURL } from "@helpers/strings";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { MenuIcon } from "lucide-svelte";
   import { screen } from "@stores/screen.store";
   import Avatar from "./Avatar.svelte";
@@ -27,11 +26,31 @@
 
   let userDropdownOpen = $state(false);
   let avatarDropdownOpen = $state(false);
+
+  function handleClick(ev: MouseEvent) {
+    let navbarDropdown = document.getElementById("navbarDropdown");
+
+    if (navbarDropdown && userDropdownOpen) {
+      if (!navbarDropdown.contains(ev.target as Node)) {
+        userDropdownOpen = false;
+      }
+    }
+
+    let avatarDropdown = document.getElementById("avatarDropdown");
+
+    if (avatarDropdown && avatarDropdownOpen) {
+      if (!avatarDropdown.contains(ev.target as Node)) {
+        avatarDropdownOpen = false;
+      }
+    }
+  }
 </script>
+
+<svelte:window onclick={handleClick} />
 
 {#snippet userSnippet()}
   <li>
-    <details class="dropdown dropdown-end">
+    <details id="avatarDropdown" class="dropdown dropdown-end" bind:open={avatarDropdownOpen}>
       <summary>
         <Avatar size="xs" user={$userStore} showName />
       </summary>
@@ -142,7 +161,7 @@
   </li>
 
   <li>
-    <details bind:open={userDropdownOpen}>
+    <details id="navbarDropdown" bind:open={userDropdownOpen}>
       <summary>
         <TrophyIcon class="text-yellow-300" />
         Resultados
@@ -150,7 +169,7 @@
 
       <ul>
         <li>
-          <a href="/results" onclick={() => (userDropdownOpen = false)}>
+          <a href="/records" onclick={() => (userDropdownOpen = false)}>
             <TrophyIcon class="text-yellow-300" /> Récords
           </a>
         </li>
@@ -183,7 +202,7 @@
   {#if !isAuth($userStore)}
     <li>
       <a
-        href={encodeURI(`/login?returnTo=${getReturnURL($page.url)}`)}
+        href={encodeURI(`/login?returnTo=${getReturnURL(page.url)}`)}
         onclick={() => (userDropdownOpen = false)}
       >
         Entrar
