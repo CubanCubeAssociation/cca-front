@@ -6,6 +6,7 @@
   import { userStore } from "@stores/user";
   import UserField from "./UserField.svelte";
   import { page } from "$app/state";
+  import SolveInfo from "./SolveInfo.svelte";
 
   interface IResultTableProps {
     rounds: ROUND[];
@@ -129,13 +130,22 @@
               data-category={round.category.name}
               data-type="single"
             >
-              <span
-                class="flex justify-center text-base-content"
-                class:best={isPos(rnd, p, 0)}
-                class:worst={isPos(rnd, p, format.amount - 1)}
-              >
-                {sTimer(rnd[tp], true)}
-              </span>
+              <div class="dropdown w-full">
+                <div tabindex="0" role="button">
+                  <span
+                    class="flex justify-center text-base-content cursor-help"
+                    class:best={isPos(rnd, p, 0)}
+                    class:worst={isPos(rnd, p, format.amount - 1)}
+                  >
+                    {sTimer(rnd[tp], true)}
+                  </span>
+                </div>
+                <div class="dropdown-content card card-sm bg-base-100 z-1 w-64 shadow-md">
+                  <div class="card-body">
+                    <SolveInfo round={rnd} solve={rnd[tp]} />
+                  </div>
+                </div>
+              </div>
             </td>
           {/each}
 
