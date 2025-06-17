@@ -7,8 +7,6 @@
   import { uniqueArray } from "@helpers/object";
   import {
     Button,
-    Dropdown,
-    DropdownItem,
     Heading,
     Input,
     Modal,
@@ -21,12 +19,17 @@
     TableHeadCell,
   } from "flowbite-svelte";
 
+  import { UserSearchIcon } from "lucide-svelte";
+  import { twMerge } from "tailwind-merge";
+
   type Callback = () => void;
 
   interface SearchUserProps {
-    user: (u: USER | USER[]) => any;
-    show?: boolean;
+    user: (u: any) => any;
     multiple?: boolean;
+    show?: boolean;
+    placeholder?: string;
+    class?: string;
     type?: "dropdown" | "modal";
   }
 
@@ -34,6 +37,8 @@
     show = $bindable(false),
     multiple = $bindable(false),
     type = "modal",
+    placeholder = "Nombre o ID",
+    class: cl = "",
     user,
   }: SearchUserProps = $props();
 
@@ -61,22 +66,28 @@
       let str = input.trim();
 
       if (str) {
-        searchUser(str).then(res => {
-          userList = res;
-          checks = userList.map(() => false);
-          checked = 0;
-        });
+        searchUser(str)
+          .then(res => {
+            userList = res;
+            checks = userList.map(() => false);
+            checked = 0;
+          })
+          .finally(() => {
+            searching = false;
+          });
       } else {
         userList.length = 0;
         checks.length = 0;
         checked = 0;
+        searching = false;
       }
     },
     () => {
+      show = true;
       searching = true;
-    },
-    () => {
-      searching = false;
+      userList.length = 0;
+      checks.length = 0;
+      checked = 0;
     }
   );
 
@@ -86,21 +97,21 @@
     selected = uniqueArray(temp, e => e.username);
   }
 
-  // function updateChecked() {
-  //   checked = checks.reduce((acc, e) => acc + (e ? 1 : 0), 0);
-  // }
-
   function deleteSelected(pos: number) {
     selected.splice(pos, 1);
     selected = selected;
   }
 
   function sendUsers(u?: USER) {
-    if (!multiple) {
-      return user(u || userList.filter((_, p) => checks[p]));
-    }
+    if (type === "dropdown") {
+      if (u) return user(u);
+    } else {
+      if (!multiple) {
+        return user(u || userList.filter((_, p) => checks[p]));
+      }
 
-    user(u || selected);
+      user(u || selected);
+    }
   }
 </script>
 
@@ -202,28 +213,37 @@
     </svelte:fragment>
   </Modal>
 {:else}
-  <Dropdown
-    placement="bottom"
-    bind:open={show}
-    class={userList.length === 0 && !searching ? "hidden" : "max-h-[15rem] overflow-y-auto grid"}
-    classContainer="rounded-md shadow-md border border-[#fff4]"
-  >
-    <div slot="header" class="px-4 py-2">
-      <Input bind:value={input} placeholder="Buscar..." on:input={handleInput} />
-    </div>
+  <div class={cl}>
+    <label class="input">
+      <UserSearchIcon />
+
+      <input bind:value={input} type="search" class="grow" {placeholder} oninput={handleInput} />
+    </label>
 
     {#if searching}
-      <Spinner size="5" class="mx-auto" />
-    {:else}
-      {#each userList as user}
-        <DropdownItem
-          on:click={() => {
-            sendUsers(user);
-            show = false;
-            multiple = false;
-          }}>{user.name}</DropdownItem
-        >
-      {/each}
+      <div class="dropdown-content menu w-full bg-base-200">
+        <Spinner size="5" class="mx-auto" />
+      </div>
+    {:else if userList.length > 0 && show}
+      <ul
+        class="dropdown-content menu bg-base-100 rounded-box z-1 p-2 shadow-sm
+          max-h-52 h-min overflow-auto flex-nowrap"
+      >
+        {#each userList as user}
+          <li>
+            <button
+              onclick={() => {
+                sendUsers(user);
+                show = false;
+                multiple = false;
+                input = "";
+              }}>{user.name}</button
+            >
+          </li>
+        {/each}
+      </ul>
+    {:else if input.trim() != ""}
+      <span class="dropdown-content menu w-full bg-base-200"> No se encontraron resultados </span>
     {/if}
-  </Dropdown>
+  </div>
 {/if}

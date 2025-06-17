@@ -3,6 +3,11 @@ import { MultiSet } from "./multiset";
 import { checkPath, createPath } from "./object";
 import { infinitePenalty, stringToMillis } from "./timer";
 
+interface METRIC_RESULT {
+  format: string;
+  times: number[];
+}
+
 export function minmax(v: number, a: number, b: number): number {
   return Math.max(a, Math.min(v, b));
 }
@@ -31,6 +36,18 @@ export function mean(values: number[]): number {
   return cant ? values.reduce((a, b) => a + b, 0) / cant : 0;
 }
 
+function cleanMetricData(results: METRIC_RESULT[], formats: FORMAT[], finite = true) {
+  return results.reduce((acc, e) => {
+    let f = formats.find(fmt => fmt.name === e.format);
+    if (!f) return acc;
+    return [...acc, ...e.times.slice(0, f.amount).filter(t => (finite ? t : true))];
+  }, [] as number[]);
+}
+
+export function metricMean(results: METRIC_RESULT[], formats: FORMAT[]): number {
+  return mean(cleanMetricData(results, formats));
+}
+
 export function median(values: number[]): number {
   const cant = values.length;
   const v1 = values.slice().sort((a, b) => a - b);
@@ -45,14 +62,18 @@ export function stdDev(values: number[], avg: number): number {
   return len > 0 ? Math.sqrt(values.reduce((acc, e) => acc + (e - avg) ** 2 / len, 0)) : 0;
 }
 
+export function metricStdDev(results: METRIC_RESULT[], formats: FORMAT[], avg: number) {
+  return stdDev(cleanMetricData(results, formats), avg);
+}
+
 export function trendLSV(values: number[][]): { m: number; n: number } {
-  const n = values.length;
+  const len = values.length;
   let Sx = 0,
     Sy = 0,
     Sxx = 0,
     Sxy = 0;
 
-  for (let i = 0; i < n; i += 1) {
+  for (let i = 0; i < len; i += 1) {
     const x = values[i][0],
       y = values[i][1];
     Sx += x;
@@ -61,10 +82,21 @@ export function trendLSV(values: number[][]): { m: number; n: number } {
     Sxy += x * y;
   }
 
-  const beta = (n * Sxy - Sx * Sy) / (n * Sxx - Sx ** 2);
-  const alpha = (Sy - beta * Sx) / n;
+  const m = (len * Sxy - Sx * Sy) / (len * Sxx - Sx ** 2);
+  const n = (Sy - m * Sx) / len;
 
-  return { m: beta, n: alpha };
+  return { m, n };
+}
+
+export function metricTrendLSV(
+  results: METRIC_RESULT[],
+  formats: FORMAT[]
+): { m: number; n: number } {
+  return trendLSV(
+    cleanMetricData(results, formats, false)
+      .map((e, p) => [p, e])
+      .filter(e => e[1])
+  );
 }
 
 export function adjustMillis(n: number, round = false): number {

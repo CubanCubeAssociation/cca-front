@@ -6,19 +6,21 @@
   import { logout } from "@helpers/API";
   import { NotificationService } from "@stores/notification.service";
   import { ROLES } from "@constants";
-  import SwordIcon from "@icons/Sword.svelte";
-  import TrophyIcon from "@icons/Trophy.svelte";
-  import RulesIcon from "@icons/Script.svelte";
-  import CubeIcon from "@icons/Cube.svelte";
-  import UserIcon from "@icons/Account.svelte";
-  import UsersIcon from "@icons/AccountGroup.svelte";
-  import RankingIcon from "@icons/SortNumericAscending.svelte";
-  import ExitIcon from "@icons/ExitToApp.svelte";
-  import SettingsIcon from "@icons/Cog.svelte";
-  import PeopleIcon from "@icons/AccountGroup.svelte";
   import { getReturnURL } from "@helpers/strings";
   import { page } from "$app/state";
-  import { MenuIcon } from "lucide-svelte";
+  import {
+    ArrowDownNarrowWideIcon,
+    BoltIcon,
+    BoxIcon,
+    LogOutIcon,
+    MenuIcon,
+    ScrollIcon,
+    SwordsIcon,
+    TrendingUpDownIcon,
+    TrophyIcon,
+    UserIcon,
+    UsersIcon,
+  } from "lucide-svelte";
   import { screen } from "@stores/screen.store";
   import Avatar from "./Avatar.svelte";
 
@@ -88,26 +90,26 @@
 
         <li>
           <a href="/me/profile" onclick={() => (avatarDropdownOpen = false)}>
-            <UserIcon class="text-green-400" /> Perfil
+            <UserIcon size="1rem" class="text-green-400" /> Perfil
           </a>
         </li>
 
         <li>
           <a href="/me/settings" onclick={() => (avatarDropdownOpen = false)}>
-            <SettingsIcon class="text-gray-400" /> Configuración
+            <BoltIcon size="1rem" class="text-gray-400" /> Configuración
           </a>
         </li>
 
         {#if minRole($userStore, "delegate")}
           <li>
             <a href="/admin/user" onclick={() => (avatarDropdownOpen = false)}>
-              <UsersIcon class="text-blue-400" /> Usuarios
+              <UsersIcon size="1rem" class="text-blue-400" /> Usuarios
             </a>
           </li>
 
           <li>
             <a href="/admin/contest" onclick={() => (avatarDropdownOpen = false)}>
-              <SwordIcon class="text-red-400" /> Competencias
+              <SwordsIcon size="1rem" class="text-red-400" /> Competencias
             </a>
           </li>
 
@@ -116,7 +118,7 @@
               <a href="/admin/category" onclick={() => (avatarDropdownOpen = false)}>
                 <WcaCategory
                   icon="333"
-                  size=".7rem"
+                  size="1rem"
                   class="text-yellow-400"
                   buttonClass="p-[.1rem]!"
                 />
@@ -145,7 +147,7 @@
               avatarDropdownOpen = false;
             }}
           >
-            <ExitIcon class="text-red-400" /> Salir
+            <LogOutIcon size="1rem" class="text-red-400" /> Salir
           </button>
         </li>
       </ul>
@@ -156,31 +158,36 @@
 {#snippet navlist()}
   <li>
     <a href="/contests">
-      <SwordIcon class="text-red-400" /> Competencias
+      <SwordsIcon size="1.2rem" class="text-red-400" /> Competencias
     </a>
   </li>
 
   <li>
     <details id="navbarDropdown" bind:open={userDropdownOpen}>
       <summary>
-        <TrophyIcon class="text-yellow-300" />
+        <TrophyIcon size="1.2rem" class="text-yellow-300" />
         Resultados
       </summary>
 
       <ul>
         <li>
           <a href="/records" onclick={() => (userDropdownOpen = false)}>
-            <TrophyIcon class="text-yellow-300" /> Récords
+            <TrophyIcon size="1.2rem" class="text-yellow-300" /> Récords
           </a>
         </li>
         <li>
           <a href="/ranking" onclick={() => (userDropdownOpen = false)}>
-            <RankingIcon class="text-green-300" /> Ranking
+            <ArrowDownNarrowWideIcon size="1.2rem" class="text-green-300" /> Ranking
           </a>
         </li>
         <li>
           <a href="/people" onclick={() => (userDropdownOpen = false)}>
-            <PeopleIcon class="text-blue-300" /> Competidores
+            <UsersIcon size="1.2rem" class="text-blue-300" /> Competidores
+          </a>
+        </li>
+        <li>
+          <a href="/compare" onclick={() => (userDropdownOpen = false)}>
+            <TrendingUpDownIcon size="1.2rem" class="text-orange-300" /> Comparar
           </a>
         </li>
       </ul>
@@ -189,13 +196,13 @@
 
   <li>
     <a href="/rules" class="flex items-center gap-1">
-      <RulesIcon class="text-orange-300" /> Reglamento
+      <ScrollIcon size="1.2rem" class="text-purple-300" /> Reglamento
     </a>
   </li>
 
   <li>
     <a href="/cca" class="flex items-center gap-1">
-      <CubeIcon class="text-primary-400" /> CCA
+      <BoxIcon size="1.2rem" class="text-primary-400" /> CCA
     </a>
   </li>
 
@@ -218,7 +225,7 @@
     {#if $screen.isMobile}
       <div class="dropdown">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
-          <MenuIcon />
+          <MenuIcon size="1.2rem" />
         </div>
 
         <ul class="menu dropdown-content bg-base-200 rounded-box w-56">
@@ -236,7 +243,7 @@
     <ul class="menu menu-horizontal items-center">
       {#if !$screen.isMobile}
         {@render navlist()}
-      {:else}
+      {:else if $userStore}
         {@render userSnippet()}
       {/if}
     </ul>

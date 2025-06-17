@@ -5,6 +5,15 @@
   themes: dark;
 }
 
+@layer base {
+  input:focus,
+  textarea:focus,
+  select:focus,
+  button:focus {
+    box-shadow: none !important;
+  }
+}
+
 @source '../node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}';
 
 @custom-variant dark (&:is(.dark *));
@@ -20,16 +29,6 @@
   --color-primary-700: #1d4ed8;
   --color-primary-800: #1e40af;
   --color-primary-900: #1e3a8a;
-}
-
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
 }
 
 @font-face {
