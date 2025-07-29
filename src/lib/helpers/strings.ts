@@ -1,4 +1,4 @@
-import type { CONTEST } from "@interfaces";
+import { PENALTY, type CONTEST } from "@interfaces";
 import type { Indicator } from "flowbite-svelte";
 
 export function getSearchParams(loc: string): Map<string, string> {
@@ -68,4 +68,17 @@ export function randomUUID() {
 
 export function getReturnURL(url: URL): string {
   return url.href.slice(url.origin.length);
+}
+
+export function getPenaltyName(p: PENALTY): string {
+  switch (p) {
+    case PENALTY.NONE:
+      return "-";
+    case PENALTY.DNF:
+      return "DNF";
+    case PENALTY.DNS:
+      return "DNS";
+    case PENALTY.P2:
+      return "+2";
+  }
 }
