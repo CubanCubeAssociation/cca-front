@@ -222,34 +222,37 @@
     </ul>
   </Card>
 
-  <Card class="max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-    <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">Competidores</Heading>
+  {#if contest.contestants.length > 0}
+    <Card class="max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
+      <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">Competidores</Heading
+      >
 
-    <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-      <TableHead>
-        <TableHeadCell padding="px-2 py-3">#</TableHeadCell>
-        <TableHeadCell padding="px-2 py-3">Nombre</TableHeadCell>
-        <TableHeadCell padding="px-2 py-3">Categorías</TableHeadCell>
-      </TableHead>
+      <Table hoverable shadow divClass="w-full relative overflow-x-auto">
+        <TableHead>
+          <TableHeadCell padding="px-2 py-3">#</TableHeadCell>
+          <TableHeadCell padding="px-2 py-3">Nombre</TableHeadCell>
+          <TableHeadCell padding="px-2 py-3">Categorías</TableHeadCell>
+        </TableHead>
 
-      <TableBody>
-        {#each contest.contestants as c, p (c.user.username)}
-          <TableBodyRow>
-            <TableBodyCell tdClass={TD_CLASS}>{p + 1}</TableBodyCell>
-            <TableBodyCell tdClass={TD_CLASS}><UserField user={c.user} link /></TableBodyCell>
-            <TableBodyCell tdClass={TD_CLASS}>
-              <div class="w-full flex flex-wrap gap-2">
-                {#each c.categories as ct}
-                  <WcaCategory icon={ct.scrambler} size="1.5rem" />
-                  <Tooltip>{ct.name}</Tooltip>
-                {/each}
-              </div>
-            </TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
-  </Card>
+        <TableBody>
+          {#each contest.contestants as c, p (c.user.username)}
+            <TableBodyRow>
+              <TableBodyCell tdClass={TD_CLASS}>{p + 1}</TableBodyCell>
+              <TableBodyCell tdClass={TD_CLASS}><UserField user={c.user} link /></TableBodyCell>
+              <TableBodyCell tdClass={TD_CLASS}>
+                <div class="w-full flex flex-wrap gap-2">
+                  {#each c.categories as ct}
+                    <WcaCategory icon={ct.scrambler} size="1.5rem" />
+                    <Tooltip>{ct.name}</Tooltip>
+                  {/each}
+                </div>
+              </TableBodyCell>
+            </TableBodyRow>
+          {/each}
+        </TableBody>
+      </Table>
+    </Card>
+  {/if}
 
   {#if contest.status !== "pending" && contest.status !== "inscription"}
     <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
