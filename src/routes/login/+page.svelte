@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Label, Input, A, Button, Card, Spinner } from "flowbite-svelte";
   import { login } from "@helpers/API";
   import { onMount } from "svelte";
   import { userStore } from "@stores/user";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
+  import { preventDefault } from "@helpers/object";
 
   let email = "";
   let password = "";
@@ -41,32 +41,34 @@
   });
 </script>
 
-<Card class="mt-4 max-w-sm w-[calc(100%-2rem)] mx-auto mb-8">
-  <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Iniciar sesión</h1>
+<div class="card mt-4 max-w-xs mx-auto mb-8">
+  <h1 class="text-2xl font-bold">Iniciar sesión</h1>
 
   {#if error}
     <h3 class="text-lg my-0 text-red-700">{error}</h3>
   {/if}
 
-  <form class="mt-8 space-y-6" on:submit|preventDefault={_login}>
-    <div>
-      <Label for="email" class="mb-2">Email</Label>
-      <Input
-        on:input={clearError}
+  <form class="space-y-2" onsubmit={preventDefault(_login)}>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Email</legend>
+      <input
+        class="input"
+        oninput={clearError}
         bind:value={email}
         type="email"
         name="email"
         id="email"
-        placeholder="name@company.com"
+        placeholder="Email"
         required
-        aria
         autocomplete="email"
       />
-    </div>
-    <div>
-      <Label for="password" class="mb-2">Contraseña</Label>
-      <Input
-        on:input={clearError}
+    </fieldset>
+
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Contraseña</legend>
+      <input
+        class="input"
+        oninput={clearError}
         bind:value={password}
         type="password"
         name="password"
@@ -75,17 +77,17 @@
         required
         autocomplete="current-password"
       />
-    </div>
+    </fieldset>
 
-    <div class="flex items-start">
-      <A href="/" aClass="ml-auto text-sm">Olvidó su contraseña?</A>
-    </div>
-    <Button type="submit">
+    <!-- <div class="flex items-start">
+      <a href="/">Olvidó su contraseña?</a>
+    </div> -->
+    <button type="submit" class="btn btn-primary">
       {#if loading}
-        <Spinner size="5" color="white" />
+        <span class="loading loading-spinner loading-sm mx-auto"></span>
       {:else}
         Entrar
       {/if}
-    </Button>
+    </button>
   </form>
-</Card>
+</div>

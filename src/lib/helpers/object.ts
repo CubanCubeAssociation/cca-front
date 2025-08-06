@@ -1,3 +1,14 @@
+import {
+  PENALTY,
+  type CATEGORY,
+  type CONTEST,
+  type CONTESTANT,
+  type FORMAT,
+  type ROUND,
+  type SOLVE,
+  type USER,
+} from "@interfaces";
+
 export function checkPath(obj: any, path: string[], useMap: boolean = false): boolean {
   if (typeof obj === "undefined") return false;
 
@@ -78,7 +89,7 @@ export function fromModel(obj: any, model: MODEL) {
 
     const md = RMODEL.find(md => isModel(md, k));
 
-    if (k === "format") console.log(k, v, md);
+    // if (k === "format") console.log(k, v, md);
 
     if (md) {
       const p = md.startsWith("$") ? md.slice(1) : md.split(":");
@@ -146,5 +157,89 @@ export function preventDefault(cb: (ev: Event) => any) {
   return (ev: Event) => {
     ev.preventDefault();
     cb(ev);
+  };
+}
+
+export function createEmptyCategory(): CATEGORY {
+  return {
+    formats: [],
+    id: "",
+    name: "",
+    scrambler: "333",
+  };
+}
+
+export function createEmptyUser(): USER {
+  return {
+    id: "",
+    name: "",
+    email: "",
+    password: "",
+    ci: "",
+    sex: "M",
+    username: "",
+    province: "",
+    municipality: "",
+    credit: 0,
+    role: "user",
+    isEmailVerified: false,
+    age: 0,
+  };
+}
+
+export function createEmptySolve(): SOLVE {
+  return {
+    time: "",
+    timeMillis: "",
+    penaltyType: PENALTY.NONE,
+    reconstruction: "",
+    penaltyDetails: "",
+    isExtra: false,
+    extra: -1,
+  };
+}
+
+export function createEmptyRound(): ROUND {
+  return {
+    id: "",
+    average: 0,
+    category: createEmptyCategory(),
+    contestant: createEmptyUser(),
+    round: 0,
+    e1: createEmptySolve(),
+    e2: createEmptySolve(),
+    t1: createEmptySolve(),
+    t2: createEmptySolve(),
+    t3: createEmptySolve(),
+    t4: createEmptySolve(),
+    t5: createEmptySolve(),
+  };
+}
+
+export function createEmptyContest(): CONTEST {
+  return {
+    categories: [],
+    contestants: [],
+    rounds: [],
+    id: "",
+    name: "",
+    place: "",
+    status: "pending",
+    date: "",
+    inscriptionStart: "",
+    inscriptionEnd: "",
+    inscriptionCost: 0,
+    visible: false,
+    seed: "",
+    gen: 0,
+  };
+}
+
+export function createEmptyFormat(): FORMAT {
+  return {
+    name: "Ao5",
+    amount: 5,
+    lMargin: 1,
+    rMargin: 1,
   };
 }

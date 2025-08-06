@@ -3,28 +3,15 @@
   import moment from "moment";
   import { getContests } from "@helpers/API";
   import type { CONTEST_RESULT } from "@interfaces";
-  import {
-    Table,
-    TableHead,
-    TableHeadCell,
-    Heading,
-    Card,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    Span,
-    Spinner,
-    Button,
-    Indicator,
-    Tooltip,
-  } from "flowbite-svelte";
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import SwordIcon from "@icons/Sword.svelte";
   import { Paginator } from "@classes/Paginator.svelte";
   import { contestNameToLink } from "@helpers/routing";
+  import { SwordsIcon } from "lucide-svelte";
+  import WcaCategory from "@components/wca/WCACategory.svelte";
+  import Indicator from "@components/Indicator.svelte";
 
   const DEFAULT_RESULT = {
     limit: 0,
@@ -68,51 +55,71 @@
   });
 </script>
 
-<Card class="mx-auto mb-8 mt-4 grid w-[calc(100%-2rem)] max-w-4xl place-items-center">
-  <Heading tag="h1" class="mb-8 flex items-center justify-center gap-1 text-center text-4xl">
-    <SwordIcon size="2rem" class="text-red-600 dark:text-red-400" /> Competencias
-  </Heading>
+<div class="card max-w-4xl mx-auto mb-8 mt-4">
+  <h1 class="mb-8 flex items-center justify-center gap-1 text-center text-4xl">
+    <SwordsIcon size="2rem" class="text-red-600 dark:text-red-400" /> Competencias
+  </h1>
 
   {#if loading}
-    <Spinner size="10" />
+    <span class="loading loading-spinner loading-lg mx-auto"></span>
   {:else if contestResults.results.length > 0}
     <PaginatorComponent {pg} update={updatePaginator} class="mb-4" />
 
-    <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-      <TableHead>
-        <TableHeadCell>#</TableHeadCell>
-        <TableHeadCell>Nombre</TableHeadCell>
-        <TableHeadCell>Fecha</TableHeadCell>
-        <TableHeadCell>Hora</TableHeadCell>
-      </TableHead>
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Fecha</th>
+            <th class="max-md:hidden">Hora</th>
+            <th class="min-w-[10rem]">Categorías</th>
+          </tr>
+        </thead>
 
-      <TableBody>
-        {#each contestResults.results as r, pos}
-          <TableBodyRow>
-            <TableBodyCell>{(pg.page - 1) * pg.limit + pos + 1}</TableBodyCell>
-            <TableBodyCell>
-              <a href={contestNameToLink(r.name)} class="flex items-center gap-2">
-                <Indicator color={getIndicatorColor(r.status)} />
-                <Tooltip>{getStatus(r.status)}</Tooltip>
-                {r.name}
-              </a>
-            </TableBodyCell>
-            <TableBodyCell>{moment.utc(r.date).format("DD/MM/YYYY")}</TableBodyCell>
-            <TableBodyCell>{moment.utc(r.date).format("hh:mm a")}</TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
+        <tbody>
+          {#each contestResults.results as r, pos}
+            <tr>
+              <td>{(pg.page - 1) * pg.limit + pos + 1}</td>
+              <td>
+                <a href={contestNameToLink(r.name)} class="flex flex-wrap items-center gap-2">
+                  <div class="tooltip" data-tip={getStatus(r.status)}>
+                    <Indicator color={getIndicatorColor(r.status)} />
+                  </div>
+                  {r.name}
+                </a>
+              </td>
+              <td>
+                {moment.utc(r.date).format("DD/MM/YYYY")}
+                <span class="md:hidden">{moment.utc(r.date).format("hh:mm a")}</span>
+              </td>
+              <td class="max-md:hidden">
+                {moment.utc(r.date).format("hh:mm a")}
+              </td>
+              <td>
+                <div class="flex w-full flex-wrap">
+                  {#each r.categories as cat}
+                    <div class="tooltip" data-tip={cat.category.name}>
+                      <WcaCategory icon={cat.category.scrambler} size="1.2rem" />
+                    </div>
+                  {/each}
+                </div>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
 
     <PaginatorComponent {pg} update={updatePaginator} class="mt-4" />
   {:else if error}
-    <Span class="text-center text-red-500!">
+    <span class="text-center text-red-500!">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-    </Span>
+    </span>
 
     <!-- <Button class="mt-8 w-min" on:click={refreshContestData}>Recargar</Button> -->
-    <Button class="mt-8 w-min" on:click={() => window.location.reload()}>Recargar</Button>
+    <button class="mt-8 w-min" onclick={() => window.location.reload()}>Recargar</button>
   {:else}
-    <Span class="text-center">No hay competencias disponibles</Span>
+    <span class="text-center">No hay competencias disponibles</span>
   {/if}
-</Card>
+</div>

@@ -1,3 +1,5 @@
+import { DOMAIN } from "@constants";
+
 interface ContestParams {
   category: string;
   time: string | number;
@@ -5,7 +7,7 @@ interface ContestParams {
   type: "single" | "avg";
 }
 
-export function contestNameToLink(name: string, params?: Partial<ContestParams>) {
+export function contestNameToLink(name: string, params?: Partial<ContestParams>, admin = false) {
   const pm: Partial<ContestParams> = {};
 
   if (params?.category) pm.category = params.category;
@@ -20,7 +22,7 @@ export function contestNameToLink(name: string, params?: Partial<ContestParams>)
     queryString = "?" + queryString;
   }
 
-  return `/contests/${name.replace(/ /g, "-")}${queryString}`;
+  return `${admin ? DOMAIN + "/admin/contest" : "/contests"}/${name.replace(/ /g, "-")}${queryString}`;
 }
 
 export function contestParamName(paramName: string) {

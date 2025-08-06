@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { Card, Heading } from "flowbite-svelte";
   import RulesIcon from "@icons/Script.svelte";
 </script>
 
-<Card class="mx-auto mb-8 mt-4 grid w-[calc(100%-2rem)] max-w-4xl place-items-center">
-  <Heading tag="h1" class="mb-4 flex items-center justify-center gap-1 text-center text-4xl">
+<div class="card mx-auto mb-8 mt-4 max-w-4xl">
+  <h1 class="mb-4 flex items-center justify-center gap-1 text-center text-4xl">
     <RulesIcon size="2rem" class="text-orange-400 dark:text-orange-300" /> Reglamento
-  </Heading>
+  </h1>
 
   <span class="max-w-2xl my-4">
     La CCA se rige bajo las mismas regulaciones de la WCA para las categorías el común. Para más
@@ -20,15 +19,15 @@
   >
     WCA Reglamento y Directrices
   </a>
-</Card>
+</div>
 
-<Card class="mx-auto mb-8 mt-4 hidden w-[calc(100%-2rem)] max-w-4xl place-items-center">
-  <Heading tag="h2" class="mb-4 flex items-center justify-center gap-1 text-center text-3xl">
+<div class="card !hidden mx-auto mb-8 mt-4 max-w-4xl">
+  <h2 class="mb-4 flex items-center justify-center gap-1 text-center text-3xl">
     Información complementaria
-  </Heading>
+  </h2>
 
   <section id="index">
-    <Heading tag="h3" class="text-2xl mb-4 text-center" id="categories">Índice</Heading>
+    <h3 class="text-2xl mb-4 text-center" id="categories">Índice</h3>
 
     <ol>
       <li class="text-center">
@@ -135,7 +134,7 @@
       </li>
     </ol>
   </section>
-</Card>
+</div>
 
 <style lang="postcss">
   @reference "tailwindcss";

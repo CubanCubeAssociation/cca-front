@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { CONTEST_CATEGORY, FORMAT, ROUND } from "@interfaces";
-  import { Accordion, AccordionItem, Heading } from "flowbite-svelte";
   import WcaCategory from "./wca/WCACategory.svelte";
 
   import ResultTable from "./ResultTable.svelte";
   import { page } from "$app/state";
+  import { weakRandomUUID } from "@helpers/strings";
 
   interface IResultViewProps {
     roundGroup: ROUND[][][];
@@ -14,16 +14,24 @@
     edit?: (round: ROUND) => void;
   }
 
-  let { roundGroup, formats, categories, allowEdit = false, edit }: IResultViewProps = $props();
+  let {
+    roundGroup = $bindable(),
+    formats,
+    categories,
+    allowEdit = false,
+    edit,
+  }: IResultViewProps = $props();
 
   let activeCategory = $state("");
+  let id = weakRandomUUID();
+  let lastOpened = $state("");
 
   $effect(() => {
     activeCategory = page.url.searchParams.get("category") || "";
   });
 </script>
 
-<Accordion class="w-full">
+<div class="grid gap-2">
   {#if !roundGroup.length}
     <div class="flex justify-center items-center w-full h-full">
       <p class="text-gray-500">No hay resultados disponibles</p>
@@ -33,33 +41,44 @@
   {#each roundGroup as group}
     {@const round = group.flat ? group.flat()[0] : group.reduce((acc, e) => [...acc, ...e], [])[0]}
 
-    <AccordionItem paddingDefault="py-0 px-0 pr-2" open={activeCategory === round.category.name}>
-      <Heading
-        tag="h4"
-        slot="header"
-        class="flex items-center gap-2 my-4 pl-2"
-        data-category={round.category.name}
-      >
+    <div class="collapse collapse-arrow bg-base-100 border" data-category={round.category.name}>
+      <input
+        class="[&:checked+div]:text-accent w-full"
+        type="radio"
+        name={id}
+        value={round.category.name}
+        checked={activeCategory === round.category.name}
+        onclick={ev => {
+          if (lastOpened === round.category.name) {
+            (ev.target as any).checked = false;
+            lastOpened = "";
+          } else {
+            lastOpened = round.category.name;
+          }
+        }}
+      />
+      <div class="collapse-title font-semibold absolute flex items-center gap-2">
         <WcaCategory icon={round.category.scrambler} size="1.5rem" />
         {round.category.name}
-      </Heading>
+      </div>
+      <div class="collapse-content text-sm grid">
+        {#each group as rounds, p}
+          {#if group.length > 1}
+            <h5 class="flex items-center gap-2 mb-4 pt-4 justify-center">
+              Ronda {rounds[0].round}
+            </h5>
+          {/if}
 
-      {#each group as rounds}
-        {#if group.length > 1}
-          <Heading tag="h5" class="flex items-center gap-2 mb-4 pt-4 justify-center">
-            Ronda {rounds[0].round}
-          </Heading>
-        {/if}
-
-        <ResultTable
-          {round}
-          {rounds}
-          {formats}
-          {categories}
-          {allowEdit}
-          edit={rnd => edit?.(rnd)}
-        />
-      {/each}
-    </AccordionItem>
+          <ResultTable
+            bind:rounds={group[p]}
+            {round}
+            {formats}
+            {categories}
+            {allowEdit}
+            edit={rnd => edit?.(rnd)}
+          />
+        {/each}
+      </div>
+    </div>
   {/each}
-</Accordion>
+</div>

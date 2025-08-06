@@ -2,11 +2,10 @@
   import SearchUser from "@components/SearchUser.svelte";
   import UserField from "@components/UserField.svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
-  import { getCategories, getFormats, getUser, getUserProfile } from "@helpers/API";
+  import { getCategories, getFormats, getUserProfile } from "@helpers/API";
   import { metricMean, metricStdDev, metricTrendLSV } from "@helpers/statistics";
   import { timer } from "@helpers/timer";
   import type { CATEGORY, FORMAT, USER, USER_PROFILE } from "@interfaces";
-  import { Button, Card } from "flowbite-svelte";
   import { ArrowDownIcon, ArrowUpIcon, TrendingUpDownIcon } from "lucide-svelte";
   import { onMount } from "svelte";
 
@@ -301,14 +300,14 @@
   });
 </script>
 
-<Card class="mx-auto mb-8 mt-4 flex w-[calc(100%-2rem)] max-w-6xl flex-col items-center gap-4">
+<div class="card mx-auto mb-8 mt-4 max-w-6xl">
   <h1 class="text-2xl text-base-content flex items-center gap-2">
     <TrendingUpDownIcon class="text-orange-300" /> Comparar Usuarios
   </h1>
 
   {#if error}
     <span class="text-red-400">Hubo un error al cargar los datos</span>
-    <Button class="mt-8 w-min cursor-pointer" onclick={getBaseData}>Recargar</Button>
+    <button class="btn btn-primary mt-8" onclick={getBaseData}>Recargar</button>
   {:else}
     <div class="flex flex-wrap justify-center gap-2">
       <SearchUser
@@ -504,7 +503,7 @@
 
   <!-- Gráficas con el desempeño de los usuarios -->
   <div class="grid place-items-center h-[20rem] w-full" bind:this={timeSerie}></div>
-</Card>
+</div>
 
 <style lang="postcss">
   @reference "../../app.css";

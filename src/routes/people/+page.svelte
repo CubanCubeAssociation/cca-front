@@ -4,19 +4,6 @@
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import { getUsers } from "@helpers/API";
   import type { USER } from "@interfaces";
-  import {
-    Button,
-    Card,
-    Heading,
-    Span,
-    Spinner,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
   import { screen } from "@stores/screen.store";
   import UserField from "@components/UserField.svelte";
   import { goto } from "$app/navigation";
@@ -60,48 +47,46 @@
   });
 </script>
 
-<Card class="mx-auto mb-8 mt-4 flex w-[calc(100%-2rem)] max-w-4xl flex-col items-center gap-4">
-  <Heading tag="h1" class="flex items-center justify-center gap-1 text-center text-4xl">
-    Competidores
-  </Heading>
+<card class="card mx-auto mb-8 mt-4 max-w-4xl">
+  <h1 class="flex items-center justify-center gap-1 text-center text-4xl">Competidores</h1>
 
   {#if loading}
-    <Spinner />
+    <span class="loading loading-spinner loading-lg mx-auto"></span>
   {:else if users.length > 0}
     <PaginatorComponent showNextPrev={!$screen.isMobile} update={updateData} bind:pg class="mb-4" />
 
-    <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-      <TableHead>
-        <TableHeadCell>#</TableHeadCell>
-        <TableHeadCell>Nombre</TableHeadCell>
-        <TableHeadCell>Provincia</TableHeadCell>
-        <TableHeadCell>ELO</TableHeadCell>
-      </TableHead>
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Provincia</th>
+            <th>ELO</th>
+          </tr>
+        </thead>
 
-      <TableBody>
-        {#each users as user, pos}
-          <TableBodyRow>
-            <TableBodyCell>
-              {(pg.page - 1) * pg.limit + pos + 1}
-            </TableBodyCell>
-            <TableBodyCell>
-              <UserField {user} showAvatar link />
-            </TableBodyCell>
-            <TableBodyCell>{user.province}</TableBodyCell>
-            <TableBodyCell>-</TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
+        <tbody>
+          {#each users as user, pos}
+            <tr>
+              <td> {(pg.page - 1) * pg.limit + pos + 1}</td>
+              <td><UserField {user} showAvatar link /></td>
+              <td>{user.province}</td>
+              <td>-</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
 
     <PaginatorComponent showNextPrev={!$screen.isMobile} update={updateData} bind:pg class="mb-4" />
   {:else if error}
-    <Span class="text-center text-red-500!">
+    <span class="text-center text-red-500!">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-    </Span>
+    </span>
 
-    <Button class="mt-8 w-min" on:click={updateData}>Recargar</Button>
+    <button class="btn btn-primary mt-8" onclick={updateData}>Recargar</button>
   {:else}
-    <Span class="text-center">No hay resultados disponibles</Span>
+    <span class="text-center">No hay resultados disponibles</span>
   {/if}
-</Card>
+</card>

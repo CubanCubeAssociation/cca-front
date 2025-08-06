@@ -20,20 +20,6 @@
   import StateIcon from "@icons/StateMachine.svelte";
   import EyeIcon from "@icons/Eye.svelte";
   import PencilIcon from "@icons/Pencil.svelte";
-  import {
-    Card,
-    Heading,
-    Indicator,
-    Span,
-    Spinner,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-    Tooltip,
-  } from "flowbite-svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { minRole } from "@helpers/auth";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
@@ -41,7 +27,8 @@
   import ResultView from "@components/ResultView.svelte";
   import { page } from "$app/state";
   import UserField from "@components/UserField.svelte";
-  import { contestParamName } from "@helpers/routing";
+  import { contestNameToLink, contestParamName } from "@helpers/routing";
+  import Indicator from "@components/Indicator.svelte";
 
   let name: string = "";
 
@@ -102,161 +89,152 @@
 </svelte:head>
 
 {#if show404}
-  <Card class="mt-4 max-w-3xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-    <Heading tag="h4" class="text-center">No se encontró la competencia: "{name}"</Heading>
-  </Card>
+  <div class="card mt-4 max-w-3xl">
+    <h4 class="text-center">No se encontró la competencia: "{name}"</h4>
+  </div>
 {:else if contest}
-  <Card class="mt-4 max-w-4xl w-[calc(100%-2rem)] mx-auto mb-4 flex flex-col items-center gap-4">
-    <Heading tag="h1" class="text-center text-4xl flex justify-center gap-1">
+  <div class="card mt-4 max-w-4xl mx-auto mb-8">
+    <h1 class="text-center text-4xl flex justify-center gap-1">
       {contest.name}
 
       {#if minRole($userStore, "delegate")}
-        <a href={"/admin/contest/" + contest.name}><PencilIcon size="1.2rem" /></a>
+        <a href={contestNameToLink(contest.name, {}, true)}><PencilIcon size="1.2rem" /></a>
       {/if}
-    </Heading>
-
-    <!-- <ButtonGroup>
-      <Button color="blue" class="rounded-tl-md rounded-bl-md" on:click={() => showSection(0)}>
-        Información
-      </Button>
-
-      {#if contest.status === "inscription"}
-        <Button color="yellow" on:click={() => showSection(1)}>Registrarse</Button>
-      {/if}
-
-      <Button color="green" class="rounded-tr-md rounded-br-md" on:click={() => showSection(2)}>
-        Competidores
-      </Button>
-    </ButtonGroup> -->
+    </h1>
 
     <ul class="grid gap-4 info-list">
       <!-- Lugar -->
       <li>
-        <Span class={spanClass}>
+        <span class={spanClass}>
           <HomeIcon {size} /> Lugar:
-        </Span>
-        <Span>{contest.place}</Span>
+        </span>
+        <span>{contest.place}</span>
       </li>
 
       <!-- Fecha -->
       <li>
-        <Span class={spanClass}>
+        <span class={spanClass}>
           <DateIcon {size} />Fecha:
-        </Span>
-        <Span>{moment(contest.date).format("DD/MM/YYYY")}</Span>
+        </span>
+        <span>{moment(contest.date).format("DD/MM/YYYY")}</span>
       </li>
 
       <!-- Hora -->
       <li>
-        <Span class={spanClass}>
+        <span class={spanClass}>
           <ClockIcon {size} />Hora:
-        </Span>
-        <Span>{moment(contest.date).format("hh:mm a")}</Span>
+        </span>
+        <span>{moment(contest.date).format("hh:mm a")}</span>
       </li>
 
       {#if before("running")}
         <!-- Inscripcion (inicio) -->
         <li>
-          <Span class={spanClass}>
+          <span class={spanClass}>
             <DateIcon {size} />Inicio de inscripción:
-          </Span>
-          <Span>{moment(contest.inscriptionStart).format("DD/MM/YYYY")}</Span>
+          </span>
+          <span>{moment(contest.inscriptionStart).format("DD/MM/YYYY")}</span>
         </li>
 
         <!-- Inscripcion (fin) -->
         <li>
-          <Span class={spanClass}>
+          <span class={spanClass}>
             <DateIcon {size} />Fin de inscripción:
-          </Span>
-          <Span>{moment(contest.inscriptionEnd).format("DD/MM/YYYY")}</Span>
+          </span>
+          <span>{moment(contest.inscriptionEnd).format("DD/MM/YYYY")}</span>
         </li>
 
         <!-- Costo -->
         <li>
-          <Span class={spanClass}>
+          <span class={spanClass}>
             <CurrencyIcon {size} />Costo de inscripción:
-          </Span>
-          <Span>
+          </span>
+          <span>
             {contest.inscriptionCost === 0
               ? "Gratis"
               : new Intl.NumberFormat("es-ES", {
                   style: "currency",
                   currency: "CUP",
                 }).format(contest.inscriptionCost)}
-          </Span>
+          </span>
         </li>
       {/if}
 
       <li>
-        <Span class={spanClass}>
+        <span class={spanClass}>
           <PuzzleIcon {size} />Categorías:
-        </Span>
-        <Span class="flex flex-wrap gap-2 max-w-[25rem]">
+        </span>
+        <span class="flex flex-wrap gap-2 max-w-[25rem]">
           {#each contest.categories as ct}
-            <WcaCategory icon={ct.category.scrambler} />
-            <Tooltip>{ct.category.name}</Tooltip>
+            <div class="tooltip" data-tip={ct.category.name}>
+              <WcaCategory icon={ct.category.scrambler} size="1.5rem" />
+            </div>
           {/each}
-        </Span>
+        </span>
       </li>
 
       <!-- Estado -->
       <li>
-        <Span class={spanClass}>
+        <span class={spanClass}>
           <StateIcon {size} />Estado:
-        </Span>
-        <Span class="p-1 flex gap-2 items-center">
+        </span>
+        <span class="p-1 flex gap-2 items-center">
           <Indicator color={getIndicatorColor(contest.status)} />
           {getStatus(contest.status)}
-        </Span>
+        </span>
       </li>
 
       <!-- Visible -->
       {#if checkProperty("visible")}
         <li>
-          <Span class={spanClass}>
+          <span class={spanClass}>
             <EyeIcon {size} />Visible:
-          </Span>
-          <Span>{contest.visible ? "Si" : "No"}</Span>
+          </span>
+          <span>{contest.visible ? "Si" : "No"}</span>
         </li>
       {/if}
     </ul>
-  </Card>
+  </div>
 
   {#if contest.contestants.length > 0}
-    <Card class="max-w-4xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-      <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">Competidores</Heading
-      >
+    <div class="card max-w-4xl mx-auto mb-8">
+      <h2 class="text-center text-4xl flex justify-center gap-1">Competidores</h2>
 
-      <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-        <TableHead>
-          <TableHeadCell padding="px-2 py-3">#</TableHeadCell>
-          <TableHeadCell padding="px-2 py-3">Nombre</TableHeadCell>
-          <TableHeadCell padding="px-2 py-3">Categorías</TableHeadCell>
-        </TableHead>
+      <div class="overflow-x-auto w-full">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Categorías</th>
+            </tr>
+          </thead>
 
-        <TableBody>
-          {#each contest.contestants as c, p (c.user.username)}
-            <TableBodyRow>
-              <TableBodyCell tdClass={TD_CLASS}>{p + 1}</TableBodyCell>
-              <TableBodyCell tdClass={TD_CLASS}><UserField user={c.user} link /></TableBodyCell>
-              <TableBodyCell tdClass={TD_CLASS}>
-                <div class="w-full flex flex-wrap gap-2">
-                  {#each c.categories as ct}
-                    <WcaCategory icon={ct.scrambler} size="1.5rem" />
-                    <Tooltip>{ct.name}</Tooltip>
-                  {/each}
-                </div>
-              </TableBodyCell>
-            </TableBodyRow>
-          {/each}
-        </TableBody>
-      </Table>
-    </Card>
+          <tbody>
+            {#each contest.contestants as c, p (c.user.username)}
+              <tr>
+                <td>{p + 1}</td>
+                <td><UserField user={c.user} link /></td>
+                <td>
+                  <div class="w-full flex flex-wrap gap-2">
+                    {#each c.categories as ct}
+                      <div class="tooltip" data-tip={ct.name}>
+                        <WcaCategory icon={ct.scrambler} size="1.5rem" />
+                      </div>
+                    {/each}
+                  </div>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    </div>
   {/if}
 
   {#if contest.status !== "pending" && contest.status !== "inscription"}
-    <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-      <Heading tag="h2" class="text-center text-4xl flex justify-center gap-1">Resultados</Heading>
+    <div class="card mt-4 max-w-6xl mx-auto mb-8">
+      <h2 class="text-center text-4xl flex justify-center gap-1">Resultados</h2>
 
       {#if contest.status === "running" || contest.status === "results"}
         <p class="max-w-2xl text-sm">
@@ -272,12 +250,12 @@
       {/if}
 
       <ResultView {roundGroup} {formats} categories={contest.categories} />
-    </Card>
+    </div>
   {/if}
 {:else}
-  <Card class="mt-4 max-w-3xl w-[calc(100%-2rem)] mx-auto mb-8 flex flex-col items-center gap-4">
-    <Spinner size="10" />
-  </Card>
+  <div class="card mt-4 max-w-3xl mx-auto mb-8">
+    <span class="loading loading-spinner loading-lg mx-auto"></span>
+  </div>
 {/if}
 
 <style lang="postcss">

@@ -10,13 +10,14 @@
     updateCategory,
   } from "@helpers/API";
   import SaveIcon from "@icons/Send.svelte";
-  import { Button, Card, Heading, Input, Label, Modal, Span, Tooltip } from "flowbite-svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
-  import { ExclamationCircleOutline, TrashBinSolid } from "flowbite-svelte-icons";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
   import { twMerge } from "tailwind-merge";
+  import { preventDefault } from "@helpers/object";
+  import Modal from "@components/Modal.svelte";
+  import { CircleAlertIcon, TrashIcon } from "lucide-svelte";
 
   let id = "";
   let type: "update" | "create" = "update";
@@ -95,35 +96,65 @@
 </svelte:head>
 
 <PrivateRouteGuard>
-  <Card class="mt-4 max-w-sm w-[calc(100%-2rem)] mx-auto mb-8">
-    <Heading class="text-3xl text-center">
+  <div class="card mt-4 max-w-sm mx-auto mb-8 !px-4">
+    <h1 class="text-3xl text-center">
       {type === "update" ? `Editar "${category.name}"` : "Crear categoría"}
-    </Heading>
+    </h1>
 
-    <form class="mt-8 grid gap-2" on:submit|preventDefault={save}>
-      <div>
-        <Label for="name" class="mb-2">Nombre</Label>
-        <Input bind:value={category.name} type="text" id="name" placeholder="Nombre..." required />
-      </div>
+    <form class="grid gap-2" onsubmit={preventDefault(save)}>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Nombre</legend>
+        <label class="input">
+          <WcaCategory icon="333" size="1.5rem" />
+          <input
+            bind:value={category.name}
+            type="text"
+            class="grow"
+            placeholder="Nombre"
+            required
+          />
+        </label>
+      </fieldset>
 
-      <div>
-        <Label>Ícono</Label>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Ícono</legend>
 
-        {#each ICONS as I}
-          <button on:click={() => selectIcon(I)} id={"ICON-" + I.scrambler} type="button">
-            <WcaCategory icon={I.scrambler} selected={I.scrambler === category.scrambler} />
-          </button>
-          <Tooltip class="text-white!" triggeredBy={"#ICON-" + I.scrambler}>{I.name}</Tooltip>
-        {/each}
-      </div>
+        <div class="flex flex-wrap gap-2">
+          {#each ICONS as I}
+            <button
+              onclick={preventDefault(() => selectIcon(I))}
+              id={"ICON-" + I.scrambler}
+              type="button"
+              class="tooltip"
+              data-tip={I.name}
+            >
+              <WcaCategory
+                size="1.5rem"
+                icon={I.scrambler}
+                selected={I.scrambler === category.scrambler}
+              />
+            </button>
+          {/each}
+        </div>
+      </fieldset>
 
-      <div>
-        <Label>Scrambler</Label>
-        <Input bind:value={category.scrambler} />
-      </div>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Scrambler</legend>
+        <label class="input">
+          <WcaCategory icon={category.scrambler} size="1.5rem" />
+          <input
+            bind:value={category.scrambler}
+            type="text"
+            class="grow"
+            placeholder="Scrambler"
+            required
+          />
+        </label>
+      </fieldset>
 
-      <div>
-        <Label>Formats</Label>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Formatos</legend>
+
         <ul class="flex gap-2">
           {#each formats as f, p}
             <li>
@@ -132,48 +163,48 @@
                   "border px-2 rounded-md cursor-pointer",
                   selectedFormats[p] ? "border-yellow-400 text-yellow-400" : ""
                 )}
-                on:click={ev => {
+                onclick={preventDefault(() => {
                   selectedFormats[p] = !selectedFormats[p];
-                  ev.preventDefault();
-                }}
+                })}
               >
                 {f.name}
               </button>
             </li>
           {/each}
         </ul>
-      </div>
+      </fieldset>
 
       <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
         {#if type === "update"}
-          <Button color="red" on:click={() => (showModal = true)}>
-            <TrashBinSolid size="sm" />
-            <Span class="ml-1">Eliminar</Span>
-          </Button>
+          <button class="btn btn-error" onclick={preventDefault(() => (showModal = true))}>
+            <TrashIcon size="1.2rem" />
+            <span class="ml-1">Eliminar</span>
+          </button>
         {/if}
 
-        <Button class="text-white" type="submit">
+        <button class="btn btn-primary" type="submit">
           <SaveIcon size="1.2rem" />
-          <Span class="ml-1">{type === "update" ? "Guardar" : "Crear"}</Span>
-        </Button>
+          <span class="ml-1">{type === "update" ? "Guardar" : "Crear"}</span>
+        </button>
       </div>
     </form>
-  </Card>
-
-  <Modal bind:open={showModal} outsideclose autoclose title="Eliminar categoría" size="xs">
-    <div class="flex flex-col items-center justify-center">
-      <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
-
-      <Heading tag="h4" class="text-center">¿Desea eliminar la categoría "{category.name}"?</Heading
-      >
-
-      <div class="flex gap-2 mt-4">
-        <Button color="red" on:click={deleteCategory}>
-          <TrashBinSolid size="sm" />
-          <Span class="ml-1">Eliminar</Span>
-        </Button>
-        <Button color="alternative">Cancelar</Button>
-      </div>
-    </div>
-  </Modal>
+  </div>
 </PrivateRouteGuard>
+
+<Modal bind:show={showModal}>
+  <h2 class="text-xl text-center mb-4">Eliminar categoria</h2>
+
+  <div class="flex flex-col items-center justify-center">
+    <CircleAlertIcon size="3rem" />
+
+    <h4 class="text-center">¿Desea eliminar la categoría "{category.name}"?</h4>
+
+    <div class="flex gap-2 mt-4">
+      <button class="btn" onclick={() => (showModal = false)}>Cancelar</button>
+      <button class="btn btn-error" onclick={deleteCategory}>
+        <TrashIcon size="1.2rem" />
+        <span class="ml-1">Eliminar</span>
+      </button>
+    </div>
+  </div>
+</Modal>

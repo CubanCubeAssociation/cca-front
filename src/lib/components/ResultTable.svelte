@@ -7,6 +7,8 @@
   import UserField from "./UserField.svelte";
   import { page } from "$app/state";
   import SolveInfo from "./SolveInfo.svelte";
+  import { createEmptyRound, createEmptySolve, preventDefault } from "@helpers/object";
+  import Modal from "./Modal.svelte";
 
   interface IResultTableProps {
     rounds: ROUND[];
@@ -17,11 +19,21 @@
     edit?: (round: ROUND) => void;
   }
 
-  let { rounds, formats, categories, round, allowEdit = false, edit }: IResultTableProps = $props();
+  let {
+    rounds = $bindable(),
+    formats,
+    categories,
+    round,
+    allowEdit = false,
+    edit,
+  }: IResultTableProps = $props();
 
   const rndKeys = ["t1", "t2", "t3", "t4", "t5"] as const;
   let categoryInfo: CONTEST_CATEGORY = categories[0];
   let format: FORMAT = $state(formats[0]);
+  let selectedRound = $state(createEmptyRound());
+  let selectedSolve = $state(createEmptySolve());
+  let showSolveInfoModal = $state(false);
 
   function isPos(round: ROUND, i: number, pos: number) {
     let vals = [round.t1, round.t2, round.t3, round.t4, round.t5]
@@ -76,7 +88,7 @@
   });
 </script>
 
-<div class="overflow-x-auto result-table">
+<div class="overflow-x-auto result-table w-full">
   <table class="table table-zebra">
     <!-- head -->
     <thead>
@@ -106,7 +118,7 @@
             {/if}
           </td>
 
-          {#if minRole($userStore, "admin")}
+          {#if minRole($userStore, "admin") && allowEdit}
             <td>
               <UserField
                 class={allowEdit ? "cursor-pointer hover:text-yellow-300" : ""}
@@ -130,22 +142,18 @@
               data-category={round.category.name}
               data-type="single"
             >
-              <div class="dropdown w-full">
-                <div tabindex="0" role="button">
-                  <span
-                    class="flex justify-center text-base-content cursor-help"
-                    class:best={isPos(rnd, p, 0)}
-                    class:worst={isPos(rnd, p, format.amount - 1)}
-                  >
-                    {sTimer(rnd[tp], true)}
-                  </span>
-                </div>
-                <div class="dropdown-content card card-sm bg-base-100 z-1 w-64 shadow-md">
-                  <div class="card-body">
-                    <SolveInfo round={rnd} solve={rnd[tp]} />
-                  </div>
-                </div>
-              </div>
+              <button
+                class="flex justify-center text-base-content cursor-help"
+                class:best={isPos(rnd, p, 0)}
+                class:worst={isPos(rnd, p, format.amount - 1)}
+                onclick={preventDefault(() => {
+                  selectedRound = rnd;
+                  selectedSolve = rnd[tp];
+                  showSolveInfoModal = true;
+                })}
+              >
+                {sTimer(rnd[tp], true)}
+              </button>
             </td>
           {/each}
 
@@ -164,6 +172,10 @@
     </tbody>
   </table>
 </div>
+
+<Modal bind:show={showSolveInfoModal}>
+  <SolveInfo round={selectedRound} solve={selectedSolve} />
+</Modal>
 
 <style lang="postcss">
   @reference "../../app.css";

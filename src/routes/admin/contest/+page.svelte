@@ -2,21 +2,6 @@
   import { onMount } from "svelte";
   import { getContests, updateResults } from "@helpers/API";
   import type { CONTEST } from "@interfaces";
-  import {
-    Button,
-    Card,
-    Heading,
-    Indicator,
-    Span,
-    Spinner,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-    Tooltip,
-  } from "flowbite-svelte";
   import moment from "moment";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
@@ -27,9 +12,10 @@
   import { page } from "$app/state";
   import { Paginator } from "@classes/Paginator.svelte";
   import { NotificationService } from "@stores/notification.service";
+  import { SwordsIcon } from "lucide-svelte";
+  import Indicator from "@components/Indicator.svelte";
 
   const notification = NotificationService.getInstance();
-  const HEADER = "Competencias";
   const ADD = "Añadir competencia";
   const debug = false;
 
@@ -90,75 +76,84 @@
 </script>
 
 <PrivateRouteGuard>
-  <Card class="mx-auto mb-8 mt-4 grid w-[calc(100%-2rem)] max-w-6xl place-items-center">
-    <Heading tag="h2" class="mb-4 text-center">{HEADER}</Heading>
+  <div class="card mx-auto mb-8 mt-4 max-w-6xl">
+    <h1 class="text-4xl mb-4 text-center flex items-center justify-center gap-2">
+      <SwordsIcon size="2rem" class="text-red-600 dark:text-red-400" /> Competencias
+    </h1>
 
     <div class="actions">
-      <Button on:click={addContest}>
+      <button class="btn btn-primary" onclick={addContest}>
         <PlusIcon size="1.2rem" />
         {ADD}
-      </Button>
+      </button>
 
-      <Button color="purple" on:click={updateResult}>Actualizar Resultados</Button>
+      <button class="btn btn-accent" onclick={updateResult}>Actualizar Resultados</button>
     </div>
 
     {#if loading}
-      <Spinner size="10" class="mx-auto" />
+      <span class="loading loading-spinner loading-lg mx-auto"></span>
     {:else if contests.length > 0}
       <PaginatorComponent {pg} update={updatePaginator} class="mb-4" />
-      <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-        <TableHead>
-          <TableHeadCell>#</TableHeadCell>
-          <TableHeadCell>Nombre</TableHeadCell>
-          <TableHeadCell>Fecha</TableHeadCell>
-          <TableHeadCell>Hora</TableHeadCell>
-          <TableHeadCell>Categorías</TableHeadCell>
-        </TableHead>
 
-        <TableBody>
-          {#each contests as ct, pos}
-            <TableBodyRow>
-              <TableBodyCell>{(pg.page - 1) * pg.limit + pos + 1}</TableBodyCell>
-              <TableBodyCell>
-                <a href={"/admin/contest/" + ct.name} class="flex items-center gap-2">
-                  <Indicator color={getIndicatorColor(ct.status)} />
-                  <Tooltip>{getStatus(ct.status)}</Tooltip>
-                  {ct.name}
-                </a>
-              </TableBodyCell>
-              <TableBodyCell>{moment.utc(ct.date).format("DD/MM/YYYY")}</TableBodyCell>
-              <TableBodyCell>{moment.utc(ct.date).format("hh:mm a")}</TableBodyCell>
-              <TableBodyCell>
-                <div class="flex w-full flex-wrap">
-                  {#each ct.categories as cat}
-                    <WcaCategory icon={cat.category.scrambler} size="1.2rem" />
-                    <Tooltip>{cat.category.name}</Tooltip>
-                  {/each}
-                </div>
-              </TableBodyCell>
-            </TableBodyRow>
-          {/each}
-        </TableBody>
-      </Table>
+      <div class="overflow-x-auto">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Categorías</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {#each contests as ct, pos}
+              <tr>
+                <td>{(pg.page - 1) * pg.limit + pos + 1}</td>
+                <td>
+                  <a href={"/admin/contest/" + ct.name} class="flex items-center gap-2">
+                    <div class="tooltip" data-tip={getStatus(ct.status)}>
+                      <Indicator color={getIndicatorColor(ct.status)} />
+                    </div>
+                    {ct.name}
+                  </a>
+                </td>
+                <td>{moment.utc(ct.date).format("DD/MM/YYYY")}</td>
+                <td>{moment.utc(ct.date).format("hh:mm a")}</td>
+                <td>
+                  <div class="flex w-full flex-wrap">
+                    {#each ct.categories as cat}
+                      <div class="tooltip" data-tip={cat.category.name}>
+                        <WcaCategory icon={cat.category.scrambler} size="1.2rem" />
+                      </div>
+                    {/each}
+                  </div>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
 
       <PaginatorComponent {pg} update={updatePaginator} class="mt-4" />
 
       <div class="actions">
-        <Button on:click={addContest}>
+        <button class="btn btn-primary" onclick={addContest}>
           <PlusIcon size="1.2rem" />
           {ADD}
-        </Button>
+        </button>
       </div>
     {:else if error}
-      <Span class="text-center text-red-500!">
+      <span class="text-center text-red-500!">
         Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-      </Span>
+      </span>
 
-      <Button class="mt-8 w-min" on:click={refreshContestData}>Recargar</Button>
+      <button class="btn btn-primary mt-8" onclick={refreshContestData}>Recargar</button>
     {:else}
-      <Span class="text-center">No hay competencias disponibles</Span>
+      <span class="text-center">No hay competencias disponibles</span>
     {/if}
-  </Card>
+  </div>
 </PrivateRouteGuard>
 
 <style lang="postcss">

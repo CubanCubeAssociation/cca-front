@@ -2,20 +2,33 @@
   import { onMount } from "svelte";
   import type { NotificationAction } from "@interfaces";
   import { NotificationService } from "@stores/notification.service";
-  import { Avatar, Button, Toast } from "flowbite-svelte";
-  import { fly } from "svelte/transition";
   import { CCA_ICON } from "@constants";
+  import { CircleXIcon } from "lucide-svelte";
+  import { twMerge } from "tailwind-merge";
 
-  export let key: string = "";
-  export let timeout = 5000;
-  export let header = "Header";
-  export let text = "Text";
-  export let html = "";
-  export let icon: any = CCA_ICON;
-  export let fixed = false;
-  export let actions: NotificationAction[] = [];
+  interface NotificationProps {
+    key?: string;
+    timeout?: number;
+    header?: string;
+    text?: string;
+    html?: string;
+    icon?: any;
+    fixed?: boolean;
+    actions?: NotificationAction[];
+  }
 
-  let open = true;
+  let {
+    key = "",
+    timeout = 5000,
+    header = "Header",
+    text = "Text",
+    html = "",
+    icon = CCA_ICON,
+    fixed = false,
+    actions = [],
+  }: NotificationProps = $props();
+
+  let open = $state(true);
   let tm: any;
   let notService = NotificationService.getInstance();
 
@@ -42,47 +55,46 @@
   });
 </script>
 
-<Toast
-  transition={fly}
-  params={{ x: 200 }}
-  class="bg-backgroundLevel3 pointer-events-auto relative bottom-0 end-0 ml-auto mr-4 border border-[#fff1] shadow-lg"
-  contentClass="flex items-center gap-4"
-  bind:toastStatus={open}
-  dismissable={fixed}
-  position="bottom-right"
-  on:close={close}
->
-  <svelte:fragment slot="icon">
-    {#if icon}
-      {#if typeof icon === "string"}
-        <Avatar border src={icon} class="bg-backgroundLevel1 tx-text aspect-square" />
-      {:else}
-        <svelte:component
-          this={icon}
-          size="1.2rem"
-          class="bg-backgroundLevel1 tx-text aspect-square"
-        />
-      {/if}
+{#if open}
+  <div class="alert">
+    {#if !fixed}
+      <button
+        class="btn absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 p-0 h-min rounded-full"
+      >
+        <CircleXIcon />
+      </button>
     {/if}
-  </svelte:fragment>
 
-  <div class="tx-text ms-3 text-sm font-normal">
-    <span class="tx-text text-lg font-semibold">{header}</span>
-    <div class="mb-2 mt-2 text-sm font-normal">{text}</div>
-    <div bind:innerHTML={html} contenteditable="false"></div>
-
-    {#if (actions || []).length}
-      <div class="mt-4 flex gap-2">
-        {#each actions || [] as action}
-          <Button
-            color={action.color}
-            on:click={e => {
-              action.callback(e);
-              close();
-            }}>{action.text}</Button
-          >
-        {/each}
+    {#if icon}
+      <div class="avatar bg-base-100 rounded-full">
+        <div class="w-10 rounded-full p-1">
+          {#if typeof icon === "string"}
+            <img src={icon} alt="" />
+          {:else}
+            {@const Icon = icon}
+            <Icon size="1.2rem" />
+          {/if}
+        </div>
       </div>
     {/if}
+    <div class="tx-text ms-3 text-sm font-normal">
+      <span class="tx-text text-lg font-bold">{header}</span>
+      <div class="mb-2 mt-2 text-sm font-normal">{text}</div>
+      <div bind:innerHTML={html} contenteditable="false"></div>
+
+      {#if (actions || []).length}
+        <div class="mt-4 flex gap-2">
+          {#each actions || [] as action}
+            <button
+              class={twMerge("btn", action.color || "btn-primary")}
+              onclick={e => {
+                action.callback(e);
+                close();
+              }}>{action.text}</button
+            >
+          {/each}
+        </div>
+      {/if}
+    </div>
   </div>
-</Toast>
+{/if}

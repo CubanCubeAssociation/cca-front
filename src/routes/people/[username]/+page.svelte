@@ -1,19 +1,6 @@
 <script lang="ts">
   import { getCategories, getFormats, getUserProfile } from "@helpers/API";
   import type { CATEGORY, FORMAT, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
-  import {
-    Button,
-    ButtonGroup,
-    Card,
-    Heading,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-    Tooltip,
-  } from "flowbite-svelte";
   import { onDestroy, onMount } from "svelte";
   import { page } from "$app/state";
   import UserField from "@components/UserField.svelte";
@@ -30,6 +17,7 @@
   import { getBest, mean, stdDev, trendLSV } from "@helpers/statistics";
   import Avatar from "@components/Avatar.svelte";
   import { contestNameToLink } from "@helpers/routing";
+  import { twMerge } from "tailwind-merge";
 
   interface USER_CONTEST_RESULT {
     round: number;
@@ -74,9 +62,6 @@
     backgroundColor: "#1c1b2a",
     confine: true,
   };
-
-  const TABLE_HEAD_CLASS = "px-2 text-center";
-  const TABLE_CELL_CLASS = "px-2 text-center not-first:border-l not-first:border-l-gray-600";
 
   let profile: USER_PROFILE | null = $state(null);
   let categories: CATEGORY[] = $state([]);
@@ -553,7 +538,7 @@
 
 <svelte:window on:resize={handleResize} />
 
-<Card class="mx-auto mb-8 mt-4 flex w-[calc(100%-2rem)] max-w-6xl flex-col items-center gap-4">
+<div class="card mx-auto mb-8 mt-4 max-w-6xl">
   <section class="grid md:flex gap-4 w-full">
     <aside class="w-full md:max-w-[16rem] h-fit">
       <!-- Profile -->
@@ -561,7 +546,7 @@
         <Avatar size="xl" user={profile?.user || null} />
         <h1 class="font-bold text-lg">
           <UserField
-            class="w-fit! text-center text-black dark:text-white"
+            class="w-fit! text-center font-bold"
             user={profile?.user || { username: "", name: "", role: "user" }}
           />
         </h1>
@@ -596,7 +581,7 @@
 
       <!-- ELO -->
       <section id="profile-elo">
-        <Heading tag="h2" class="text-center mb-4 text-2xl">ELO: {ELO}</Heading>
+        <h2 class="text-center mb-4 text-2xl">ELO: {ELO}</h2>
 
         <div class="grid w-full overflow-hidden h-[20rem]" bind:this={stepPercentSerie}></div>
       </section>
@@ -605,26 +590,26 @@
     <aside>
       <!-- Podium -->
       <section>
-        <Heading tag="h2" class="text-center mb-4 text-2xl">Podios</Heading>
+        <h2 class="text-center mb-4 text-2xl">Podios</h2>
 
         <ul class="podium-list">
           <li class="first">
-            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
+            <h3 class="text-center text-lg flex items-center justify-center gap-2">
               <Award variant="trophy" type="gold" size={awardSize} />
-            </Heading>
-            <span class="text-gray-800 dark:text-white">{podium[0]}</span>
+            </h3>
+            <span>{podium[0]}</span>
           </li>
           <li class="second">
-            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
+            <h3 class="text-center text-lg flex items-center justify-center gap-2">
               <Award variant="trophy" type="silver" size={awardSize * 0.9} />
-            </Heading>
-            <span class="text-gray-800 dark:text-white">{podium[1]}</span>
+            </h3>
+            <span>{podium[1]}</span>
           </li>
           <li class="third">
-            <Heading tag="h3" class="text-center text-lg flex items-center justify-center gap-2">
+            <h3 class="text-center text-lg flex items-center justify-center gap-2">
               <Award variant="trophy" type="bronze" size={awardSize * 0.8} />
-            </Heading>
-            <span class="text-gray-800 dark:text-white">{podium[2]}</span>
+            </h3>
+            <span>{podium[2]}</span>
           </li>
         </ul>
       </section>
@@ -632,178 +617,176 @@
       <!-- Records personales -->
       {#if userRanks.length}
         <section>
-          <Heading tag="h2" class="text-center mb-4 text-2xl">Récords personales</Heading>
+          <h2 class="text-center mb-4 text-2xl">Récords personales</h2>
 
-          <Table shadow divClass="w-full relative overflow-auto max-h-[30rem]">
-            <TableHead>
-              <TableHeadCell class={TABLE_HEAD_CLASS}>Categoría</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS}>NR</TableHeadCell>
-              <!-- <TableHeadCell class={TABLE_HEAD_CLASS}>PR</TableHeadCell> -->
-              <TableHeadCell class={TABLE_HEAD_CLASS + " text-green-400"}>Single</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS + " text-purple-400"}>Media</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS}>NR</TableHeadCell>
-              <!-- <TableHeadCell class={TABLE_HEAD_CLASS}>PR</TableHeadCell> -->
-            </TableHead>
+          <div class="overflow-x-auto max-h-[30rem]">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>Categoría</th>
+                  <th>NR</th>
+                  <th class="text-green-400">Single</th>
+                  <th class="text-purple-400">Media</th>
+                  <th>NR</th>
+                </tr>
+              </thead>
 
-            <TableBody>
-              {#each userRanks as rank, p}
-                <TableBodyRow
-                  class={p % 2 ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-700"}
-                >
-                  <TableBodyCell class={TABLE_CELL_CLASS}>
-                    <div class="flex items-center">
-                      <WcaCategory icon={rank.category.scrambler} size="1.5rem" />
-                      {rank.category?.name}
-                    </div>
-                  </TableBodyCell>
-                  <TableBodyCell
-                    class={TABLE_CELL_CLASS + (rank.single.rank === 1 ? " text-red-500!" : "")}
-                  >
-                    {rank.single.rank}
-                  </TableBodyCell>
-                  <TableBodyCell class={TABLE_CELL_CLASS + " text-green-400!"}>
-                    <a
-                      href={contestNameToLink(rank.single.contest, {
-                        category: rank.category.name,
-                        time: rank.single.time,
-                        username: profile?.user.username,
-                      })}
-                      class="hover:text-primary-300"
-                    >
-                      {timer(rank.single.time || Infinity, true, true)}
-                    </a>
-                  </TableBodyCell>
-
-                  <!-- Average -->
-                  <TableBodyCell class={TABLE_CELL_CLASS + " text-purple-400!"}>
-                    {#if rank.average.rank}
+              <tbody>
+                {#each userRanks as rank, p}
+                  <tr>
+                    <td>
+                      <div class="flex items-center">
+                        <WcaCategory icon={rank.category.scrambler} size="1.5rem" />
+                        {rank.category?.name}
+                      </div>
+                    </td>
+                    <td class={rank.single.rank === 1 ? " text-red-500!" : ""}>
+                      {rank.single.rank}
+                    </td>
+                    <td class={"text-green-400!"}>
                       <a
-                        href={contestNameToLink(rank.average.contest, {
+                        href={contestNameToLink(rank.single.contest, {
                           category: rank.category.name,
-                          time: rank.average.time,
+                          time: rank.single.time,
                           username: profile?.user.username,
-                          type: "avg",
                         })}
                         class="hover:text-primary-300"
                       >
-                        {timer(rank.average.time || Infinity, true, true)}
+                        {timer(rank.single.time || Infinity, true, true)}
                       </a>
-                    {:else}
-                      -
-                    {/if}
-                  </TableBodyCell>
-                  <TableBodyCell
-                    class={TABLE_CELL_CLASS + (rank.average.rank === 1 ? " text-red-500!" : "")}
-                  >
-                    {#if rank.average.rank}
-                      {rank.average.rank}
-                    {:else}
-                      -
-                    {/if}
-                  </TableBodyCell>
-                </TableBodyRow>
-              {/each}
-            </TableBody>
-          </Table>
+                    </td>
+
+                    <!-- Average -->
+                    <td class={"text-purple-400!"}>
+                      {#if rank.average.rank}
+                        <a
+                          href={contestNameToLink(rank.average.contest, {
+                            category: rank.category.name,
+                            time: rank.average.time,
+                            username: profile?.user.username,
+                            type: "avg",
+                          })}
+                          class="hover:text-primary-300"
+                        >
+                          {timer(rank.average.time || Infinity, true, true)}
+                        </a>
+                      {:else}
+                        -
+                      {/if}
+                    </td>
+                    <td class={rank.average.rank === 1 ? " text-red-500!" : ""}>
+                      {#if rank.average.rank}
+                        {rank.average.rank}
+                      {:else}
+                        -
+                      {/if}
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
         </section>
       {/if}
 
       <!-- Records locales y nacionales -->
       {#if getRecords(userRecords).filter(rc => rc.results.length).length}
         <section>
-          <Heading tag="h2" class="text-center mb-4 text-2xl">Récords locales y nacionales</Heading>
+          <h2 class="text-center mb-4 text-2xl">Récords locales y nacionales</h2>
 
-          <ButtonGroup class="space-x-px mb-4">
+          <div class="join mb-4 border border-primary rounded-lg">
             {#each getRecords(userRecords).filter(rc => rc.results.length) as ur, p}
-              <Button
-                on:click={() => {
-                  recordIndex = p;
-                  userRecord = ur;
-                }}
-                color={p === recordIndex ? "primary" : "alternative"}
-                class="text-black dark:text-white"
-                pill
-              >
-                {ur.type} ({ur.results.length})
-              </Button>
-              <Tooltip class="text-gray-200! capitalize">{ur.name}</Tooltip>
+              <div class="tooltip" data-tip={ur.name}>
+                <button
+                  onclick={() => {
+                    recordIndex = p;
+                    userRecord = ur;
+                  }}
+                  class={twMerge(
+                    "btn join-item",
+                    p === recordIndex ? "btn-primary" : "btn-neutral"
+                  )}
+                >
+                  {ur.type} ({ur.results.length})
+                </button>
+              </div>
             {/each}
-          </ButtonGroup>
+          </div>
 
           {#if userRecord}
-            <Table shadow divClass="w-full relative overflow-auto max-h-[30rem]">
-              <TableHead>
-                <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
-                <TableHeadCell class={TABLE_HEAD_CLASS}>Record</TableHeadCell>
-                <TableHeadCell class={TABLE_HEAD_CLASS}>Tiempo</TableHeadCell>
-                <TableHeadCell class={TABLE_HEAD_CLASS}>Competencia</TableHeadCell>
-                <TableHeadCell class={TABLE_HEAD_CLASS}>Fecha</TableHeadCell>
-              </TableHead>
+            <div class="overflow-x-auto max-h-[30rem]">
+              <table class="table table-zebra w-full">
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>Record</th>
+                    <th>Tiempo</th>
+                    <th>Competencia</th>
+                    <th>Fecha</th>
+                  </tr>
+                </thead>
 
-              <TableBody>
-                {#each userRecord.results as res, p}
-                  <TableBodyRow
-                    class={p % 2 ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-700"}
-                  >
-                    <TableBodyCell class={TABLE_CELL_CLASS}>
-                      {p + 1}
-                    </TableBodyCell>
-                    <TableBodyCell class={TABLE_CELL_CLASS}>
-                      <div class="flex items-center">
-                        <WcaCategory icon={res.category?.scrambler} size="1.5rem" />
-                        {res.category?.name} (<span
-                          class={res.type === "single" ? " text-green-400!" : " text-purple-400!"}
-                          >{res.type === "single" ? "Single" : "Media"}</span
-                        >)
-                      </div>
-                    </TableBodyCell>
-                    <TableBodyCell
-                      class={TABLE_CELL_CLASS +
-                        (res.type === "single" ? " text-green-400!" : " text-purple-400!")}
-                    >
-                      <a
-                        href={contestNameToLink(res.contest.name, {
-                          category: res.category?.name,
-                          time: res.time,
-                          username: profile?.user.username,
-                          type: res.type === "single" ? "single" : "avg",
-                        })}
-                        class="hover:text-primary-300"
-                      >
-                        {timer(res.time || Infinity, true, true)}
-                      </a>
-                    </TableBodyCell>
-                    <TableBodyCell class={TABLE_CELL_CLASS}>
-                      <a href={contestNameToLink(res.contest.name)} class="hover:text-primary-300">
-                        {res.contest?.name}
-                      </a>
-                    </TableBodyCell>
-                    <TableBodyCell class={TABLE_CELL_CLASS}>
-                      {moment(res.contest?.date).format("DD/MM/YYYY")}
-                    </TableBodyCell>
-                  </TableBodyRow>
-                {/each}
-              </TableBody>
-            </Table>
+                <tbody>
+                  {#each userRecord.results as res, p}
+                    <tr>
+                      <td>
+                        {p + 1}
+                      </td>
+                      <td>
+                        <div class="flex items-center">
+                          <WcaCategory icon={res.category?.scrambler} size="1.5rem" />
+                          {res.category?.name} (<span
+                            class={res.type === "single" ? " text-green-400!" : " text-purple-400!"}
+                            >{res.type === "single" ? "Single" : "Media"}</span
+                          >)
+                        </div>
+                      </td>
+                      <td class={res.type === "single" ? " text-green-400!" : " text-purple-400!"}>
+                        <a
+                          href={contestNameToLink(res.contest.name, {
+                            category: res.category?.name,
+                            time: res.time,
+                            username: profile?.user.username,
+                            type: res.type === "single" ? "single" : "avg",
+                          })}
+                          class="hover:text-primary-300"
+                        >
+                          {timer(res.time || Infinity, true, true)}
+                        </a>
+                      </td>
+                      <td>
+                        <a
+                          href={contestNameToLink(res.contest.name)}
+                          class="hover:text-primary-300"
+                        >
+                          {res.contest?.name}
+                        </a>
+                      </td>
+                      <td>
+                        {moment(res.contest?.date).format("DD/MM/YYYY")}
+                      </td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            </div>
           {/if}
         </section>
       {/if}
 
       <!-- Results -->
       <section>
-        <Heading tag="h2" class="text-center mb-4 text-2xl"
-          >Resultados ({selectedCategory.name})</Heading
-        >
+        <h2 class="text-center mb-4 text-2xl">Resultados ({selectedCategory.name})</h2>
 
         <ul class="w-full flex flex-wrap gap-2 justify-center mb-4">
           {#each categories.filter(ct => ct.name in groupedData) as cat}
-            <Button color="alternative" class="p-0!" on:click={() => (selectedCategory = cat)}>
+            <button onclick={() => (selectedCategory = cat)}>
               <WcaCategory
                 class={"cursor-pointer " +
                   (selectedCategory.name === cat.name ? "text-green-300" : "")}
                 icon={cat.scrambler}
               />
-            </Button>
+            </button>
           {/each}
         </ul>
 
@@ -812,139 +795,138 @@
         {:else if selectedCategory.name in groupedData}
           {@const categoryData = groupedData[selectedCategory.name]}
 
-          <Table shadow divClass="w-full relative overflow-x-auto">
-            <TableHead>
-              <TableHeadCell class={TABLE_HEAD_CLASS}>No.</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS}>Competencia</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS}>Ronda</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS}>Lugar</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS}>Single</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS}>Media</TableHeadCell>
-              <TableHeadCell class={TABLE_HEAD_CLASS} colspan={5}>Resultados</TableHeadCell>
-            </TableHead>
+          <div class="overflow-x-auto">
+            <table class="table table-zebra w-full overflow-x-auto">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Competencia</th>
+                  <th>Ronda</th>
+                  <th>Lugar</th>
+                  <th>Single</th>
+                  <th>Media</th>
+                  <th colspan={5}>Resultados</th>
+                </tr>
+              </thead>
 
-            <TableBody>
-              {#each profile.contests.filter(cnt => cnt.name in categoryData) as cnt, p}
-                {@const contestData = categoryData[cnt.name]}
+              <tbody>
+                {#each profile.contests.filter(cnt => cnt.name in categoryData) as cnt, p}
+                  {@const contestData = categoryData[cnt.name]}
 
-                {#each contestData as result, rp}
-                  {@const format = formats.find(fm => fm.name === result.format) || formats[0]}
+                  {#each contestData as result, rp}
+                    {@const format = formats.find(fm => fm.name === result.format) || formats[0]}
 
-                  <TableBodyRow
-                    class={"border-t-gray-600! " +
-                      (p % 2 ? "bg-gray-200 dark:bg-gray-800" : "bg-gray-100 dark:bg-gray-700")}
-                  >
-                    {#if rp === 0}
-                      <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
-                        <span class="flex justify-center">{p + 1}</span>
-                      </TableBodyCell>
-                      <TableBodyCell class={TABLE_CELL_CLASS} rowspan={contestData.length}>
+                    <tr>
+                      {#if rp === 0}
+                        <td rowspan={contestData.length}>
+                          <span class="flex justify-center">{p + 1}</span>
+                        </td>
+                        <td rowspan={contestData.length}>
+                          <span class="flex justify-center">
+                            <a href={contestNameToLink(cnt.name)} class="hover:text-primary-300"
+                              >{cnt.name}</a
+                            >
+                          </span>
+                        </td>
+                      {/if}
+
+                      <td>
+                        <span class="flex justify-center">{result.round}</span>
+                      </td>
+                      <td>
                         <span class="flex justify-center">
-                          <a href={contestNameToLink(cnt.name)} class="hover:text-primary-300"
-                            >{cnt.name}</a
-                          >
-                        </span>
-                      </TableBodyCell>
-                    {/if}
+                          {#if result.place === 1}
+                            <Award type="gold" />
+                          {:else if result.place === 2}
+                            <Award type="silver" />
+                          {:else if result.place === 3}
+                            <Award type="bronze" />
+                          {/if}
 
-                    <TableBodyCell
-                      class={TABLE_CELL_CLASS + (p ? " border-l border-l-gray-600" : "")}
-                    >
-                      <span class="flex justify-center">Ronda {result.round}</span>
-                    </TableBodyCell>
-                    <TableBodyCell class={TABLE_CELL_CLASS}>
-                      <span class="flex justify-center">
-                        {#if result.place === 1}
-                          <Award type="gold" />
-                        {:else if result.place === 2}
-                          <Award type="silver" />
-                        {:else if result.place === 3}
-                          <Award type="bronze" />
-                        {/if}
-
-                        {result.place}
-                      </span>
-                    </TableBodyCell>
-                    <TableBodyCell class={TABLE_CELL_CLASS}>
-                      <a
-                        href={contestNameToLink(cnt.name, {
-                          category: selectedCategory.name,
-                          time: Math.min(...result.times.map(t => t || Infinity)) || Infinity,
-                          username: profile?.user.username,
-                        })}
-                        class="hover:text-primary-300"
-                      >
-                        <span class="flex justify-center text-green-400">
-                          {timer(
-                            Math.min(...result.times.map(t => t || Infinity)) || Infinity,
-                            true
-                          )}
+                          {result.place}
                         </span>
-                      </a>
-                    </TableBodyCell>
-                    <TableBodyCell class={TABLE_CELL_CLASS}>
-                      <a
-                        href={contestNameToLink(cnt.name, {
-                          category: selectedCategory.name,
-                          time: result.average || Infinity,
-                          username: profile?.user.username,
-                          type: "avg",
-                        })}
-                        class="hover:text-primary-300"
-                      >
-                        <span class="flex justify-center text-purple-400">
-                          {timer(result.average || Infinity, true)}
-                        </span>
-                      </a>
-                    </TableBodyCell>
-
-                    {#each result.times.slice(0, format.amount) as t, p1}
-                      <TableBodyCell class={TABLE_CELL_CLASS}>
+                      </td>
+                      <td>
                         <a
                           href={contestNameToLink(cnt.name, {
                             category: selectedCategory.name,
-                            time: t || Infinity,
+                            time: Math.min(...result.times.map(t => t || Infinity)) || Infinity,
                             username: profile?.user.username,
                           })}
                           class="hover:text-primary-300"
                         >
-                          <span
-                            class="flex justify-center"
-                            class:best={isPos(result.times, p1, 0)}
-                            class:worst={isPos(result.times, p1, format.amount - 1)}
-                          >
-                            {timer(t || Infinity, true)}
+                          <span class="flex justify-center text-green-400">
+                            {timer(
+                              Math.min(...result.times.map(t => t || Infinity)) || Infinity,
+                              true
+                            )}
                           </span>
                         </a>
-                      </TableBodyCell>
-                    {/each}
+                      </td>
+                      <td>
+                        <a
+                          href={contestNameToLink(cnt.name, {
+                            category: selectedCategory.name,
+                            time: result.average || Infinity,
+                            username: profile?.user.username,
+                            type: "avg",
+                          })}
+                          class="hover:text-primary-300"
+                        >
+                          <span class="flex justify-center text-purple-400">
+                            {timer(result.average || Infinity, true)}
+                          </span>
+                        </a>
+                      </td>
 
-                    {#each [1, 2, 3, 4, 5].slice(0, 5 - format.amount) as _}
-                      <TableBodyCell class={TABLE_CELL_CLASS} data-number={_}></TableBodyCell>
-                    {/each}
-                  </TableBodyRow>
+                      {#each result.times.slice(0, format.amount) as t, p1}
+                        <td>
+                          <a
+                            href={contestNameToLink(cnt.name, {
+                              category: selectedCategory.name,
+                              time: t || Infinity,
+                              username: profile?.user.username,
+                            })}
+                            class="hover:text-primary-300"
+                          >
+                            <span
+                              class="flex justify-center"
+                              class:best={isPos(result.times, p1, 0)}
+                              class:worst={isPos(result.times, p1, format.amount - 1)}
+                            >
+                              {timer(t || Infinity, true)}
+                            </span>
+                          </a>
+                        </td>
+                      {/each}
+
+                      {#each [1, 2, 3, 4, 5].slice(0, 5 - format.amount) as _}
+                        <td data-number={_}></td>
+                      {/each}
+                    </tr>
+                  {/each}
                 {/each}
-              {/each}
-            </TableBody>
-          </Table>
+              </tbody>
+            </table>
+          </div>
         {/if}
       </section>
 
       <!-- Performance -->
       <section>
-        <Heading tag="h2" class="text-center mb-4 text-2xl">
+        <h2 class="text-center mb-4 text-2xl">
           Desempeño ({selectedCategory.name})
-        </Heading>
+        </h2>
 
         <ul class="w-full flex flex-wrap gap-2 justify-center mb-4">
           {#each categories.filter(ct => ct.name in groupedData) as cat}
-            <Button color="alternative" class="p-0!" on:click={() => (selectedCategory = cat)}>
+            <button onclick={() => (selectedCategory = cat)}>
               <WcaCategory
                 class={"cursor-pointer " +
                   (selectedCategory.name === cat.name ? "text-green-300" : "")}
                 icon={cat.scrambler}
               />
-            </Button>
+            </button>
           {/each}
         </ul>
 
@@ -952,7 +934,7 @@
       </section>
     </aside>
   </section>
-</Card>
+</div>
 
 <style lang="postcss">
   @reference "tailwindcss";

@@ -134,6 +134,8 @@ export interface CONTEST {
   visible: boolean;
   status: CONTEST_STATUS;
   rounds: ROUND[];
+  seed: string;
+  gen: number;
 }
 
 export interface RANKING {
@@ -187,16 +189,17 @@ export type IColor =
   | undefined;
 
 export type INotColor =
-  | "red"
-  | "yellow"
-  | "green"
-  | "purple"
-  | "blue"
-  | "primary"
-  | "light"
-  | "dark"
-  | "none"
-  | "alternative";
+  | "btn-primary"
+  | "btn-secondary"
+  | "btn-accent"
+  | "btn-neutral"
+  | "btn-base-100"
+  | "btn-base-200"
+  | "btn-base-300"
+  | "btn-info"
+  | "btn-success"
+  | "btn-warning"
+  | "btn-error";
 
 export interface NotificationAction {
   text: string;

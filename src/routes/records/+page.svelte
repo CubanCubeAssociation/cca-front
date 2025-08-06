@@ -1,17 +1,4 @@
 <script lang="ts">
-  import {
-    Button,
-    Card,
-    Heading,
-    Span,
-    Spinner,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import type { ROLE, Scrambler } from "@interfaces";
   import { timer } from "@helpers/timer";
@@ -153,263 +140,265 @@
   });
 </script>
 
-<Card class="mx-auto mb-8 mt-4 flex w-[calc(100%-2rem)] max-w-4xl flex-col items-center gap-4">
-  <Heading tag="h1" class="flex items-center justify-center gap-1 text-center text-4xl">
+<div class="card mx-auto mb-8 mt-4 max-w-4xl">
+  <h1 class="flex items-center justify-center gap-1 text-center text-4xl">
     <TrophyIcon size="2rem" class="text-yellow-400 dark:text-yellow-300" /> Récords
-  </Heading>
+  </h1>
 
   {#if loading}
-    <Spinner />
+    <span class="loading loading-spinner loading-lg mx-auto"></span>
   {:else if getSortedEntries(categoryMap, 1).length > 0}
     <!-- NR -->
-    <Heading
-      tag="h2"
+    <h2
       class="mt-8 flex w-max items-center justify-center gap-1 rounded-md
       p-2 text-center text-xl !text-green-300"
     >
       Récords Nacionales
-    </Heading>
+    </h2>
 
-    <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-      <TableHead>
-        <TableHeadCell class="px-2 py-4">Categoría</TableHeadCell>
-        <TableHeadCell class="flex gap-1 px-2 py-4">
-          <span class="max-sm:text-green-400">Single</span>
-          <span class="sm:hidden">/</span>
-          <span class="max-sm:text-purple-400 sm:hidden">Media</span>
-        </TableHeadCell>
-        <TableHeadCell class="px-2 py-4">Competidor</TableHeadCell>
-        <TableHeadCell class="px-2 py-4 max-sm:hidden">Media</TableHeadCell>
-        <TableHeadCell class="px-2 py-4 max-sm:hidden">Competidor</TableHeadCell>
-      </TableHead>
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th class="px-2 py-4">Categoría</th>
+            <th class="flex gap-1 px-2 py-4">
+              <span class="max-sm:text-green-400">Single</span>
+              <span class="sm:hidden">/</span>
+              <span class="max-sm:text-purple-400 sm:hidden">Media</span>
+            </th>
+            <th class="px-2 py-4">Competidor</th>
+            <th class="px-2 py-4 max-sm:hidden">Media</th>
+            <th class="px-2 py-4 max-sm:hidden">Competidor</th>
+          </tr>
+        </thead>
 
-      <TableBody>
-        {#each getSortedEntries(categoryMap, 1) as cats}
-          {@const nr = nrMap.get(cats[0])}
-          {@const nrs = nr?.single}
-          {@const nra = nr?.mean}
+        <tbody>
+          {#each getSortedEntries(categoryMap, 1) as cats}
+            {@const nr = nrMap.get(cats[0])}
+            {@const nrs = nr?.single}
+            {@const nra = nr?.mean}
 
-          <TableBodyRow class={nra && nra.time ? "max-sm:row-span-2" : ""}>
-            <TableBodyCell class="px-2">
-              <Heading
-                tag="h3"
-                class="col-span-2 flex w-fit items-center justify-center gap-1 text-center text-lg"
-              >
-                <WcaCategory icon={categoryIcon.get(cats[0])} size="1.2rem" />
-                {cats[1]}
-              </Heading>
-            </TableBodyCell>
-
-            <TableBodyCell class="gap-4 px-2">
-              <a
-                href={contestNameToLink(nrs?.contest || "", {
-                  category: nrs?.category.name,
-                  username: nrs?.contestant.username,
-                  time: nrs?.time,
-                })}
-              >
-                <span class="flex items-center justify-between gap-2 text-green-400">
-                  {timer(nrs?.time || 0, true, true)}
-                  <LinkIcon size="1.2rem" />
-                </span>
-              </a>
-              {#if nra && nra.time}
-                <a
-                  href={contestNameToLink(nra.contest, {
-                    category: nra?.category.name,
-                    username: nra?.contestant.username,
-                    time: nra?.time,
-                    type: "avg",
-                  })}
-                  class="sm:hidden"
+            <tr class={nra && nra.time ? "max-sm:row-span-2" : ""}>
+              <td class="px-2">
+                <h3
+                  class="col-span-2 flex w-fit items-center justify-center gap-1 text-center text-lg"
                 >
-                  <span class="mt-2 flex items-center justify-between gap-2 text-purple-400">
-                    {timer(nra.time, true, true)}
+                  <WcaCategory icon={categoryIcon.get(cats[0])} size="1.2rem" />
+                  {cats[1]}
+                </h3>
+              </td>
+
+              <td class="gap-4 px-2">
+                <a
+                  href={contestNameToLink(nrs?.contest || "", {
+                    category: nrs?.category.name,
+                    username: nrs?.contestant.username,
+                    time: nrs?.time,
+                  })}
+                >
+                  <span class="flex items-center justify-between gap-2 text-green-400">
+                    {timer(nrs?.time || 0, true, true)}
                     <LinkIcon size="1.2rem" />
                   </span>
                 </a>
-              {/if}
-            </TableBodyCell>
-            <TableBodyCell class="px-2 max-sm:grid">
-              <span class="text-sm">
-                <UserField
-                  link
-                  user={nrs?.contestant || { name: "", role: "user", username: "" }}
-                />
-              </span>
+                {#if nra && nra.time}
+                  <a
+                    href={contestNameToLink(nra.contest, {
+                      category: nra?.category.name,
+                      username: nra?.contestant.username,
+                      time: nra?.time,
+                      type: "avg",
+                    })}
+                    class="sm:hidden"
+                  >
+                    <span class="mt-2 flex items-center justify-between gap-2 text-purple-400">
+                      {timer(nra.time, true, true)}
+                      <LinkIcon size="1.2rem" />
+                    </span>
+                  </a>
+                {/if}
+              </td>
+              <td class="px-2 max-sm:grid">
+                <span class="text-sm">
+                  <UserField
+                    link
+                    user={nrs?.contestant || { name: "", role: "user", username: "" }}
+                  />
+                </span>
+                {#if nra && nra.time}
+                  <span class="mt-2 text-sm sm:hidden">
+                    <UserField
+                      link
+                      user={nra?.contestant || { name: "", role: "user", username: "" }}
+                    />
+                  </span>
+                {/if}
+              </td>
+
               {#if nra && nra.time}
-                <span class="mt-2 text-sm sm:hidden">
+                <td class="px-2 max-sm:hidden">
+                  <a
+                    href={contestNameToLink(nra.contest, {
+                      category: nra?.category.name,
+                      username: nra?.contestant.username,
+                      time: nra?.time,
+                      type: "avg",
+                    })}
+                  >
+                    <span class="flex items-center justify-between gap-2 text-purple-400">
+                      {timer(nra.time, true, true)}
+                      <LinkIcon size="1.2rem" />
+                    </span>
+                  </a>
+                </td>
+                <td class="px-2 max-sm:hidden">
                   <UserField
                     link
                     user={nra?.contestant || { name: "", role: "user", username: "" }}
                   />
-                </span>
+                </td>
+              {:else}
+                <td class="px-2 max-sm:hidden">-</td>
+                <td class="px-2 max-sm:hidden">-</td>
               {/if}
-            </TableBodyCell>
-
-            {#if nra && nra.time}
-              <TableBodyCell class="px-2 max-sm:hidden">
-                <a
-                  href={contestNameToLink(nra.contest, {
-                    category: nra?.category.name,
-                    username: nra?.contestant.username,
-                    time: nra?.time,
-                    type: "avg",
-                  })}
-                >
-                  <span class="flex items-center justify-between gap-2 text-purple-400">
-                    {timer(nra.time, true, true)}
-                    <LinkIcon size="1.2rem" />
-                  </span>
-                </a>
-              </TableBodyCell>
-              <TableBodyCell class="px-2 max-sm:hidden">
-                <UserField
-                  link
-                  user={nra?.contestant || { name: "", role: "user", username: "" }}
-                />
-              </TableBodyCell>
-            {:else}
-              <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>
-              <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>
-            {/if}
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
 
     <!-- PR -->
-    <Heading
-      tag="h2"
+    <h2
       class="mt-14 flex w-max items-center justify-center gap-1 rounded-md
       p-2 text-center text-xl !text-green-300"
     >
       Récords Provinciales
-    </Heading>
+    </h2>
 
     {#each getSortedEntries(categoryMap, 1) as cats}
       {@const pr = prMap.get(cats[0])}
 
       {#if pr}
-        <Heading
-          tag="h3"
-          class="col-span-2 flex w-fit items-center justify-center gap-1 text-center text-lg"
-        >
+        <h3 class="col-span-2 flex w-fit items-center justify-center gap-1 text-center text-lg">
           <WcaCategory icon={categoryIcon.get(cats[0])} size="1.2rem" />
           {cats[1]}
-        </Heading>
+        </h3>
 
-        <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-          <TableHead>
-            <TableHeadCell class="px-2 py-4">Provincia</TableHeadCell>
-            <TableHeadCell class="flex gap-1 px-2 py-4">
-              <span class="max-sm:text-green-400">Single</span>
-              <span class="sm:hidden">/</span>
-              <span class="max-sm:text-purple-400 sm:hidden">Media</span>
-            </TableHeadCell>
-            <TableHeadCell class="px-2 py-4">Competidor</TableHeadCell>
-            <TableHeadCell class="px-2 py-4 max-sm:hidden">Media</TableHeadCell>
-            <TableHeadCell class="px-2 py-4 max-sm:hidden">Competidor</TableHeadCell>
-          </TableHead>
+        <div class="overflow-x-auto w-full mb-8">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th class="px-2 py-4">Provincia</th>
+                <th class="flex gap-1 px-2 py-4">
+                  <span class="max-sm:text-green-400">Single</span>
+                  <span class="sm:hidden">/</span>
+                  <span class="max-sm:text-purple-400 sm:hidden">Media</span>
+                </th>
+                <th class="px-2 py-4">Competidor</th>
+                <th class="px-2 py-4 max-sm:hidden">Media</th>
+                <th class="px-2 py-4 max-sm:hidden">Competidor</th>
+              </tr>
+            </thead>
 
-          <TableBody>
-            {#each pr.entries() as prRes}
-              {@const prSingle = prRes[1].single}
-              {@const prMean = prRes[1].mean}
+            <tbody>
+              {#each pr.entries() as prRes}
+                {@const prSingle = prRes[1].single}
+                {@const prMean = prRes[1].mean}
 
-              <TableBodyRow>
-                <TableBodyCell class="px-2">{prRes[0]}</TableBodyCell>
+                <tr>
+                  <td class="px-2">{prRes[0]}</td>
 
-                <TableBodyCell class="px-2">
-                  <a
-                    href={contestNameToLink(prSingle?.contest || "", {
-                      category: cats[1],
-                      username: prSingle?.contestant.username,
-                      time: prSingle?.time,
-                    })}
-                  >
-                    <span class="flex items-center justify-between gap-2 text-green-400">
-                      {timer(prSingle?.time || 0, true, true)}
-                      <LinkIcon size="1.2rem" />
-                    </span>
-                  </a>
-
-                  {#if prMean && prMean.time}
+                  <td class="px-2">
                     <a
-                      href={contestNameToLink(prMean.contest, {
+                      href={contestNameToLink(prSingle?.contest || "", {
                         category: cats[1],
-                        username: prMean?.contestant.username,
-                        time: prMean?.time,
-                        type: "avg",
+                        username: prSingle?.contestant.username,
+                        time: prSingle?.time,
                       })}
-                      class="sm:hidden"
                     >
-                      <span class="mt-2 flex items-center justify-between gap-2 text-purple-400">
-                        {timer(prMean.time, true, true)}
+                      <span class="flex items-center justify-between gap-2 text-green-400">
+                        {timer(prSingle?.time || 0, true, true)}
                         <LinkIcon size="1.2rem" />
                       </span>
                     </a>
-                  {/if}
-                </TableBodyCell>
-                <TableBodyCell class="px-2">
-                  <span class="flex items-end text-sm">
-                    <UserField
-                      link
-                      user={prSingle?.contestant || { name: "", role: "user", username: "" }}
-                    />
-                  </span>
+
+                    {#if prMean && prMean.time}
+                      <a
+                        href={contestNameToLink(prMean.contest, {
+                          category: cats[1],
+                          username: prMean?.contestant.username,
+                          time: prMean?.time,
+                          type: "avg",
+                        })}
+                        class="sm:hidden"
+                      >
+                        <span class="mt-2 flex items-center justify-between gap-2 text-purple-400">
+                          {timer(prMean.time, true, true)}
+                          <LinkIcon size="1.2rem" />
+                        </span>
+                      </a>
+                    {/if}
+                  </td>
+                  <td class="px-2">
+                    <span class="flex items-end text-sm">
+                      <UserField
+                        link
+                        user={prSingle?.contestant || { name: "", role: "user", username: "" }}
+                      />
+                    </span>
+
+                    {#if prMean && prMean.time}
+                      <span class="mt-2 flex items-center justify-between gap-2 text-sm sm:hidden">
+                        <UserField
+                          link
+                          user={prMean?.contestant || { name: "", role: "user", username: "" }}
+                        />
+                      </span>
+                    {/if}
+                  </td>
 
                   {#if prMean && prMean.time}
-                    <span class="mt-2 flex items-center justify-between gap-2 text-sm sm:hidden">
-                      <UserField
-                        link
-                        user={prMean?.contestant || { name: "", role: "user", username: "" }}
-                      />
-                    </span>
-                  {/if}
-                </TableBodyCell>
-
-                {#if prMean && prMean.time}
-                  <TableBodyCell class="px-2 max-sm:hidden">
-                    <a
-                      href={contestNameToLink(prMean.contest, {
-                        category: cats[1],
-                        username: prMean?.contestant.username,
-                        time: prMean?.time,
-                        type: "avg",
-                      })}
-                    >
-                      <span class="flex items-center justify-between gap-2 text-purple-400">
-                        {timer(prMean.time, true, true)}
-                        <LinkIcon size="1.2rem" />
+                    <td class="px-2 max-sm:hidden">
+                      <a
+                        href={contestNameToLink(prMean.contest, {
+                          category: cats[1],
+                          username: prMean?.contestant.username,
+                          time: prMean?.time,
+                          type: "avg",
+                        })}
+                      >
+                        <span class="flex items-center justify-between gap-2 text-purple-400">
+                          {timer(prMean.time, true, true)}
+                          <LinkIcon size="1.2rem" />
+                        </span>
+                      </a>
+                    </td>
+                    <td class="px-2 max-sm:hidden">
+                      <span class="text-sm">
+                        <UserField
+                          link
+                          user={prMean?.contestant || { name: "", role: "user", username: "" }}
+                        />
                       </span>
-                    </a>
-                  </TableBodyCell>
-                  <TableBodyCell class="px-2 max-sm:hidden">
-                    <span class="text-sm">
-                      <UserField
-                        link
-                        user={prMean?.contestant || { name: "", role: "user", username: "" }}
-                      />
-                    </span>
-                  </TableBodyCell>
-                {:else}
-                  <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>
-                  <TableBodyCell class="px-2 max-sm:hidden">-</TableBodyCell>
-                {/if}
-              </TableBodyRow>
-            {/each}
-          </TableBody>
-        </Table>
+                    </td>
+                  {:else}
+                    <td class="px-2 max-sm:hidden">-</td>
+                    <td class="px-2 max-sm:hidden">-</td>
+                  {/if}
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
       {/if}
     {/each}
   {:else if error}
-    <Span class="text-center text-red-500!">
+    <span class="text-center text-red-500!">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-    </Span>
+    </span>
 
-    <Button class="mt-8 w-min" on:click={updateCategoryMap}>Recargar</Button>
+    <button class="btn btn-primary mt-8" onclick={updateCategoryMap}>Recargar</button>
   {:else}
-    <Span class="text-center">No hay resultados disponibles</Span>
+    <span class="text-center">No hay resultados disponibles</span>
   {/if}
-</Card>
+</div>

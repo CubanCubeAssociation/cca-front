@@ -8,21 +8,6 @@
     updateRankings,
   } from "@helpers/API";
   import type { CATEGORY, RANKING } from "@interfaces";
-  import {
-    Table,
-    TableHead,
-    TableHeadCell,
-    Heading,
-    Card,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    Span,
-    Spinner,
-    Button,
-    Dropdown,
-    DropdownItem,
-  } from "flowbite-svelte";
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import Select from "@components/Select.svelte";
   // import { PROVINCIAS } from "@constants";
@@ -137,10 +122,10 @@
   });
 </script>
 
-<Card class="mx-auto mb-8 mt-4 grid w-[calc(100%-2rem)] max-w-4xl place-items-center">
-  <Heading tag="h1" class="mb-4 flex items-center justify-center gap-1 text-center text-4xl">
+<div class="card mx-auto mb-8 mt-4 max-w-4xl">
+  <h1 class="mb-4 flex items-center justify-center gap-1 text-center text-4xl">
     <RankingIcon size="2rem" class="text-green-400 dark:text-green-300" /> Ranking
-  </Heading>
+  </h1>
 
   <div class="actions mb-8 flex flex-wrap justify-center gap-4">
     <Select
@@ -172,87 +157,93 @@
     /> -->
 
     {#if minRole($userStore, "admin")}
-      <Button class="p-1! w-9 h-9"><ReloadIcon size="1rem" /></Button>
-      <Dropdown trigger="hover">
-        <DropdownItem on:click={handleUpdateCategory}>Actualizar Categoría</DropdownItem>
-        <DropdownItem on:click={handleUpdateRanking}>Actualizar General</DropdownItem>
-      </Dropdown>
+      <div class="dropdown dropdown-hover">
+        <div tabindex="0" role="button" class="btn m-1"><ReloadIcon size="1rem" /></div>
+        <ul class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+          <li><a href="?#" onclick={handleUpdateCategory}>Actualizar Categoría</a></li>
+          <li><a href="?#" onclick={handleUpdateRanking}>Actualizar General</a></li>
+        </ul>
+      </div>
     {/if}
   </div>
 
   {#if loading}
-    <Spinner size="10" />
+    <span class="loading loading-spinner loading-lg mx-auto"></span>
   {:else if rankingResults.length > 0}
     <PaginatorComponent showNextPrev={!$screen.isMobile} bind:pg class="mb-4" />
 
-    <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-      <TableHead>
-        <TableHeadCell>#</TableHeadCell>
-        <TableHeadCell>Nombre</TableHeadCell>
-        <TableHeadCell>{type === "Single" ? "Tiempo" : "Promedio"}</TableHeadCell>
-        <TableHeadCell>Competencia</TableHeadCell>
-      </TableHead>
+    <div class="overflow-x-auto">
+      <table class="table table-zebra">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>{type === "Single" ? "Tiempo" : "Promedio"}</th>
+            <th>Competencia</th>
+          </tr>
+        </thead>
 
-      <TableBody>
-        {#each rankingResults.slice(pg.start, pg.end) as r, pos}
-          <TableBodyRow>
-            <TableBodyCell>
-              {#if pos === 0 && pg.page === 1}
-                <Award type="gold" />
-              {:else if pos === 1 && pg.page === 1}
-                <Award type="silver" />
-              {:else if pos === 2 && pg.page === 1}
-                <Award type="bronze" />
-              {:else}
-                <span class="flex justify-center">{(pg.page - 1) * pg.limit + pos + 1}</span>
-              {/if}
-            </TableBodyCell>
-            <TableBodyCell>
-              <UserField user={r.contestant} link />
-            </TableBodyCell>
-            <TableBodyCell>
-              <a
-                href={contestNameToLink(r.contest, {
-                  category: category?.name,
-                  time: r.time,
-                  type: type === "Single" ? "single" : "avg",
-                  username: r.contestant.username,
-                })}
-                target="_blank"
-              >
-                <span
-                  class={twMerge(
-                    "flex items-center justify-between gap-2",
-                    type === "Single" ? "text-green-400" : "text-purple-400"
-                  )}
+        <tbody>
+          {#each rankingResults.slice(pg.start, pg.end) as r, pos}
+            <tr>
+              <td>
+                {#if pos === 0 && pg.page === 1}
+                  <Award type="gold" />
+                {:else if pos === 1 && pg.page === 1}
+                  <Award type="silver" />
+                {:else if pos === 2 && pg.page === 1}
+                  <Award type="bronze" />
+                {:else}
+                  <span class="flex justify-center">{(pg.page - 1) * pg.limit + pos + 1}</span>
+                {/if}
+              </td>
+              <td>
+                <UserField user={r.contestant} link />
+              </td>
+              <td>
+                <a
+                  href={contestNameToLink(r.contest, {
+                    category: category?.name,
+                    time: r.time,
+                    type: type === "Single" ? "single" : "avg",
+                    username: r.contestant.username,
+                  })}
+                  target="_blank"
                 >
-                  {r.time ? timer(r.time, true, true) : "DNF"}
-                </span>
-              </a>
-            </TableBodyCell>
-            <TableBodyCell>
-              <a class="text-blue-300" href={contestNameToLink(r.contest)} target="_blank">
-                {r.contest}
-              </a>
-            </TableBodyCell>
-          </TableBodyRow>
-        {/each}
-      </TableBody>
-    </Table>
+                  <span
+                    class={twMerge(
+                      "flex items-center justify-between gap-2",
+                      type === "Single" ? "text-green-400" : "text-purple-400"
+                    )}
+                  >
+                    {r.time ? timer(r.time, true, true) : "DNF"}
+                  </span>
+                </a>
+              </td>
+              <td>
+                <a class="text-blue-300" href={contestNameToLink(r.contest)} target="_blank">
+                  {r.contest}
+                </a>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
 
     <PaginatorComponent showNextPrev={!$screen.isMobile} bind:pg class="mt-4" />
   {:else if error}
-    <Span class="text-center text-red-500!">
+    <span class="text-center text-red-500!">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-    </Span>
+    </span>
 
-    <Button
-      class="mt-8 w-min"
-      on:click={() => (category ? getRankingInfo(category.id || "", type) : refreshRankingData())}
+    <button
+      class="btn btn-primary mt-8"
+      onclick={() => (category ? getRankingInfo(category.id || "", type) : refreshRankingData())}
     >
       Recargar
-    </Button>
+    </button>
   {:else}
-    <Span class="text-center">No hay resultados disponibles para {category?.name} {type}</Span>
+    <span class="text-center">No hay resultados disponibles para {category?.name} {type}</span>
   {/if}
-</Card>
+</div>

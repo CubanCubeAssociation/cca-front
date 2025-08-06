@@ -2,10 +2,11 @@ import type { CATEGORY, PROVINCE, ROLE } from "../interfaces";
 
 export const CCA_ICON = "/cca_logo.svg";
 
-// export const API = "http://localhost:3500/v1"; 
+// export const API = "http://localhost:3500/v1";
 // export const API = 'http://192.168.180.93:3500/v1';
 export const API = "https://cca-back.onrender.com/v1";
-export const DOMAIN = "https://cca-cuba.netlify.app";
+export const DOMAIN = "http://localhost:5173";
+// export const DOMAIN = "https://cca-cuba.netlify.app";
 
 export const ICONS: Partial<CATEGORY>[] = [
   {

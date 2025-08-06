@@ -304,9 +304,16 @@ export async function getCategory(id: string): Promise<CATEGORY> {
   return await ky.get(API + "/categories/" + id, commonAuth()).json();
 }
 
-export async function getFormats(): Promise<FORMAT[]> {
-  if (tokenNeedsRefresh()) await refreshToken();
-  return await ky.get(API + "/categories/formats", commonAuth()).json();
+export function getFormats(): FORMAT[] {
+  return [
+    { name: "Ao5", amount: 5, lMargin: 1, rMargin: 1 },
+    { name: "Mo3", amount: 3, lMargin: 0, rMargin: 0 },
+    { name: "Bo3", amount: 3, lMargin: 0, rMargin: 2 },
+    { name: "Bo2", amount: 2, lMargin: 0, rMargin: 1 },
+    { name: "Bo1", amount: 1, lMargin: 0, rMargin: 0 },
+  ];
+  // if (tokenNeedsRefresh()) await refreshToken();
+  // return await ky.get(API + "/categories/formats", commonAuth()).json();
 }
 
 export async function createCategory(c: CATEGORY) {

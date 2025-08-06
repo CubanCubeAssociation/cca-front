@@ -1,5 +1,4 @@
 import { PENALTY, type CONTEST } from "@interfaces";
-import type { Indicator } from "flowbite-svelte";
 
 export function getSearchParams(loc: string): Map<string, string> {
   return loc
@@ -32,14 +31,12 @@ export function getStatus(st: CONTEST["status"]): string {
   return "-";
 }
 
-export function getIndicatorColor(
-  st: CONTEST["status"]
-): InstanceType<typeof Indicator>["$$prop_def"]["color"] {
-  if (st === "pending") return "yellow";
-  if (st === "inscription") return "blue";
-  if (st === "running") return "green";
-  if (st === "results") return "purple";
-  if (st === "finished") return "red";
+export function getIndicatorColor(st: CONTEST["status"]) {
+  if (st === "pending") return "status-warning";
+  if (st === "inscription") return "status-info";
+  if (st === "running") return "status-accent";
+  if (st === "results") return "status-primary";
+  if (st === "finished") return "status-error";
   return "gray";
 }
 

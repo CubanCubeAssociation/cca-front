@@ -17,7 +17,7 @@
   const notService = NotificationService.getInstance();
   const subService = notService.notificationSub;
 
-  let notifications: INotification[] = $state([]);
+  let notifications: INotification[] = $state(<INotification[]>[]);
   let jsonld = $state("");
 
   initializeUserService();
@@ -50,6 +50,7 @@
     });
 
     setInterval(() => checkAuth(), 60000);
+    handleResize();
   });
 
   $effect(() => {
@@ -71,25 +72,8 @@
 
 <FooterComponent />
 
-<div class="notification-container">
+<div class="toast toast-end toast-middle">
   {#each notifications as nt (nt.key)}
     <Notification {...nt} fixed={nt.fixed} />
   {/each}
 </div>
-
-<style>
-  .notification-container {
-    max-width: 25rem;
-    position: fixed;
-    right: 0;
-    top: 3rem;
-    height: calc(100% - 3rem);
-    width: 100%;
-    pointer-events: none;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    justify-content: center;
-    z-index: 50;
-  }
-</style>

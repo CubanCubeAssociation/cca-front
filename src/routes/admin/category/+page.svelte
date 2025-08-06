@@ -3,17 +3,6 @@
   import type { CATEGORY } from "@interfaces";
   import { getCategories } from "@helpers/API";
   import PlusIcon from "@icons/Plus.svelte";
-  import {
-    Button,
-    Card,
-    Heading,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
@@ -40,47 +29,47 @@
 </script>
 
 <PrivateRouteGuard>
-  <Card class="mt-4 max-w-lg w-[calc(100%-2rem)] mx-auto mb-8">
-    <Heading class="text-3xl text-center">{HEADER}</Heading>
+  <div class="card mt-4 max-w-lg mx-auto mb-8">
+    <h1 class="text-3xl text-center">{HEADER}</h1>
 
     <div class="actions">
-      <Button on:click={addCategory}>
+      <button class="btn btn-primary" onclick={addCategory}>
         <PlusIcon size="1.2rem" />
         {ADD}
-      </Button>
+      </button>
     </div>
 
     {#if categories.length > 0}
-      <Table striped hoverable shadow>
-        <TableHead>
-          <TableHeadCell>Nombre</TableHeadCell>
-          <TableHeadCell>Ícono</TableHeadCell>
-          <TableHeadCell>Scrambler</TableHeadCell>
-        </TableHead>
+      <div class="overflow-x-auto w-full">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Ícono</th>
+              <th>Scrambler</th>
+            </tr>
+          </thead>
 
-        <TableBody>
-          {#each categories as cat}
-            <TableBodyRow>
-              <TableBodyCell>
-                <a href={"/admin/category/" + cat.id}>{cat.name}</a>
-              </TableBodyCell>
-              <TableBodyCell>
-                <WcaCategory icon={cat.scrambler} />
-              </TableBodyCell>
-              <TableBodyCell>{cat.scrambler}</TableBodyCell>
-            </TableBodyRow>
-          {/each}
-        </TableBody>
-      </Table>
+          <tbody>
+            {#each categories as cat}
+              <tr>
+                <td><a href={"/admin/category/" + cat.id}>{cat.name}</a></td>
+                <td><WcaCategory icon={cat.scrambler} /></td>
+                <td>{cat.scrambler}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
 
       <div class="actions">
-        <Button on:click={addCategory}>
+        <button class="btn btn-primary" onclick={addCategory}>
           <PlusIcon size="1.2rem" />
           {ADD}
-        </Button>
+        </button>
       </div>
     {/if}
-  </Card>
+  </div>
 </PrivateRouteGuard>
 
 <style lang="postcss">

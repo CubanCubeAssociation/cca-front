@@ -220,7 +220,7 @@
   {/if}
 {/snippet}
 
-<div class="navbar bg-base-100 shadow-sm fixed z-50 top-0 left-0 w-full">
+<div class="navbar bg-base-100 shadow-sm fixed z-[1000] top-0 left-0 w-full">
   <div class="navbar-start w-min">
     {#if $screen.isMobile}
       <div class="dropdown">

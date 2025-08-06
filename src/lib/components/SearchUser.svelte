@@ -5,22 +5,8 @@
   import DeleteIcon from "@icons/Delete.svelte";
   import AddIcon from "@icons/Plus.svelte";
   import { uniqueArray } from "@helpers/object";
-  import {
-    Button,
-    Heading,
-    Input,
-    Modal,
-    Spinner,
-    Table,
-    TableBody,
-    TableBodyCell,
-    TableBodyRow,
-    TableHead,
-    TableHeadCell,
-  } from "flowbite-svelte";
-
   import { UserSearchIcon } from "lucide-svelte";
-  import { twMerge } from "tailwind-merge";
+  import Modal from "./Modal.svelte";
 
   type Callback = () => void;
 
@@ -103,6 +89,7 @@
   }
 
   function sendUsers(u?: USER) {
+    show = false;
     if (type === "dropdown") {
       if (u) return user(u);
     } else {
@@ -116,101 +103,109 @@
 </script>
 
 {#if type === "modal"}
-  <Modal
-    title={`Buscar ${multiple ? "usuarios" : "usuario"}`}
-    bind:open={show}
-    autoclose
-    outsideclose
-  >
-    <Input bind:value={input} placeholder="Buscar..." on:input={handleInput} />
+  <Modal bind:show>
+    <h2 class="text-2xl text-center mb-4">Buscar {multiple ? "usuarios" : "usuario"}</h2>
 
-    {#if userList.length}
-      <Table hoverable shadow divClass="w-full relative overflow-x-auto">
-        <TableHead>
-          <TableHeadCell></TableHeadCell>
-          <TableHeadCell>Nombre</TableHeadCell>
-          <TableHeadCell>Usuario</TableHeadCell>
-        </TableHead>
+    <label class="input mx-auto w-full mb-4">
+      <UserSearchIcon />
 
-        <TableBody>
-          {#each userList as c (c.username)}
-            <TableBodyRow>
-              <TableBodyCell>
-                <Button
-                  class="px-2 py-2"
-                  type="button"
-                  on:click={e => {
-                    e.stopPropagation();
-                    selected = uniqueArray([...selected, c], e => e.username);
-                  }}
-                >
-                  <AddIcon size="1.2rem" class="pointer-events-none" />
-                </Button>
-              </TableBodyCell>
+      <input bind:value={input} type="search" class="grow" {placeholder} oninput={handleInput} />
+    </label>
 
-              <TableBodyCell class="cursor-pointer">
-                {c.name}
-              </TableBodyCell>
-
-              <TableBodyCell>
-                {c.username}
-              </TableBodyCell>
-            </TableBodyRow>
-          {/each}
-        </TableBody>
-      </Table>
-    {/if}
-
-    {#if multiple}
-      {#if checked}
-        <Button on:click={addSelected}>Añadir ({checked})</Button>
-      {/if}
-
-      {#if selected.length}
-        <Heading tag="h4" class="text-center">Seleccionados</Heading>
-
-        <Table striped shadow hoverable>
-          <TableHead>
-            <TableHeadCell>Nombre</TableHeadCell>
-            <TableHeadCell>Usuario</TableHeadCell>
-            <TableHeadCell></TableHeadCell>
-          </TableHead>
-
-          <TableBody>
-            {#each selected as c, i (c.username)}
-              <TableBodyRow>
-                <TableBodyCell on:click={() => (checks[i] = !checks[i])}>
-                  {c.name}
-                </TableBodyCell>
-
-                <TableBodyCell>
-                  {c.username}
-                </TableBodyCell>
-
-                <TableBodyCell>
-                  <Button type="button" color="red" on:click={() => deleteSelected(i)}
-                    ><DeleteIcon size="1.2rem" /></Button
-                  >
-                </TableBodyCell>
-              </TableBodyRow>
-            {/each}
-          </TableBody>
-        </Table>
-      {/if}
-    {/if}
-
-    <svelte:fragment slot="footer">
-      <div class="flex gap-2 justify-center mt-2">
-        <Button color="alternative">Cancelar</Button>
-
-        <Button
-          on:click={() => sendUsers()}
-          disabled={(!multiple && !checked) || (multiple && selected.length === 0)}
-        >
-          <SendIcon size="1.2rem" /> Aceptar
-        </Button>
+    {#if searching}
+      <div class="dropdown-content menu w-full bg-base-200">
+        <span class="loading loading-spinner loading-lg mx-auto"></span>
       </div>
-    </svelte:fragment>
+    {:else}
+      {#if userList.length}
+        <div class="overflow-x-auto">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Nombre</th>
+                <th>Usuario</th>
+              </tr>
+            </thead>
+            <tbody>
+              {#each userList as c (c.username)}
+                <tr>
+                  <td>
+                    <button
+                      class="btn btn-secondary px-2 py-2"
+                      type="button"
+                      onclick={e => {
+                        e.stopPropagation();
+                        selected = uniqueArray([...selected, c], e => e.username);
+                      }}
+                    >
+                      <AddIcon size="1.2rem" class="pointer-events-none" />
+                    </button>
+                  </td>
+
+                  <td>{c.name}</td>
+                  <td>{c.username} </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+      {/if}
+
+      {#if multiple}
+        {#if checked}
+          <button onclick={addSelected}>Añadir ({checked})</button>
+        {/if}
+
+        {#if selected.length}
+          <h4 class="text-center text-xl my-2 text-accent">Seleccionados</h4>
+
+          <div class="overflow-x-auto">
+            <table class="table table-zebra">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Usuario</th>
+                  <th></th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {#each selected as c, i (c.username)}
+                  <tr>
+                    <td onclick={() => (checks[i] = !checks[i])}>
+                      {c.name}
+                    </td>
+
+                    <td>
+                      {c.username}
+                    </td>
+
+                    <td>
+                      <button type="button" color="red" onclick={() => deleteSelected(i)}>
+                        <DeleteIcon size="1.2rem" />
+                      </button>
+                    </td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
+        {/if}
+      {/if}
+    {/if}
+
+    <div class="flex gap-2 justify-center mt-2">
+      <button class="btn" onclick={() => (show = false)}>Cancelar</button>
+
+      <button
+        class="btn btn-primary"
+        onclick={() => sendUsers()}
+        disabled={(!multiple && !checked) || (multiple && selected.length === 0)}
+      >
+        <SendIcon size="1.2rem" /> Aceptar
+      </button>
+    </div>
   </Modal>
 {:else}
   <div class={cl}>
@@ -222,7 +217,7 @@
 
     {#if searching}
       <div class="dropdown-content menu w-full bg-base-200">
-        <Spinner size="5" class="mx-auto" />
+        <span class="loading loading-spinner loading-xs"></span>
       </div>
     {:else if userList.length > 0 && show}
       <ul

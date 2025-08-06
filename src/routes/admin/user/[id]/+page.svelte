@@ -1,31 +1,29 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import {
-    Button,
-    Card,
-    Dropzone,
-    Heading,
-    Input,
-    Label,
-    Modal,
-    Radio,
-    Span,
-    Tooltip,
-  } from "flowbite-svelte";
-  import { ExclamationCircleOutline, TrashBinSolid } from "flowbite-svelte-icons";
   import { createUser, getAvatarRoute, getUser, removeUser, updateUser } from "@helpers/API";
   import type { USER } from "@interfaces";
   import { PROVINCIAS, ROLES } from "@constants";
   import SaveIcon from "@icons/Send.svelte";
   import Select from "@components/Select.svelte";
   import { goto } from "$app/navigation";
-  import { page } from "$app/stores";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
   import Cropper from "svelte-easy-crop";
-  import UploadIcon from "@icons/CloudUpload.svelte";
-  import DeleteIcon from "@icons/Delete.svelte";
-  import CropIcon from "@icons/Crop.svelte";
+  // import UploadIcon from "@icons/CloudUpload.svelte";
+  // import DeleteIcon from "@icons/Delete.svelte";
+  // import CropIcon from "@icons/Crop.svelte";
   import { userStore } from "@stores/user";
+  import {
+    CircleAlertIcon,
+    DollarSignIcon,
+    IdCardIcon,
+    KeyRoundIcon,
+    MailIcon,
+    TrashIcon,
+    UserIcon,
+  } from "lucide-svelte";
+  import Modal from "@components/Modal.svelte";
+  import { preventDefault } from "@helpers/object";
+  import { page } from "$app/state";
 
   const WIDTH = 200;
   const HEIGHT = WIDTH;
@@ -225,7 +223,7 @@
   }
 
   onMount(() => {
-    id = $page.params.id;
+    id = page.params.id;
 
     if (!id || !id.trim()) {
       id = "new";
@@ -246,8 +244,9 @@
     }
   });
 
+  $effect(() => updateMunicipalities(user.province));
   $effect(() => {
-    updateMunicipalities(user.province);
+    user.sex = user.ci.length >= 10 ? (~~(user.ci.at(9) || 0) % 2 === 0 ? "M" : "F") : user.sex;
   });
 </script>
 
@@ -260,17 +259,17 @@
 </svelte:head>
 
 <PrivateRouteGuard>
-  <Card class="mt-4 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
-    <Heading class="text-3xl text-center">
+  <div class="card mt-4 max-w-6xl mx-auto mb-8">
+    <h1 class="text-3xl text-center">
       {id === "new" ? "Crear usuario" : `Editar "${user.name}"`}
-    </Heading>
+    </h1>
 
     <form
       autocomplete="off"
-      class="mt-8 grid items-center gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2"
+      class="mt-8 grid items-center px-4 gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2"
       onsubmit={save}
     >
-      <div class="grid">
+      <!-- <div class="grid">
         <Dropzone
           id="dropzone"
           on:drop={dropHandle}
@@ -294,76 +293,103 @@
 
         {#if tempAvatar || true}
           <div class="flex gap-2 items-center justify-center mt-2">
-            <Button class="px-3" on:click={() => (showCropModal = true)}>
-              <CropIcon size="1.1rem" />
-            </Button>
-            <Tooltip>Recortar</Tooltip>
+            <div class="tooltip" data-tip="Recortar">
+              <button class="btn px-3" onclick={preventDefault(() => (showCropModal = true))}>
+                <CropIcon size="1.1rem" />
+              </button>
+            </div>
 
-            <Button
-              class="px-3"
-              color="red"
-              on:click={() => {
-                tempAvatar = croppedData = "";
-              }}
-            >
-              <DeleteIcon size="1.1rem" />
-            </Button>
-            <Tooltip>Eliminar</Tooltip>
+            <div class="tooltip" data-tip="Eliminar">
+              <button
+                class="btn btn-error px-3"
+                onclick={preventDefault(() => (tempAvatar = croppedData = ""))}
+              >
+                <DeleteIcon size="1.1rem" />
+              </button>
+            </div>
           </div>
         {/if}
-      </div>
+      </div> -->
 
-      <div>
-        <Label for="name" class="mb-2">Nombre</Label>
-        <Input bind:value={user.name} type="text" id="name" placeholder="Nombre..." required />
-      </div>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Nombre</legend>
+        <label class="input">
+          <UserIcon />
+          <input bind:value={user.name} type="text" class="grow" placeholder="Nombre" required />
+        </label>
+      </fieldset>
 
-      <div>
-        <Label for="email" class="mb-2">Email</Label>
-        <Input
-          bind:value={user.email}
-          type="email"
-          id="email"
-          placeholder="email@email.com"
-          required
-        />
-      </div>
-
-      {#if id === "new"}
-        <div>
-          <Label for="password" class="mb-2">Contraseña</Label>
-          <Input
-            bind:value={user.password}
-            type="password"
-            name="password"
-            id="password"
-            placeholder="contraseña"
-            autocomplete="off"
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Email</legend>
+        <label class="input">
+          <MailIcon />
+          <input
+            bind:value={user.email}
+            type="email"
+            class="grow"
+            placeholder="email@email.com"
             required
           />
-        </div>
+        </label>
+      </fieldset>
+
+      {#if id === "new"}
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Contraseña</legend>
+          <label class="input">
+            <KeyRoundIcon />
+            <input
+              bind:value={user.password}
+              type="password"
+              class="grow"
+              placeholder="contraseña"
+              autocomplete="off"
+              required
+            />
+          </label>
+        </fieldset>
       {/if}
 
-      <div>
-        <Label for="ci" class="mb-2">CI</Label>
-        <Input bind:value={user.ci} type="text" id="ci" placeholder="########" required />
-      </div>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">CI</legend>
+        <label class="input">
+          <IdCardIcon />
+          <input bind:value={user.ci} type="text" class="grow" placeholder="########" required />
+        </label>
+      </fieldset>
 
-      <div>
-        <Label for="sex" class="mb-2">Sexo</Label>
-        <div class="flex flex-wrap">
-          <Radio class="p-2 gap-1" bind:group={user.sex} value="M">Masculino</Radio>
-          <Radio class="p-2 gap-1" bind:group={user.sex} value="F">Femenino</Radio>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Usuario</legend>
+        <label class="input">
+          <UserIcon />
+          <input bind:value={user.username} type="text" class="grow" autocomplete="off" required />
+        </label>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Crédito</legend>
+
+        <label class="input">
+          <DollarSignIcon />
+          <input bind:value={user.credit} min={0} type="number" class="grow" required />
+        </label>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Sexo</legend>
+        <div class="flex flex-col gap-2">
+          <label class="flex items-center gap-2">
+            <input type="radio" class="radio" bind:group={user.sex} value="M" />Masculino
+          </label>
+          <label class="flex items-center gap-2">
+            <input type="radio" class="radio" bind:group={user.sex} value="F" />Femenino
+          </label>
         </div>
-      </div>
+      </fieldset>
 
-      <div>
-        <Label for="username" class="mb-2">Usuario</Label>
-        <Input bind:value={user.username} type="text" id="username" required autocomplete="off" />
-      </div>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Provincia </legend>
 
-      <div>
-        <Label class="mb-2">Provincia</Label>
         <Select
           items={PROVINCIAS}
           transform={e => e.nombre}
@@ -372,10 +398,10 @@
           onChange={updateMunicipalities}
           placement="right-start"
         />
-      </div>
+      </fieldset>
 
-      <div>
-        <Label class="mb-2">Municipio</Label>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Municipio </legend>
         <Select
           items={municipios}
           transform={e => e}
@@ -383,15 +409,10 @@
           bind:value={user.municipality}
           placement="right-start"
         />
-      </div>
+      </fieldset>
 
-      <div>
-        <Label for="credit" class="mb-2">Crédito</Label>
-        <Input bind:value={user.credit} type="number" min={0} id="credit" required />
-      </div>
-
-      <div>
-        <Label class="mb-2">Rol</Label>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Rol</legend>
         <Select
           items={ROLES.slice(1)}
           transform={e => e.value}
@@ -399,43 +420,44 @@
           bind:value={user.role}
           placement="right-start"
         />
-      </div>
+      </fieldset>
 
       <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
         {#if id != "new"}
-          <Button color="red" on:click={() => (showModal = true)}>
-            <TrashBinSolid size="sm" />
-            <Span class="ml-1">Eliminar</Span>
-          </Button>
+          <button class="btn btn-error" onclick={preventDefault(() => (showModal = true))}>
+            <TrashIcon size="1.2rem" />
+            <span class="ml-1">Eliminar</span>
+          </button>
         {/if}
 
-        <Button type="submit" class="gap-2"
-          ><SaveIcon size="1.2rem" /> {id === "new" ? "Crear" : "Guardar"}</Button
-        >
+        <button type="submit" class="btn btn-primary gap-2">
+          <SaveIcon size="1.2rem" />
+          {id === "new" ? "Crear" : "Guardar"}
+        </button>
       </div>
     </form>
-
-    <!-- <Button class="w-fit mx-auto mt-4" on:click={ createGroup }>Crear grupo</Button> -->
-  </Card>
+  </div>
 </PrivateRouteGuard>
 
-<Modal bind:open={showModal} outsideclose autoclose title="Eliminar usuario" size="xs">
+<Modal bind:show={showModal}>
+  <h2 class="text-xl text-center mb-4">Eliminar usuario</h2>
   <div class="flex flex-col items-center justify-center">
-    <ExclamationCircleOutline class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
+    <CircleAlertIcon size="3rem" />
 
-    <Heading tag="h4" class="text-center">¿Desea eliminar el usuario "{user.name}"?</Heading>
+    <h4 class="text-center">¿Desea eliminar el usuario "{user.name}"?</h4>
 
     <div class="flex gap-2 mt-4">
-      <Button color="red" on:click={deleteUser}>
-        <TrashBinSolid size="sm" />
-        <Span class="ml-1">Eliminar</Span>
-      </Button>
-      <Button color="alternative">Cancelar</Button>
+      <button class="btn" onclick={() => (showModal = false)}>Cancelar</button>
+      <button class="btn btn-error" onclick={deleteUser}>
+        <TrashIcon size="1.2rem" />
+        <span class="ml-1">Eliminar</span>
+      </button>
     </div>
   </div>
 </Modal>
 
-<Modal bind:open={showCropModal} outsideclose autoclose title="Ajustar imagen" size="sm">
+<Modal bind:show={showCropModal}>
+  <h2 class="text-xl text-center mb-4">Ajustar imagen</h2>
   <div class="relative h-[20rem] w-full">
     <Cropper
       image={tempAvatar}
@@ -446,7 +468,7 @@
   </div>
 
   <div class="flex gap-2 mt-4 justify-center">
-    <Button color="alternative">Cancelar</Button>
-    <Button color="primary" on:click={cropImage}>Recortar</Button>
+    <button class="btn" onclick={() => (showCropModal = false)}>Cancelar</button>
+    <button class="btn btn-primary" onclick={cropImage}>Recortar</button>
   </div>
 </Modal>

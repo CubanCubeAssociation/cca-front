@@ -2,7 +2,7 @@
 
 @plugin 'flowbite/plugin';
 @plugin "daisyui" {
-  themes: dark;
+  themes: night;
 }
 
 @layer base {
@@ -13,8 +13,6 @@
     box-shadow: none !important;
   }
 }
-
-@source '../node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -52,11 +50,12 @@
   scroll-padding: 5rem 0;
 }
 
-:root.dark {
-  --bg-color: #181e2e;
+:root.dark,
+:root.night {
+  --bg-color: #2e3954;
 }
 
-:root:not(.dark) {
+:root:not(.dark):not(.night) {
   --bg-color: #d5dfff;
 }
 
@@ -81,6 +80,18 @@ th {
 
 footer {
   margin-top: auto;
+}
+
+input[type="checkbox"] {
+  background-image: none;
+}
+
+input[type="radio"] {
+  background-color: transparent;
+}
+
+.card {
+  @apply w-[calc(100%-2rem)] flex flex-col items-center gap-4 bg-base-100 py-5 px-2;
 }
 
 /* Custom scrollbar */
