@@ -12,12 +12,12 @@
   import SaveIcon from "@icons/Send.svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { goto } from "$app/navigation";
-  import { page } from "$app/stores";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
   import { twMerge } from "tailwind-merge";
   import { preventDefault } from "@helpers/object";
   import Modal from "@components/Modal.svelte";
   import { CircleAlertIcon, TrashIcon } from "lucide-svelte";
+  import { page } from "$app/state";
 
   let id = "";
   let type: "update" | "create" = "update";
@@ -62,16 +62,16 @@
   }
 
   onMount(() => {
-    id = $page.params.id;
+    id = page.params.id;
     type = id != "new" ? "update" : "create";
 
-    if (id && id != "new") {
-      Promise.all([getFormats(), getCategory(id)])
-        .then(res => {
-          formats = res[0];
-          category = res[1];
+    formats = getFormats();
+    selectedFormats = formats.map(() => false);
 
-          selectedFormats = formats.map(() => false);
+    if (id && id != "new") {
+      getCategory(id)
+        .then(res => {
+          category = res;
 
           for (let i = 0, maxi = category.formats.length; i < maxi; i += 1) {
             for (let j = 0, maxj = formats.length; j < maxj; j += 1) {

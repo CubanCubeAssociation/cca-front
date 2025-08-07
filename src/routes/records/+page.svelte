@@ -156,7 +156,7 @@
       Récords Nacionales
     </h2>
 
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
       <table class="table table-zebra">
         <thead>
           <tr>

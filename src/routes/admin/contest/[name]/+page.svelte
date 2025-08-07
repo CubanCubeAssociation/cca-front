@@ -167,7 +167,7 @@
       user,
       categories: [],
       paid: false,
-      paidAmount: 0,
+      paidAmount: contest.inscriptionCost,
     }));
 
     contest.contestants = uniqueArray([...current, ...newUsers], e => e.user.id);
@@ -412,7 +412,7 @@
         <div class="tabs tabs-border">
           <!-- Datos -->
           <label class="tab gap-2 text-accent">
-            <input type="radio" name="contesttab" />
+            <input type="radio" name="contesttab" checked />
             <HardDriveIcon size="1.2rem" /> Datos
           </label>
           <div class="tab-content border-base-300 bg-base-100 md:p-10">
@@ -546,6 +546,7 @@
                       <WcaCategory
                         icon={ct.scrambler}
                         class="cursor-pointer"
+                        size="1.5rem"
                         selected={!!contest.categories.find(cat => cat.category.id === ct.id)}
                       />
                     </button>
@@ -676,7 +677,7 @@
             </div>
 
             {#if contest.contestants.length}
-              <div class="overflow-x-auto result-table">
+              <div class="overflow-x-auto max-w-full result-table">
                 <table class="table table-zebra">
                   <!-- head -->
                   <thead>
@@ -759,7 +760,7 @@
           <!-- Resultados -->
           {#if name != "new"}
             <label class="tab gap-2 text-accent">
-              <input type="radio" name="contesttab" checked />
+              <input type="radio" name="contesttab" />
               <ListOrderedIcon size="1.2rem" /> Resultados
             </label>
             <div class="tab-content border-base-300 bg-base-100 md:p-10">
@@ -880,7 +881,7 @@
     {/if}
   </div>
 
-  <div class="overflow-x-auto">
+  <div class="overflow-x-auto max-w-full">
     <table class="table table-zebra">
       <thead>
         <tr>

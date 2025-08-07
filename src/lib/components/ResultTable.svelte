@@ -88,7 +88,7 @@
   });
 </script>
 
-<div class="overflow-x-auto result-table w-full">
+<div class="overflow-x-auto result-table max-w-full">
   <table class="table table-zebra">
     <!-- head -->
     <thead>

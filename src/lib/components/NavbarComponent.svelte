@@ -12,6 +12,7 @@
     ArrowDownNarrowWideIcon,
     BoltIcon,
     BoxIcon,
+    LogInIcon,
     LogOutIcon,
     MenuIcon,
     ScrollIcon,
@@ -212,6 +213,7 @@
         href={encodeURI(`/login?returnTo=${getReturnURL(page.url)}`)}
         onclick={() => (userDropdownOpen = false)}
       >
+        <LogInIcon size="1.2rem" class="text-accent" />
         Entrar
       </a>
     </li>

@@ -123,11 +123,11 @@
 </script>
 
 <div class="card mx-auto mb-8 mt-4 max-w-4xl">
-  <h1 class="mb-4 flex items-center justify-center gap-1 text-center text-4xl">
+  <h1 class="mb-2 flex items-center justify-center gap-1 text-center text-4xl">
     <RankingIcon size="2rem" class="text-green-400 dark:text-green-300" /> Ranking
   </h1>
 
-  <div class="actions mb-8 flex flex-wrap justify-center gap-4">
+  <div class="actions mb-2 flex flex-wrap justify-center gap-4">
     <Select
       bind:value={category}
       items={categories}
@@ -170,9 +170,9 @@
   {#if loading}
     <span class="loading loading-spinner loading-lg mx-auto"></span>
   {:else if rankingResults.length > 0}
-    <PaginatorComponent showNextPrev={!$screen.isMobile} bind:pg class="mb-4" />
+    <PaginatorComponent showNextPrev={!$screen.isMobile} bind:pg />
 
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
       <table class="table table-zebra">
         <thead>
           <tr>

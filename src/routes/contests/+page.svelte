@@ -57,7 +57,7 @@
 
 <div class="card max-w-4xl mx-auto mb-8 mt-4">
   <h1 class="mb-8 flex items-center justify-center gap-1 text-center text-4xl">
-    <SwordsIcon size="2rem" class="text-red-600 dark:text-red-400" /> Competencias
+    <SwordsIcon size="2rem" class="text-red-400" /> Competencias
   </h1>
 
   {#if loading}
@@ -65,7 +65,7 @@
   {:else if contestResults.results.length > 0}
     <PaginatorComponent {pg} update={updatePaginator} class="mb-4" />
 
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto max-w-full">
       <table class="table table-zebra">
         <thead>
           <tr>

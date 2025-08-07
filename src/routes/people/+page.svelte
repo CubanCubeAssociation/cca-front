@@ -55,7 +55,7 @@
   {:else if users.length > 0}
     <PaginatorComponent showNextPrev={!$screen.isMobile} update={updateData} bind:pg class="mb-4" />
 
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
       <table class="table table-zebra">
         <thead>
           <tr>

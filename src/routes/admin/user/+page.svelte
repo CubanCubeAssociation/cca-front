@@ -137,7 +137,7 @@
     {:else if users.length > 0}
       <PaginatorComponent {pg} update={updatePaginator} class="mb-4" />
 
-      <div class="overflow-x-auto w-full">
+      <div class="overflow-x-auto max-w-full">
         <table class="table table-zebra">
           <thead>
             <tr>

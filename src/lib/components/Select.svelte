@@ -145,7 +145,7 @@
   <div
     tabindex={0}
     role="button"
-    class={twMerge("btn btn-secondary gap-1 h-9 py-1 px-2 ", cl)}
+    class={twMerge("btn border border-base-content/20 !rounded-lg gap-1 h-9 py-1 px-2 ", cl)}
     onclick={preventDefault(handleClick)}
     {...$$restProps}
   >

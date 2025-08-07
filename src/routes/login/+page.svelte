@@ -48,7 +48,7 @@
     <h3 class="text-lg my-0 text-red-700">{error}</h3>
   {/if}
 
-  <form class="space-y-2" onsubmit={preventDefault(_login)}>
+  <form class="space-y-2 w-full px-2" onsubmit={preventDefault(_login)}>
     <fieldset class="fieldset">
       <legend class="fieldset-legend">Email</legend>
       <input

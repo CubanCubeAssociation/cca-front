@@ -118,7 +118,7 @@
       </div>
     {:else}
       {#if userList.length}
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto w-full">
           <table class="table table-zebra">
             <thead>
               <tr>
@@ -160,7 +160,7 @@
         {#if selected.length}
           <h4 class="text-center text-xl my-2 text-accent">Seleccionados</h4>
 
-          <div class="overflow-x-auto">
+          <div class="overflow-x-auto w-full">
             <table class="table table-zebra">
               <thead>
                 <tr>

@@ -77,8 +77,8 @@
 
 <PrivateRouteGuard>
   <div class="card mx-auto mb-8 mt-4 max-w-6xl">
-    <h1 class="text-4xl mb-4 text-center flex items-center justify-center gap-2">
-      <SwordsIcon size="2rem" class="text-red-600 dark:text-red-400" /> Competencias
+    <h1 class="text-4xl text-center flex items-center justify-center gap-2">
+      <SwordsIcon size="2rem" class="text-red-400" /> Competencias
     </h1>
 
     <div class="actions">
@@ -93,9 +93,9 @@
     {#if loading}
       <span class="loading loading-spinner loading-lg mx-auto"></span>
     {:else if contests.length > 0}
-      <PaginatorComponent {pg} update={updatePaginator} class="mb-4" />
+      <PaginatorComponent {pg} update={updatePaginator} class="mb-2" />
 
-      <div class="overflow-x-auto">
+      <div class="overflow-x-auto w-full">
         <table class="table table-zebra">
           <thead>
             <tr>
@@ -159,6 +159,6 @@
 <style lang="postcss">
   @reference "tailwindcss";
   .actions {
-    @apply my-4 flex justify-start gap-2;
+    @apply my-2 flex justify-start gap-2;
   }
 </style>

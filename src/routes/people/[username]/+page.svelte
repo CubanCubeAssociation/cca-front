@@ -619,7 +619,7 @@
         <section>
           <h2 class="text-center mb-4 text-2xl">Récords personales</h2>
 
-          <div class="overflow-x-auto max-h-[30rem]">
+          <div class="overflow-x-auto max-h-[30rem] w-full">
             <table class="table table-zebra">
               <thead>
                 <tr>
@@ -714,7 +714,7 @@
           </div>
 
           {#if userRecord}
-            <div class="overflow-x-auto max-h-[30rem]">
+            <div class="overflow-x-auto w-full max-h-[30rem]">
               <table class="table table-zebra w-full">
                 <thead>
                   <tr>
@@ -795,7 +795,7 @@
         {:else if selectedCategory.name in groupedData}
           {@const categoryData = groupedData[selectedCategory.name]}
 
-          <div class="overflow-x-auto">
+          <div class="overflow-x-auto w-full">
             <table class="table table-zebra w-full overflow-x-auto">
               <thead>
                 <tr>
