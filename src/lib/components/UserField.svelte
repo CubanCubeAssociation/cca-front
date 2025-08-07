@@ -8,6 +8,7 @@
     user: any;
     class?: string;
     showAvatar?: boolean;
+    fullName?: boolean;
     link?: boolean;
     onclick?: (e: MouseEvent) => void;
   }
@@ -17,8 +18,34 @@
     class: cl = "",
     showAvatar = false,
     link = false,
+    fullName = false,
     onclick,
   }: IUserFieldProps = $props();
+
+  let displayName = $state("");
+
+  $effect(() => {
+    if (fullName) {
+      displayName = user.name;
+    } else {
+      let parts: string[] = (user.name || "").trim().split(" ");
+      let res: string[][] = [[]];
+
+      for (let i = 0, maxi = parts.length; i < maxi; i += 1) {
+        res[res.length - 1].push(parts[i]);
+
+        if (parts[i][0] === parts[i][0].toUpperCase()) {
+          res.push([]);
+        }
+      }
+
+      res.pop();
+
+      // console.log("RES: ", res);
+
+      displayName = [...res[0], ...res[res.length - 2], ...res[res.length - 1]].join(" ");
+    }
+  });
 </script>
 
 <span
@@ -34,10 +61,10 @@
 
   {#if link}
     <a href={`/people/${user.username}`} class="hover:text-primary-300">
-      {user.name}
+      {displayName}
     </a>
   {:else}
-    {user.name}
+    {displayName}
   {/if}
 
   {#if user.role === "root"}

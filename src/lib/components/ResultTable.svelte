@@ -100,12 +100,12 @@
           <th class="text-center">T{n}</th>
         {/each}
 
-        <th class="text-center text-primary-400">{format.name}</th>
+        <th class="text-center">{format.name}</th>
       </tr>
     </thead>
     <tbody>
       {#each rounds as rnd, p}
-        <tr class="bg-white/5! border-t-gray-600!">
+        <tr>
           <td>
             {#if p === 0}
               <Award type="gold" />
@@ -163,7 +163,7 @@
             data-category={round.category.name}
             data-type="avg"
           >
-            <span class="flex justify-center dark:text-primary-400 text-primary-600">
+            <span class="flex justify-center text-primary">
               {timer(rnd.average, true)}
             </span>
           </td>

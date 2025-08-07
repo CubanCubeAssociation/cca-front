@@ -158,7 +158,7 @@
                 {#if columns[0].show}
                   <td>
                     <a href={"/admin/user/" + u.id} class="flex items-center gap-2 text-ellipsis">
-                      <UserField user={u} showAvatar />
+                      <UserField user={u} showAvatar fullName />
                     </a>
                   </td>
                 {/if}

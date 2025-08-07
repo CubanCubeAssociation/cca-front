@@ -43,7 +43,7 @@
 
     <div class="collapse collapse-arrow bg-base-100 border" data-category={round.category.name}>
       <input
-        class="[&:checked+div]:text-accent w-full"
+        class="[&:checked+div]:text-success w-full"
         type="radio"
         name={id}
         value={round.category.name}

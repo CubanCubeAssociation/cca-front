@@ -546,6 +546,7 @@
         <Avatar size="xl" user={profile?.user || null} />
         <h1 class="font-bold text-lg">
           <UserField
+            fullName
             class="w-fit! text-center font-bold"
             user={profile?.user || { username: "", name: "", role: "user" }}
           />
