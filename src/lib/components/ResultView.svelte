@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { CONTEST_CATEGORY, FORMAT, ROUND } from "@interfaces";
+  import type { CONTEST, CONTEST_CATEGORY, FORMAT, ROUND } from "@interfaces";
   import WcaCategory from "./wca/WCACategory.svelte";
 
   import ResultTable from "./ResultTable.svelte";
@@ -10,6 +10,7 @@
     roundGroup: ROUND[][][];
     formats: FORMAT[];
     categories: CONTEST_CATEGORY[];
+    contest: CONTEST;
     allowEdit?: boolean;
     edit?: (round: ROUND) => void;
   }
@@ -18,6 +19,7 @@
     roundGroup = $bindable(),
     formats,
     categories,
+    contest,
     allowEdit = false,
     edit,
   }: IResultViewProps = $props();
@@ -71,6 +73,7 @@
 
           <ResultTable
             bind:rounds={group[p]}
+            {contest}
             {round}
             {formats}
             {categories}

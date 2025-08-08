@@ -29,18 +29,17 @@
   import UserField from "@components/UserField.svelte";
   import { contestNameToLink, contestParamName } from "@helpers/routing";
   import Indicator from "@components/Indicator.svelte";
+  import { createEmptyContest } from "@helpers/object";
 
   let name: string = "";
 
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 text-green-200!";
-  const TD_CLASS = "px-2 py-2 whitespace-nowrap font-medium ";
 
-  let show404 = false;
-  let contest: CONTEST;
-  // let section: number = 0;
-  let roundGroup: ROUND[][][] = [];
-  let formats: FORMAT[] = [];
+  let show404 = $state(false);
+  let contest: CONTEST = $state(createEmptyContest());
+  let roundGroup: ROUND[][][] = $state([]);
+  let formats: FORMAT[] = $state([]);
 
   function before(state: CONTEST_STATUS) {
     let idx = STATUS_ORDER.indexOf(contest.status);
@@ -48,10 +47,6 @@
 
     return idx < idx1;
   }
-
-  // function showSection(n: number) {
-  //   section = n;
-  // }
 
   function checkProperty(p: string) {
     return Object.prototype.hasOwnProperty.call(contest, p);
@@ -249,7 +244,7 @@
         </p>
       {/if}
 
-      <ResultView {roundGroup} {formats} categories={contest.categories} />
+      <ResultView {roundGroup} {formats} {contest} categories={contest.categories} />
     </div>
   {/if}
 {:else}

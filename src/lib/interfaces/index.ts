@@ -273,3 +273,63 @@ export interface USER_PROFILE {
   totalContests: number;
   rankSummary: RANK_SUMMARY[];
 }
+
+export const PuzzleTypeName = [
+  "rubik",
+  "icarry",
+  "skewb",
+  "square1",
+  "pyraminx",
+  "axis",
+  "fisher",
+  "ivy",
+  "clock",
+  "megaminx",
+  "mirror",
+  "dino",
+  "rex",
+  "redi",
+  "mixup",
+  "pyramorphix",
+  "gear",
+  "dreidel",
+  "bandaged222",
+  "bicube",
+  "square2",
+  "pandora",
+  "ultimateSkewb",
+  "pyraminxCrystal",
+  "tetraminx",
+  "meierHalpernPyramid",
+  "sq1Star",
+  "windmill",
+  "helicopter",
+  "supersquare1",
+  "fto",
+  "timemachine",
+  "masterskewb",
+  "void",
+  "diamondcube",
+  "axis44",
+  "fisher44",
+  "redibarrel",
+  "twisty33",
+  "ghost",
+  "barrel33",
+] as const;
+
+export declare type PuzzleType = (typeof PuzzleTypeName)[number];
+
+export interface IReconstruction {
+  sequence: string[];
+  sequenceIndex: number[];
+  finalAlpha: number;
+  result: string;
+  hasError: boolean;
+}
+
+export interface IPuzzleOrder {
+  a: number;
+  b: number;
+  c: number;
+}

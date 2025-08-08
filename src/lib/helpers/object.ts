@@ -243,3 +243,7 @@ export function createEmptyFormat(): FORMAT {
     rMargin: 1,
   };
 }
+
+export function newArr(length: number): any[] {
+  return Array.from({ length });
+}

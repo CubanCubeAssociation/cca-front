@@ -94,6 +94,19 @@ input[type="radio"] {
   @apply w-[calc(100%-2rem)] flex flex-col items-center gap-4 bg-base-100 py-5 px-2;
 }
 
+/* Reconstructor */
+.reconstructor .move {
+  @apply text-success;
+}
+
+.reconstructor .comment {
+  @apply text-base-content/60;
+}
+
+.reconstructor .operator {
+  @apply text-accent;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 0.8rem;

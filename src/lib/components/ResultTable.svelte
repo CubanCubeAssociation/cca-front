@@ -2,7 +2,7 @@
   import Award from "./Award.svelte";
   import { minRole } from "@helpers/auth";
   import { actualTime, sTimer, timer } from "@helpers/timer";
-  import type { CONTEST_CATEGORY, FORMAT, ROUND } from "@interfaces";
+  import type { CONTEST, CONTEST_CATEGORY, FORMAT, ROUND } from "@interfaces";
   import { userStore } from "@stores/user";
   import UserField from "./UserField.svelte";
   import { page } from "$app/state";
@@ -15,6 +15,7 @@
     formats: FORMAT[];
     categories: CONTEST_CATEGORY[];
     round: ROUND;
+    contest: CONTEST;
     allowEdit?: boolean;
     edit?: (round: ROUND) => void;
   }
@@ -24,6 +25,7 @@
     formats,
     categories,
     round,
+    contest,
     allowEdit = false,
     edit,
   }: IResultTableProps = $props();
@@ -174,7 +176,7 @@
 </div>
 
 <Modal bind:show={showSolveInfoModal}>
-  <SolveInfo round={selectedRound} solve={selectedSolve} />
+  <SolveInfo round={selectedRound} solve={selectedSolve} {contest} />
 </Modal>
 
 <style lang="postcss">
