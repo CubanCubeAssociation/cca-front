@@ -9,28 +9,24 @@
     removeCategory,
     updateCategory,
   } from "@helpers/API";
-  import SaveIcon from "@icons/Send.svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
   import { twMerge } from "tailwind-merge";
-  import { preventDefault } from "@helpers/object";
+  import { createEmptyCategory, preventDefault } from "@helpers/object";
   import Modal from "@components/Modal.svelte";
-  import { CircleAlertIcon, TrashIcon } from "lucide-svelte";
+  import { CircleAlertIcon, SendIcon, TrashIcon } from "lucide-svelte";
   import { page } from "$app/state";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
 
   let id = "";
-  let type: "update" | "create" = "update";
-  let category: CATEGORY = {
-    id: "",
-    name: "",
-    scrambler: "333",
-    formats: [],
-  };
-  let formats: FORMAT[] = [];
-  let selectedFormats: boolean[] = [];
-
-  let showModal = false;
+  let type: "update" | "create" = $state("update");
+  let category: CATEGORY = $state(createEmptyCategory());
+  let formats: FORMAT[] = $state([]);
+  let selectedFormats: boolean[] = $state([]);
+  let loading = $state(false);
+  let error = $state(false);
+  let showModal = $state(false);
 
   function selectIcon(ic: Partial<CATEGORY>) {
     category.scrambler = ic.scrambler || "333";
@@ -61,6 +57,27 @@
       .catch(err => console.log("ERROR: ", err));
   }
 
+  function updateData() {
+    loading = true;
+    error = false;
+
+    getCategory(id)
+      .then(res => {
+        category = res;
+
+        for (let i = 0, maxi = category.formats.length; i < maxi; i += 1) {
+          for (let j = 0, maxj = formats.length; j < maxj; j += 1) {
+            if (formats[j].name === category.formats[i]) {
+              selectedFormats[j] = true;
+              break;
+            }
+          }
+        }
+      })
+      .catch(() => (error = true))
+      .finally(() => (loading = false));
+  }
+
   onMount(() => {
     id = page.params.id;
     type = id != "new" ? "update" : "create";
@@ -69,20 +86,7 @@
     selectedFormats = formats.map(() => false);
 
     if (id && id != "new") {
-      getCategory(id)
-        .then(res => {
-          category = res;
-
-          for (let i = 0, maxi = category.formats.length; i < maxi; i += 1) {
-            for (let j = 0, maxj = formats.length; j < maxj; j += 1) {
-              if (formats[j].name === category.formats[i]) {
-                selectedFormats[j] = true;
-                break;
-              }
-            }
-          }
-        })
-        .catch(err => console.log("ERROR: ", err));
+      updateData();
     }
   });
 </script>
@@ -96,99 +100,101 @@
 </svelte:head>
 
 <PrivateRouteGuard>
-  <div class="card mt-4 max-w-sm mx-auto mb-8 !px-4">
-    <h1 class="text-3xl text-center">
+  <LoadingLayout class="max-w-sm" {loading} {error} altError={false} reloadFunction={updateData}>
+    {#snippet title()}
       {type === "update" ? `Editar "${category.name}"` : "Crear categoría"}
-    </h1>
+    {/snippet}
 
-    <form class="grid gap-2" onsubmit={preventDefault(save)}>
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Nombre</legend>
-        <label class="input">
-          <WcaCategory icon="333" size="1.5rem" />
-          <input
-            bind:value={category.name}
-            type="text"
-            class="grow"
-            placeholder="Nombre"
-            required
-          />
-        </label>
-      </fieldset>
+    {#snippet content()}
+      <form class="grid gap-2 px-2" onsubmit={preventDefault(save)}>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Nombre</legend>
+          <label class="input">
+            <WcaCategory icon="333" size="1.5rem" />
+            <input
+              bind:value={category.name}
+              type="text"
+              class="grow"
+              placeholder="Nombre"
+              required
+            />
+          </label>
+        </fieldset>
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Ícono</legend>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Ícono</legend>
 
-        <div class="flex flex-wrap gap-2">
-          {#each ICONS as I}
-            <button
-              onclick={preventDefault(() => selectIcon(I))}
-              id={"ICON-" + I.scrambler}
-              type="button"
-              class="tooltip"
-              data-tip={I.name}
-            >
-              <WcaCategory
-                size="1.5rem"
-                icon={I.scrambler}
-                selected={I.scrambler === category.scrambler}
-              />
-            </button>
-          {/each}
-        </div>
-      </fieldset>
-
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Scrambler</legend>
-        <label class="input">
-          <WcaCategory icon={category.scrambler} size="1.5rem" />
-          <input
-            bind:value={category.scrambler}
-            type="text"
-            class="grow"
-            placeholder="Scrambler"
-            required
-          />
-        </label>
-      </fieldset>
-
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Formatos</legend>
-
-        <ul class="flex gap-2">
-          {#each formats as f, p}
-            <li>
+          <div class="flex flex-wrap gap-2">
+            {#each ICONS as I}
               <button
-                class={twMerge(
-                  "border px-2 rounded-md cursor-pointer",
-                  selectedFormats[p] ? "border-yellow-400 text-yellow-400" : ""
-                )}
-                onclick={preventDefault(() => {
-                  selectedFormats[p] = !selectedFormats[p];
-                })}
+                onclick={preventDefault(() => selectIcon(I))}
+                id={"ICON-" + I.scrambler}
+                type="button"
+                class="tooltip"
+                data-tip={I.name}
               >
-                {f.name}
+                <WcaCategory
+                  size="1.5rem"
+                  icon={I.scrambler}
+                  selected={I.scrambler === category.scrambler}
+                />
               </button>
-            </li>
-          {/each}
-        </ul>
-      </fieldset>
+            {/each}
+          </div>
+        </fieldset>
 
-      <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
-        {#if type === "update"}
-          <button class="btn btn-error" onclick={preventDefault(() => (showModal = true))}>
-            <TrashIcon size="1.2rem" />
-            <span class="ml-1">Eliminar</span>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Scrambler</legend>
+          <label class="input">
+            <WcaCategory icon={category.scrambler} size="1.5rem" />
+            <input
+              bind:value={category.scrambler}
+              type="text"
+              class="grow"
+              placeholder="Scrambler"
+              required
+            />
+          </label>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Formatos</legend>
+
+          <ul class="flex gap-2">
+            {#each formats as f, p}
+              <li>
+                <button
+                  class={twMerge(
+                    "border px-2 rounded-md cursor-pointer",
+                    selectedFormats[p] ? "border-yellow-400 text-yellow-400" : ""
+                  )}
+                  onclick={preventDefault(() => {
+                    selectedFormats[p] = !selectedFormats[p];
+                  })}
+                >
+                  {f.name}
+                </button>
+              </li>
+            {/each}
+          </ul>
+        </fieldset>
+
+        <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
+          {#if type === "update"}
+            <button class="btn btn-error" onclick={preventDefault(() => (showModal = true))}>
+              <TrashIcon size="1.2rem" />
+              <span class="ml-1">Eliminar</span>
+            </button>
+          {/if}
+
+          <button class="btn btn-primary" type="submit">
+            <SendIcon size="1.2rem" />
+            <span class="ml-1">{type === "update" ? "Guardar" : "Crear"}</span>
           </button>
-        {/if}
-
-        <button class="btn btn-primary" type="submit">
-          <SaveIcon size="1.2rem" />
-          <span class="ml-1">{type === "update" ? "Guardar" : "Crear"}</span>
-        </button>
-      </div>
-    </form>
-  </div>
+        </div>
+      </form>
+    {/snippet}
+  </LoadingLayout>
 </PrivateRouteGuard>
 
 <Modal bind:show={showModal}>

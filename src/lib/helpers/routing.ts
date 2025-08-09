@@ -1,4 +1,5 @@
 import { DOMAIN } from "@constants";
+import { isFinite } from "./math";
 
 interface ContestParams {
   category: string;
@@ -11,7 +12,7 @@ export function contestNameToLink(name: string, params?: Partial<ContestParams>,
   const pm: Partial<ContestParams> = {};
 
   if (params?.category) pm.category = params.category;
-  if (params?.time) pm.time = params.time === Infinity ? "DNF" : params.time + "";
+  if (params?.time) pm.time = !isFinite(+params.time) ? "DNF" : params.time + "";
   if (params?.username) pm.username = params.username;
   if (params?.type) pm.type = params.type;
   if (pm.type === "single") delete pm.type;

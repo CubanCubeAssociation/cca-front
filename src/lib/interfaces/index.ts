@@ -87,6 +87,7 @@ export interface SOLVE {
   timeMillis: string;
   penaltyType: PENALTY;
   penaltyDetails: string;
+  isAverage?: boolean;
 }
 
 export interface ROUND {

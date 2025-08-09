@@ -12,6 +12,7 @@
   import { SwordsIcon } from "lucide-svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import Indicator from "@components/Indicator.svelte";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
 
   const DEFAULT_RESULT = {
     limit: 0,
@@ -55,17 +56,20 @@
   });
 </script>
 
-<div class="card max-w-4xl mx-auto mb-8 mt-4">
-  <h1 class="mb-8 flex items-center justify-center gap-1 text-center text-4xl">
-    <SwordsIcon size="2rem" class="text-red-400" /> Competencias
-  </h1>
+<LoadingLayout
+  {loading}
+  {error}
+  altError={contestResults.results.length <= 0}
+  reloadFunction={refreshContestData}
+>
+  {#snippet title()}
+    <SwordsIcon size="1.5rem" class="text-red-400" /> Competencias
+  {/snippet}
 
-  {#if loading}
-    <span class="loading loading-spinner loading-lg mx-auto"></span>
-  {:else if contestResults.results.length > 0}
+  {#snippet content()}
     <PaginatorComponent {pg} update={updatePaginator} class="mb-4" />
 
-    <div class="overflow-x-auto max-w-full">
+    <div class="overflow-x-auto w-full rounded-lg border border-base-content/10">
       <table class="table table-zebra">
         <thead>
           <tr>
@@ -112,14 +116,9 @@
     </div>
 
     <PaginatorComponent {pg} update={updatePaginator} class="mt-4" />
-  {:else if error}
-    <span class="text-center text-red-500!">
-      Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-    </span>
+  {/snippet}
 
-    <!-- <Button class="mt-8 w-min" on:click={refreshContestData}>Recargar</Button> -->
-    <button class="mt-8 w-min" onclick={() => window.location.reload()}>Recargar</button>
-  {:else}
+  {#snippet altErrorContent()}
     <span class="text-center">No hay competencias disponibles</span>
-  {/if}
-</div>
+  {/snippet}
+</LoadingLayout>

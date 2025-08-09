@@ -5,6 +5,8 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { preventDefault } from "@helpers/object";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { LogInIcon, SendIcon } from "lucide-svelte";
 
   let email = "";
   let password = "";
@@ -41,53 +43,60 @@
   });
 </script>
 
-<div class="card mt-4 max-w-xs mx-auto mb-8">
-  <h1 class="text-2xl font-bold">Iniciar sesión</h1>
+<LoadingLayout
+  class="max-w-sm"
+  loading={false}
+  error={false}
+  altError={false}
+  reloadFunction={() => {}}
+>
+  {#snippet title()}
+    <LogInIcon size="1.5rem" class="text-accent" /> Iniciar sesión
+  {/snippet}
 
-  {#if error}
-    <h3 class="text-lg my-0 text-red-700">{error}</h3>
-  {/if}
+  {#snippet content()}
+    {#if error}
+      <h3 class="text-lg my-0 text-red-700">{error}</h3>
+    {/if}
 
-  <form class="space-y-2 w-full px-2" onsubmit={preventDefault(_login)}>
-    <fieldset class="fieldset">
-      <legend class="fieldset-legend">Email</legend>
-      <input
-        class="input"
-        oninput={clearError}
-        bind:value={email}
-        type="email"
-        name="email"
-        id="email"
-        placeholder="Email"
-        required
-        autocomplete="email"
-      />
-    </fieldset>
+    <form class="space-y-2 w-full px-2" onsubmit={preventDefault(_login)}>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Email</legend>
+        <input
+          class="input"
+          oninput={clearError}
+          bind:value={email}
+          type="email"
+          name="email"
+          id="email"
+          placeholder="Email"
+          required
+          autocomplete="email"
+        />
+      </fieldset>
 
-    <fieldset class="fieldset">
-      <legend class="fieldset-legend">Contraseña</legend>
-      <input
-        class="input"
-        oninput={clearError}
-        bind:value={password}
-        type="password"
-        name="password"
-        id="password"
-        placeholder="Contraseña"
-        required
-        autocomplete="current-password"
-      />
-    </fieldset>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend">Contraseña</legend>
+        <input
+          class="input"
+          oninput={clearError}
+          bind:value={password}
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Contraseña"
+          required
+          autocomplete="current-password"
+        />
+      </fieldset>
 
-    <!-- <div class="flex items-start">
-      <a href="/">Olvidó su contraseña?</a>
-    </div> -->
-    <button type="submit" class="btn btn-primary">
-      {#if loading}
-        <span class="loading loading-spinner loading-sm mx-auto"></span>
-      {:else}
-        Entrar
-      {/if}
-    </button>
-  </form>
-</div>
+      <button type="submit" class="btn btn-primary flex mx-auto" disabled={loading}>
+        {#if loading}
+          <span class="loading loading-spinner loading-sm mx-auto"></span>
+        {:else}
+          <SendIcon size="1.2rem" /> Entrar
+        {/if}
+      </button>
+    </form>
+  {/snippet}
+</LoadingLayout>

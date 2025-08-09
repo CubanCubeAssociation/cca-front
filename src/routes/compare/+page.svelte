@@ -1,4 +1,5 @@
 <script lang="ts">
+  import LoadingLayout from "@components/LoadingLayout.svelte";
   import SearchUser from "@components/SearchUser.svelte";
   import UserField from "@components/UserField.svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
@@ -30,6 +31,7 @@
   let userProfileB: USER_PROFILE | null = $state(null);
   let categories: CATEGORY[] = $state([]);
   let formats: FORMAT[] = $state([]);
+  let loading = $state(false);
   let error = $state(false);
   let catDataA: Record<string, CATEGORY_METRICS> = $state({});
   let catDataB: Record<string, CATEGORY_METRICS> = $state({});
@@ -113,6 +115,7 @@
   }
 
   function getBaseData() {
+    loading = true;
     error = false;
 
     Promise.all([getCategories(), getFormats()])
@@ -122,7 +125,8 @@
       })
       .catch(() => {
         error = true;
-      });
+      })
+      .finally(() => (loading = false));
   }
 
   function updateUserData(u: any, variant: "A" | "B") {
@@ -289,26 +293,15 @@
 
   onMount(() => {
     getBaseData();
-    // getUserProfile("2212VEGA01").then(p => {
-    //   userProfileA = p;
-    //   updateStatistics(p, "A");
-    // });
-    // getUserProfile("2411RODR01").then(p => {
-    //   userProfileB = p;
-    //   updateStatistics(p, "B");
-    // });
   });
 </script>
 
-<div class="card mx-auto mb-8 mt-4 max-w-6xl">
-  <h1 class="text-2xl text-base-content flex items-center gap-2">
+<LoadingLayout {loading} {error} reloadFunction={getBaseData}>
+  {#snippet title()}
     <TrendingUpDownIcon class="text-orange-300" /> Comparar Usuarios
-  </h1>
+  {/snippet}
 
-  {#if error}
-    <span class="text-red-400">Hubo un error al cargar los datos</span>
-    <button class="btn btn-primary mt-8" onclick={getBaseData}>Recargar</button>
-  {:else}
+  {#snippet content()}
     <div class="flex flex-wrap justify-center gap-2">
       <SearchUser
         placeholder="Nombre o ID 1"
@@ -344,67 +337,6 @@
       {@const placesB = getPlaces(userProfileB)}
 
       <div class="flex flex-wrap gap-4 justify-center items-start">
-        <!-- General -->
-        <div
-          class="general-results overflow-x-auto rounded-box border border-base-content/5 bg-base-100"
-        >
-          <table class="table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>
-                  {userA ? userA.name.split(" ")[0] : "Usuario 1"}
-                </th>
-                <th>
-                  {userB ? userB.name.split(" ")[0] : "Usuario 2"}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>SoR</td>
-                <td>{rnd()}</td>
-                <td>{rnd()}</td>
-              </tr>
-              <tr>
-                <td>ELO</td>
-                <td>{placesA.reduce((acc, e) => acc + e[2], 0)}</td>
-                <td>{placesB.reduce((acc, e) => acc + e[2], 0)}</td>
-              </tr>
-              <tr>
-                <td>Récords nacionales</td>
-                <td>{placesA[1][1]}</td>
-                <td>{placesB[1][1]}</td>
-              </tr>
-              <tr>
-                <td>Récords provinciales</td>
-                <td>{placesA[2][1]}</td>
-                <td>{placesB[2][1]}</td>
-              </tr>
-              <tr>
-                <td>Oro</td>
-                <td>{placesA[3][1]}</td>
-                <td>{placesB[3][1]}</td>
-              </tr>
-              <tr>
-                <td>Plata</td>
-                <td>{placesA[4][1]}</td>
-                <td>{placesB[4][1]}</td>
-              </tr>
-              <tr>
-                <td>Bronce</td>
-                <td>{placesA[5][1]}</td>
-                <td>{placesB[5][1]}</td>
-              </tr>
-              <tr>
-                <td>4to+</td>
-                <td>{placesA[6][1]}</td>
-                <td>{placesB[6][1]}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
         <!-- Categorías comunes -->
         <div
           class="category-ranking overflow-x-auto max-w-full rounded-box border border-base-content/5 bg-base-100"
@@ -497,13 +429,73 @@
             </tbody>
           </table>
         </div>
+
+        <!-- General -->
+        <div
+          class="general-results overflow-x-auto rounded-box border border-base-content/5 bg-base-100"
+        >
+          <table class="table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>
+                  {userA ? userA.name.split(" ")[0] : "Usuario 1"}
+                </th>
+                <th>
+                  {userB ? userB.name.split(" ")[0] : "Usuario 2"}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SoR</td>
+                <td>{rnd()}</td>
+                <td>{rnd()}</td>
+              </tr>
+              <tr>
+                <td>ELO</td>
+                <td>{placesA.reduce((acc, e) => acc + e[2], 0)}</td>
+                <td>{placesB.reduce((acc, e) => acc + e[2], 0)}</td>
+              </tr>
+              <tr>
+                <td>Récords nacionales</td>
+                <td>{placesA[1][1]}</td>
+                <td>{placesB[1][1]}</td>
+              </tr>
+              <tr>
+                <td>Récords provinciales</td>
+                <td>{placesA[2][1]}</td>
+                <td>{placesB[2][1]}</td>
+              </tr>
+              <tr>
+                <td>Oro</td>
+                <td>{placesA[3][1]}</td>
+                <td>{placesB[3][1]}</td>
+              </tr>
+              <tr>
+                <td>Plata</td>
+                <td>{placesA[4][1]}</td>
+                <td>{placesB[4][1]}</td>
+              </tr>
+              <tr>
+                <td>Bronce</td>
+                <td>{placesA[5][1]}</td>
+                <td>{placesB[5][1]}</td>
+              </tr>
+              <tr>
+                <td>4to+</td>
+                <td>{placesA[6][1]}</td>
+                <td>{placesB[6][1]}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     {/if}
-  {/if}
 
-  <!-- Gráficas con el desempeño de los usuarios -->
-  <div class="grid place-items-center h-[20rem] w-full" bind:this={timeSerie}></div>
-</div>
+    <div class="grid place-items-center h-[20rem] w-full" bind:this={timeSerie}></div>
+  {/snippet}
+</LoadingLayout>
 
 <style lang="postcss">
   @reference "../../app.css";

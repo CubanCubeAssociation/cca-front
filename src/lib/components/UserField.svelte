@@ -1,7 +1,5 @@
 <script lang="ts">
-  import RootIcon from "@icons/ShieldCrownOutline.svelte";
-  import AdminIcon from "@icons/ShieldAccount.svelte";
-  import DelegateIcon from "@icons/Shield.svelte";
+  import { ShieldIcon, ShieldUserIcon } from "lucide-svelte";
   import Avatar from "./Avatar.svelte";
 
   interface IUserFieldProps {
@@ -40,21 +38,12 @@
       }
 
       res.pop();
-
-      // console.log("RES: ", res);
-
       displayName = [...res[0], ...res[res.length - 2], ...res[res.length - 1]].join(" ");
     }
   });
 </script>
 
-<span
-  class={"flex gap-2 items-center w-max text-base-content " + cl}
-  role="button"
-  tabindex="0"
-  {onclick}
-  onkeydown={() => {}}
->
+{#snippet content()}
   {#if showAvatar}
     <Avatar {user} />
   {/if}
@@ -68,13 +57,32 @@
   {/if}
 
   {#if user.role === "root"}
-    <RootIcon size="1.1rem" class="text-purple-500 dark:text-purple-400" />
-    <!-- <Tooltip class="text-purple-200!">Superadmin</Tooltip> -->
+    <div class="tooltip" data-tip="SuperAdmin">
+      <ShieldUserIcon size="1.1rem" class="text-purple-500" />
+    </div>
   {:else if user.role === "admin"}
-    <AdminIcon size="1.1rem" class="text-primary-500 dark:text-primary-400" />
-    <!-- <Tooltip class="text-blue-200!">Administrador</Tooltip> -->
+    <div class="tooltip" data-tip={"Administrador" + (user.sex === "F" ? "a" : "")}>
+      <ShieldUserIcon size="1.1rem" class="text-primary" />
+    </div>
   {:else if user.role === "delegate"}
-    <DelegateIcon class="text-green-500 dark:text-green-400" />
-    <!-- <Tooltip class="text-green-200!">Delegado</Tooltip> -->
+    <div class="tooltip" data-tip={"Delegad" + (user.sex === "F" ? "a" : "o")}>
+      <ShieldIcon size="1rem" class="text-green-500 fill-green-500" />
+    </div>
   {/if}
-</span>
+{/snippet}
+
+{#if onclick}
+  <span
+    class={"flex gap-2 items-center w-max text-base-content " + cl}
+    role="button"
+    tabindex="0"
+    {onclick}
+    onkeydown={() => {}}
+  >
+    {@render content()}
+  </span>
+{:else}
+  <span class={"flex gap-2 items-center w-max text-base-content " + cl}>
+    {@render content()}
+  </span>
+{/if}

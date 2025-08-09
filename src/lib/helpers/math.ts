@@ -11,3 +11,7 @@ export function between(n: number, a: number, b: number): number {
 export function getEloDecay(contests: number) {
   return Math.exp((contests - 1) * -0.01);
 }
+
+export function isFinite(n: number): boolean {
+  return !(n === Infinity || n === -Infinity);
+}

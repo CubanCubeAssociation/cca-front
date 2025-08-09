@@ -1,7 +1,8 @@
 import { PENALTY, type SOLVE } from "../interfaces";
+import { isFinite } from "./math";
 
 export function timer(val: number, dec?: boolean, suff?: boolean): string {
-  if (val === Infinity || val === -Infinity) return "DNF";
+  if (!isFinite(val)) return "DNF";
   if (isNaN(val)) return (dec ? "0.00" : "0") + (suff ? "s" : "");
 
   let v = ~~(val / 10);

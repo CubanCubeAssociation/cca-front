@@ -1,11 +1,8 @@
 <script lang="ts">
   import type { USER } from "@interfaces";
   import { searchUser } from "@helpers/API";
-  import SendIcon from "@icons/Send.svelte";
-  import DeleteIcon from "@icons/Delete.svelte";
-  import AddIcon from "@icons/Plus.svelte";
   import { uniqueArray } from "@helpers/object";
-  import { UserSearchIcon } from "lucide-svelte";
+  import { PlusIcon, SendIcon, TrashIcon, UserSearchIcon } from "lucide-svelte";
   import Modal from "./Modal.svelte";
 
   type Callback = () => void;
@@ -118,7 +115,7 @@
       </div>
     {:else}
       {#if userList.length}
-        <div class="overflow-x-auto w-full">
+        <div class="overflow-x-auto w-full rounded-lg border border-base-content/10">
           <table class="table table-zebra">
             <thead>
               <tr>
@@ -139,7 +136,7 @@
                         selected = uniqueArray([...selected, c], e => e.username);
                       }}
                     >
-                      <AddIcon size="1.2rem" class="pointer-events-none" />
+                      <PlusIcon size="1.2rem" class="pointer-events-none" />
                     </button>
                   </td>
 
@@ -160,7 +157,7 @@
         {#if selected.length}
           <h4 class="text-center text-xl my-2 text-accent">Seleccionados</h4>
 
-          <div class="overflow-x-auto w-full">
+          <div class="overflow-x-auto w-full rounded-lg border border-base-content/10">
             <table class="table table-zebra">
               <thead>
                 <tr>
@@ -182,8 +179,8 @@
                     </td>
 
                     <td>
-                      <button type="button" color="red" onclick={() => deleteSelected(i)}>
-                        <DeleteIcon size="1.2rem" />
+                      <button class="btn btn-error w-8 h-8 p-1" onclick={() => deleteSelected(i)}>
+                        <TrashIcon size="1.2rem" />
                       </button>
                     </td>
                   </tr>

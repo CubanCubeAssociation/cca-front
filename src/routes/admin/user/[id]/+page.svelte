@@ -1,16 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { createUser, getAvatarRoute, getUser, removeUser, updateUser } from "@helpers/API";
-  import type { USER } from "@interfaces";
   import { PROVINCIAS, ROLES } from "@constants";
-  import SaveIcon from "@icons/Send.svelte";
   import Select from "@components/Select.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
   import Cropper from "svelte-easy-crop";
-  // import UploadIcon from "@icons/CloudUpload.svelte";
-  // import DeleteIcon from "@icons/Delete.svelte";
-  // import CropIcon from "@icons/Crop.svelte";
   import { userStore } from "@stores/user";
   import {
     CircleAlertIcon,
@@ -18,34 +13,22 @@
     IdCardIcon,
     KeyRoundIcon,
     MailIcon,
+    SaveIcon,
     TrashIcon,
     UserIcon,
   } from "lucide-svelte";
   import Modal from "@components/Modal.svelte";
-  import { preventDefault } from "@helpers/object";
+  import { createEmptyUser, preventDefault } from "@helpers/object";
   import { page } from "$app/state";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
 
   const WIDTH = 200;
   const HEIGHT = WIDTH;
 
   let id = $state("");
-
-  let user: USER = $state({
-    name: "",
-    email: "",
-    password: "",
-    ci: "",
-    sex: "M",
-    username: "",
-    province: "",
-    municipality: "",
-    credit: 0,
-    avatar: "",
-    role: "user",
-    isEmailVerified: false,
-    age: 0,
-    id: "",
-  });
+  let loading = $state(false);
+  let error = $state(false);
+  let user = $state(createEmptyUser());
 
   let municipios: string[] = $state([]);
   let showModal = $state(false);
@@ -222,6 +205,24 @@
     img.src = tempAvatar;
   }
 
+  function updateData() {
+    loading = true;
+    error = false;
+
+    getUser(id)
+      .then(u => {
+        if (!u) {
+          return goto("/login");
+        }
+        user = u;
+        tempAvatar = getAvatarRoute(u.username || "");
+        croppedData = getAvatarRoute(u.username || "");
+        municipios = PROVINCIAS.find(p => p.nombre === u.province)?.municipios || [];
+      })
+      .catch(() => (error = true))
+      .finally(() => (loading = false));
+  }
+
   onMount(() => {
     id = page.params.id;
 
@@ -230,17 +231,7 @@
     }
 
     if (id != "new") {
-      getUser(id)
-        .then(u => {
-          if (!u) {
-            return goto("/login");
-          }
-          user = u;
-          tempAvatar = getAvatarRoute(u.username || "");
-          croppedData = getAvatarRoute(u.username || "");
-          municipios = PROVINCIAS.find(p => p.nombre === u.province)?.municipios || [];
-        })
-        .catch(err => console.log("ERROR: ", err));
+      updateData();
     }
   });
 
@@ -259,17 +250,18 @@
 </svelte:head>
 
 <PrivateRouteGuard>
-  <div class="card mt-4 max-w-6xl mx-auto mb-8">
-    <h1 class="text-3xl text-center">
+  <LoadingLayout {loading} {error} altError={false} reloadFunction={updateData}>
+    {#snippet title()}
       {id === "new" ? "Crear usuario" : `Editar "${user.name}"`}
-    </h1>
+    {/snippet}
 
-    <form
-      autocomplete="off"
-      class="mt-8 grid items-center px-4 gap-2 lg:grid-cols-5 md:grid-cols-4 sm:grid-cols-2"
-      onsubmit={save}
-    >
-      <!-- <div class="grid">
+    {#snippet content()}
+      <form
+        autocomplete="off"
+        class="mt-8 grid items-center px-4 gap-2 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2"
+        onsubmit={save}
+      >
+        <!-- <div class="grid">
         <Dropzone
           id="dropzone"
           on:drop={dropHandle}
@@ -311,132 +303,139 @@
         {/if}
       </div> -->
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Nombre</legend>
-        <label class="input">
-          <UserIcon />
-          <input bind:value={user.name} type="text" class="grow" placeholder="Nombre" required />
-        </label>
-      </fieldset>
-
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Email</legend>
-        <label class="input">
-          <MailIcon />
-          <input
-            bind:value={user.email}
-            type="email"
-            class="grow"
-            placeholder="email@email.com"
-            required
-          />
-        </label>
-      </fieldset>
-
-      {#if id === "new"}
         <fieldset class="fieldset">
-          <legend class="fieldset-legend">Contraseña</legend>
+          <legend class="fieldset-legend">Nombre</legend>
           <label class="input">
-            <KeyRoundIcon />
+            <UserIcon />
+            <input bind:value={user.name} type="text" class="grow" placeholder="Nombre" required />
+          </label>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Email</legend>
+          <label class="input">
+            <MailIcon />
             <input
-              bind:value={user.password}
-              type="password"
+              bind:value={user.email}
+              type="email"
               class="grow"
-              placeholder="contraseña"
+              placeholder="email@email.com"
+              required
+            />
+          </label>
+        </fieldset>
+
+        {#if id === "new"}
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend">Contraseña</legend>
+            <label class="input">
+              <KeyRoundIcon />
+              <input
+                bind:value={user.password}
+                type="password"
+                class="grow"
+                placeholder="contraseña"
+                autocomplete="off"
+                required
+              />
+            </label>
+          </fieldset>
+        {/if}
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">CI</legend>
+          <label class="input">
+            <IdCardIcon />
+            <input bind:value={user.ci} type="text" class="grow" placeholder="########" required />
+          </label>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Usuario</legend>
+          <label class="input">
+            <UserIcon />
+            <input
+              bind:value={user.username}
+              type="text"
+              class="grow"
               autocomplete="off"
               required
             />
           </label>
         </fieldset>
-      {/if}
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">CI</legend>
-        <label class="input">
-          <IdCardIcon />
-          <input bind:value={user.ci} type="text" class="grow" placeholder="########" required />
-        </label>
-      </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Crédito</legend>
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Usuario</legend>
-        <label class="input">
-          <UserIcon />
-          <input bind:value={user.username} type="text" class="grow" autocomplete="off" required />
-        </label>
-      </fieldset>
-
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Crédito</legend>
-
-        <label class="input">
-          <DollarSignIcon />
-          <input bind:value={user.credit} min={0} type="number" class="grow" required />
-        </label>
-      </fieldset>
-
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Sexo</legend>
-        <div class="flex flex-col gap-2">
-          <label class="flex items-center gap-2">
-            <input type="radio" class="radio" bind:group={user.sex} value="M" />Masculino
+          <label class="input">
+            <DollarSignIcon />
+            <input bind:value={user.credit} min={0} type="number" class="grow" required />
           </label>
-          <label class="flex items-center gap-2">
-            <input type="radio" class="radio" bind:group={user.sex} value="F" />Femenino
-          </label>
-        </div>
-      </fieldset>
+        </fieldset>
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Provincia </legend>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Sexo</legend>
+          <div class="flex flex-col gap-2">
+            <label class="flex items-center gap-2">
+              <input type="radio" class="radio" bind:group={user.sex} value="M" />Masculino
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="radio" class="radio" bind:group={user.sex} value="F" />Femenino
+            </label>
+          </div>
+        </fieldset>
 
-        <Select
-          items={PROVINCIAS}
-          transform={e => e.nombre}
-          label={e => e.nombre}
-          bind:value={user.province}
-          onChange={updateMunicipalities}
-          placement="right-start"
-        />
-      </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Provincia </legend>
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Municipio </legend>
-        <Select
-          items={municipios}
-          transform={e => e}
-          label={e => e}
-          bind:value={user.municipality}
-          placement="right-start"
-        />
-      </fieldset>
+          <Select
+            items={PROVINCIAS}
+            transform={e => e.nombre}
+            label={e => e.nombre}
+            bind:value={user.province}
+            onChange={updateMunicipalities}
+            placement="right-start"
+          />
+        </fieldset>
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend">Rol</legend>
-        <Select
-          items={ROLES.slice(1)}
-          transform={e => e.value}
-          label={e => e.name}
-          bind:value={user.role}
-          placement="right-start"
-        />
-      </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Municipio </legend>
+          <Select
+            items={municipios}
+            transform={e => e}
+            label={e => e}
+            bind:value={user.municipality}
+            placement="right-start"
+          />
+        </fieldset>
 
-      <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
-        {#if id != "new"}
-          <button class="btn btn-error" onclick={preventDefault(() => (showModal = true))}>
-            <TrashIcon size="1.2rem" />
-            <span class="ml-1">Eliminar</span>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend">Rol</legend>
+          <Select
+            items={ROLES.slice(1)}
+            transform={e => e.value}
+            label={e => e.name}
+            bind:value={user.role}
+            placement="right-start"
+          />
+        </fieldset>
+
+        <div class="col-span-full flex flex-wrap gap-2 justify-center mt-4">
+          {#if id != "new"}
+            <button class="btn btn-error" onclick={preventDefault(() => (showModal = true))}>
+              <TrashIcon size="1.2rem" />
+              <span class="ml-1">Eliminar</span>
+            </button>
+          {/if}
+
+          <button type="submit" class="btn btn-primary gap-2">
+            <SaveIcon size="1.2rem" />
+            {id === "new" ? "Crear" : "Guardar"}
           </button>
-        {/if}
-
-        <button type="submit" class="btn btn-primary gap-2">
-          <SaveIcon size="1.2rem" />
-          {id === "new" ? "Crear" : "Guardar"}
-        </button>
-      </div>
-    </form>
-  </div>
+        </div>
+      </form>
+    {/snippet}
+  </LoadingLayout>
 </PrivateRouteGuard>
 
 <Modal bind:show={showModal}>

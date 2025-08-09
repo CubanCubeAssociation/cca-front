@@ -48,17 +48,19 @@
   }
 
   function handleClick(ev: MouseEvent) {
-    if (!cancel) return;
-    if (!modal) return;
-    if (ev.target != ev.currentTarget) return;
+    let tg = ev.target as HTMLElement | null;
+    if (!cancel || !modal || !show || !tg) return;
+    if (tg.getAttribute("data-type") != "modal") return;
 
-    let bb = modal.getBoundingClientRect();
+    let bb = modal.children[0].getBoundingClientRect();
     let x1 = bb.x,
       y1 = bb.y;
     let x2 = x1 + bb.width,
       y2 = y1 + bb.height;
     let cx = ev.x,
       cy = ev.y;
+
+    console.log({ x1, y1, x2, y2, cx, cy }, closeOnClickOutside);
 
     if (closeOnClickOutside && ((cx - x1) * (cx - x2) > 0 || (cy - y1) * (cy - y2) > 0)) {
       close(null);

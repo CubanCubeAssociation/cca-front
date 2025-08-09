@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { Paginator } from "@classes/Paginator.svelte";
-  import ChevronLeftIcon from "@icons/ChevronLeft.svelte";
-  import ChevronRightIcon from "@icons/ChevronRight.svelte";
-  import ChevronDoubleLeftIcon from "@icons/ChevronDoubleLeft.svelte";
-  import ChevronDoubleRightIcon from "@icons/ChevronDoubleRight.svelte";
+  import {
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ChevronsLeftIcon,
+    ChevronsRightIcon,
+  } from "lucide-svelte";
 
   interface PageComponentProps {
     pg: Paginator;
@@ -37,14 +39,18 @@
     _cl}
 >
   {#if showFirstLast}
-    <li class="paginator-item">
-      <button onclick={() => setPage(1)}> <ChevronDoubleLeftIcon /> </button>
+    <li class="paginator-item paginator-operator">
+      <button disabled={pg.page === 1} onclick={() => setPage(1)}>
+        <ChevronsLeftIcon size="1rem" />
+      </button>
     </li>
   {/if}
 
   {#if showNextPrev}
-    <li class="paginator-item">
-      <button onclick={() => setPage(-2)}> <ChevronLeftIcon /> </button>
+    <li class="paginator-item paginator-operator">
+      <button disabled={pg.page === 1} onclick={() => setPage(-2)}>
+        <ChevronLeftIcon size="1rem" />
+      </button>
     </li>
   {/if}
 
@@ -55,14 +61,18 @@
   {/each}
 
   {#if showNextPrev}
-    <li class="paginator-item">
-      <button onclick={() => setPage(-1)}> <ChevronRightIcon /> </button>
+    <li class="paginator-item paginator-operator">
+      <button disabled={pg.page === pg.pages} onclick={() => setPage(-1)}>
+        <ChevronRightIcon size="1rem" />
+      </button>
     </li>
   {/if}
 
   {#if showFirstLast}
-    <li class="paginator-item">
-      <button onclick={() => setPage(Infinity)}> <ChevronDoubleRightIcon /> </button>
+    <li class="paginator-item paginator-operator">
+      <button disabled={pg.page === pg.pages} onclick={() => setPage(Infinity)}>
+        <ChevronsRightIcon size="1rem" />
+      </button>
     </li>
   {/if}
 </ul>
@@ -76,11 +86,13 @@
   }
 
   .paginator-item button {
-    @apply grid h-8 w-8 cursor-pointer select-none place-items-center rounded-md bg-violet-400/30
-    shadow-md transition-all duration-300 hover:bg-violet-400/40 hover:text-gray-300;
+    /* @apply grid h-8 w-8 cursor-pointer select-none place-items-center rounded-md bg-secondary/40
+    shadow-md transition-all duration-300 hover:bg-secondary/60 hover:text-gray-200; */
+    @apply btn btn-secondary w-8 h-8 p-0;
   }
 
   .paginator-item.selected button {
-    @apply bg-violet-500/60 text-gray-200 hover:bg-violet-500/50;
+    @apply btn-primary;
+    /* @apply bg-secondary/80 text-gray-200 hover:bg-secondary/60; */
   }
 </style>

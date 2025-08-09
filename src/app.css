@@ -75,7 +75,7 @@ body {
 }
 
 th {
-  @apply bg-primary-500 text-white dark:bg-[#040420];
+  @apply bg-primary text-primary-content;
 }
 
 footer {
@@ -91,7 +91,7 @@ input[type="radio"] {
 }
 
 .card {
-  @apply w-[calc(100%-2rem)] flex flex-col items-center gap-4 bg-base-100 py-5 px-2;
+  @apply w-[calc(100%-2rem)] max-md:w-[calc(100%-.5rem)] flex flex-col items-center gap-4 bg-base-100 py-5 px-2 max-md:px-0;
 }
 
 /* Reconstructor */

@@ -4,10 +4,10 @@
   import { timer } from "@helpers/timer";
   import { onMount } from "svelte";
   import { getResults } from "@helpers/API";
-  import LinkIcon from "@icons/OpenInNew.svelte";
-  import TrophyIcon from "@icons/Trophy.svelte";
   import UserField from "@components/UserField.svelte";
   import { contestNameToLink } from "@helpers/routing";
+  import { ExternalLinkIcon, TrophyIcon } from "lucide-svelte";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
 
   interface ISingleRecord {
     category: {
@@ -46,15 +46,15 @@
     records: IAverageResult[];
   }
 
-  let categoryMap: Map<string, string> = $state(new Map());
-  let categoryIcon: Map<string, Scrambler> = $state(new Map());
-  let nrMap: Map<string, { single: ISingleRecord | null; mean: ISingleRecord | null }> = $state(
-    new Map()
-  );
+  let categoryMap: Map<string, string> = new Map();
+  let categoryIcon: Map<string, Scrambler> = new Map();
+  let nrMap: Map<string, { single: ISingleRecord | null; mean: ISingleRecord | null }> = new Map();
   let prMap: Map<
     string,
     Map<string, { single: IAverageResult | null; mean: IAverageResult | null }>
   > = new Map();
+
+  let sortedEntries: [any, any][] = $state([]);
 
   let loading = $state(false);
   let error = $state(false);
@@ -72,9 +72,11 @@
 
         const { data } = res;
 
+        sortedEntries.length = 0;
         categoryMap.clear();
         categoryIcon.clear();
         nrMap.clear();
+        prMap.clear();
 
         let NR_avg: ISingleRecord[] = data[0];
         let PR_avg: IAverageRecord[] = data[1];
@@ -126,8 +128,9 @@
             ctMap.set(rec.contestant.province, pr);
           });
         });
+        sortedEntries = getSortedEntries(categoryMap, 1);
       })
-      .catch(() => (error = true))
+      .catch(err => (error = true))
       .finally(() => (loading = false));
   }
 
@@ -140,23 +143,25 @@
   });
 </script>
 
-<div class="card mx-auto mb-8 mt-4 max-w-4xl">
-  <h1 class="flex items-center justify-center gap-1 text-center text-4xl">
-    <TrophyIcon size="2rem" class="text-yellow-400 dark:text-yellow-300" /> Récords
-  </h1>
+<LoadingLayout
+  {loading}
+  {error}
+  altError={sortedEntries.length <= 0}
+  reloadFunction={updateCategoryMap}
+>
+  {#snippet title()}
+    <TrophyIcon size="1.5rem" class="text-yellow-400" /> Récords
+  {/snippet}
 
-  {#if loading}
-    <span class="loading loading-spinner loading-lg mx-auto"></span>
-  {:else if getSortedEntries(categoryMap, 1).length > 0}
-    <!-- NR -->
+  {#snippet content()}
     <h2
-      class="mt-8 flex w-max items-center justify-center gap-1 rounded-md
+      class="flex w-max items-center justify-center gap-1 rounded-md
       p-2 text-center text-xl !text-green-300"
     >
       Récords Nacionales
     </h2>
 
-    <div class="overflow-x-auto w-full">
+    <div class="overflow-x-auto w-full rounded-lg border border-base-content/10">
       <table class="table table-zebra">
         <thead>
           <tr>
@@ -173,7 +178,7 @@
         </thead>
 
         <tbody>
-          {#each getSortedEntries(categoryMap, 1) as cats}
+          {#each sortedEntries as cats}
             {@const nr = nrMap.get(cats[0])}
             {@const nrs = nr?.single}
             {@const nra = nr?.mean}
@@ -198,7 +203,7 @@
                 >
                   <span class="flex items-center justify-between gap-2 text-green-400">
                     {timer(nrs?.time || 0, true, true)}
-                    <LinkIcon size="1.2rem" />
+                    <ExternalLinkIcon size="1.2rem" />
                   </span>
                 </a>
                 {#if nra && nra.time}
@@ -213,7 +218,7 @@
                   >
                     <span class="mt-2 flex items-center justify-between gap-2 text-purple-400">
                       {timer(nra.time, true, true)}
-                      <LinkIcon size="1.2rem" />
+                      <ExternalLinkIcon size="1.2rem" />
                     </span>
                   </a>
                 {/if}
@@ -247,7 +252,7 @@
                   >
                     <span class="flex items-center justify-between gap-2 text-purple-400">
                       {timer(nra.time, true, true)}
-                      <LinkIcon size="1.2rem" />
+                      <ExternalLinkIcon size="1.2rem" />
                     </span>
                   </a>
                 </td>
@@ -284,7 +289,7 @@
           {cats[1]}
         </h3>
 
-        <div class="overflow-x-auto w-full mb-8">
+        <div class="overflow-x-auto w-full mb-8 rounded-lg border border-base-content/10">
           <table class="table table-zebra">
             <thead>
               <tr>
@@ -318,7 +323,7 @@
                     >
                       <span class="flex items-center justify-between gap-2 text-green-400">
                         {timer(prSingle?.time || 0, true, true)}
-                        <LinkIcon size="1.2rem" />
+                        <ExternalLinkIcon size="1.2rem" />
                       </span>
                     </a>
 
@@ -334,7 +339,7 @@
                       >
                         <span class="mt-2 flex items-center justify-between gap-2 text-purple-400">
                           {timer(prMean.time, true, true)}
-                          <LinkIcon size="1.2rem" />
+                          <ExternalLinkIcon size="1.2rem" />
                         </span>
                       </a>
                     {/if}
@@ -369,7 +374,7 @@
                       >
                         <span class="flex items-center justify-between gap-2 text-purple-400">
                           {timer(prMean.time, true, true)}
-                          <LinkIcon size="1.2rem" />
+                          <ExternalLinkIcon size="1.2rem" />
                         </span>
                       </a>
                     </td>
@@ -392,13 +397,9 @@
         </div>
       {/if}
     {/each}
-  {:else if error}
-    <span class="text-center text-red-500!">
-      Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-    </span>
+  {/snippet}
 
-    <button class="btn btn-primary mt-8" onclick={updateCategoryMap}>Recargar</button>
-  {:else}
+  {#snippet altErrorContent()}
     <span class="text-center">No hay resultados disponibles</span>
-  {/if}
-</div>
+  {/snippet}
+</LoadingLayout>

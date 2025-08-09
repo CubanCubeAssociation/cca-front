@@ -1,4 +1,5 @@
 import type { CONTEST_CATEGORY, FORMAT, ROUND, SOLVE } from "../interfaces";
+import { isFinite } from "./math";
 import { MultiSet } from "./multiset";
 import { checkPath, createPath } from "./object";
 import { infinitePenalty, stringToMillis } from "./timer";

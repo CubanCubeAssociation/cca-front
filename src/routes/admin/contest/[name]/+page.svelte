@@ -63,6 +63,7 @@
   import { page } from "$app/state";
   import ResultView from "@components/ResultView.svelte";
   import { twMerge } from "tailwind-merge";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
 
   let name = $state("");
   const notification = NotificationService.getInstance();
@@ -394,21 +395,13 @@
 </svelte:head>
 
 <PrivateRouteGuard>
-  <div class="mt-4 bg-base-100 rounded-md pt-8 max-w-6xl w-[calc(100%-2rem)] mx-auto mb-8">
-    <h1 class="text-3xl text-center">
+  <LoadingLayout {loading} {error} altError={false} reloadFunction={getContestData}>
+    {#snippet title()}
       {name === "new" ? "Crear competencia" : `Editar "${name}"`}
-    </h1>
+    {/snippet}
 
-    {#if loading}
-      <span class="loading loading-spinner loading-lg flex mx-auto my-4"></span>
-    {:else if error}
-      <span class="text-center text-red-500!">
-        Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-      </span>
-
-      <button class="mt-8 w-min" onclick={getContestData}>Recargar</button>
-    {:else}
-      <form class="mt-8" onsubmit={preventDefault(save)}>
+    {#snippet content()}
+      <form class="mt-8 w-full" onsubmit={preventDefault(save)}>
         <div class="tabs tabs-border">
           <!-- Datos -->
           <label class="tab gap-2 text-accent">
@@ -416,7 +409,7 @@
             <HardDriveIcon size="1.2rem" /> Datos
           </label>
           <div class="tab-content border-base-300 bg-base-100 md:p-10">
-            <div class="grid gap-4 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
+            <div class="grid gap-4 md:grid-cols-3 sm:grid-cols-2">
               <!-- Nombre -->
               <fieldset class="fieldset">
                 <legend class="fieldset-legend">Competencia</legend>
@@ -533,7 +526,7 @@
               </fieldset>
 
               <!-- Categorias -->
-              <fieldset class="fieldset">
+              <fieldset class="fieldset md:col-span-2">
                 <legend class="fieldset-legend">Categorías </legend>
 
                 <div class="w-full flex flex-wrap gap-2">
@@ -677,7 +670,7 @@
             </div>
 
             {#if contest.contestants.length}
-              <div class="overflow-x-auto max-w-full result-table">
+              <div class="overflow-x-auto max-w-full result-table rounded-lg border border-base-content/10">
                 <table class="table table-zebra">
                   <!-- head -->
                   <thead>
@@ -685,7 +678,7 @@
                       <th class="text-center">No.</th>
                       <th class="text-center">Nombre</th>
                       <th class="text-center">Usuario</th>
-                      <th class="text-center">Categorías</th>
+                      <th class="text-center min-w-[10rem]">Categorías</th>
                       <th class="text-center">Pagó</th>
                       <th class="text-center">Inscripción</th>
                       <th class="text-center"></th>
@@ -774,6 +767,7 @@
                 <ResultView
                   bind:roundGroup
                   {formats}
+                  {contest}
                   categories={contest.categories}
                   edit={handleEditRound}
                   allowEdit
@@ -806,8 +800,8 @@
           </button>
         </div>
       </form>
-    {/if}
-  </div>
+    {/snippet}
+  </LoadingLayout>
 </PrivateRouteGuard>
 
 <!-- ADD DIALOG -->
@@ -881,7 +875,7 @@
     {/if}
   </div>
 
-  <div class="overflow-x-auto max-w-full">
+  <div class="overflow-x-auto max-w-full rounded-lg border border-base-content/10">
     <table class="table table-zebra">
       <thead>
         <tr>

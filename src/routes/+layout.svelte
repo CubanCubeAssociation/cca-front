@@ -12,6 +12,8 @@
   import { page } from "$app/stores";
   import { checkAuth, initializeUserService } from "@stores/user.service";
 
+  import("eruda").then(eruda => eruda.default.init());
+
   let { children, data }: { children: any; data: LayoutServerData } = $props();
 
   const notService = NotificationService.getInstance();
@@ -72,7 +74,7 @@
 
 <FooterComponent />
 
-<div class="toast toast-end toast-middle">
+<div class="toast toast-end toast-middle z-50">
   {#each notifications as nt (nt.key)}
     <Notification {...nt} fixed={nt.fixed} />
   {/each}

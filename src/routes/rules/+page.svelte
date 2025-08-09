@@ -1,27 +1,30 @@
 <script lang="ts">
-  import RulesIcon from "@icons/Script.svelte";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { ScrollIcon } from "lucide-svelte";
 </script>
 
-<div class="card mx-auto mb-8 mt-4 max-w-4xl">
-  <h1 class="mb-4 flex items-center justify-center gap-1 text-center text-4xl">
-    <RulesIcon size="2rem" class="text-orange-400 dark:text-orange-300" /> Reglamento
-  </h1>
+<LoadingLayout loading={false} error={false} altError={false} reloadFunction={() => {}}>
+  {#snippet title()}
+    <ScrollIcon size="1.5rem" class="text-orange-400" /> Reglamento
+  {/snippet}
 
-  <span class="max-w-2xl my-4">
-    La CCA se rige bajo las mismas regulaciones de la WCA para las categorías el común. Para más
-    información, consultar el enlace debajo.
-  </span>
+  {#snippet content()}
+    <span class="max-w-2xl my-4">
+      La CCA se rige bajo las mismas regulaciones de la WCA para las categorías el común. Para más
+      información, consultar el enlace debajo.
+    </span>
 
-  <a
-    href="https://www.worldcubeassociation.org/regulations/translations/spanish-american/"
-    class="bg-orange-300 py-1 px-2 rounded-md text-black"
-    target="_blank"
-  >
-    WCA Reglamento y Directrices
-  </a>
-</div>
+    <a
+      href="https://www.worldcubeassociation.org/regulations/translations/spanish-american/"
+      class="bg-orange-300 py-1 px-2 rounded-md text-black"
+      target="_blank"
+    >
+      WCA Reglamento y Directrices
+    </a>
+  {/snippet}
+</LoadingLayout>
 
-<div class="card !hidden mx-auto mb-8 mt-4 max-w-4xl">
+<!-- <div class="card !hidden mx-auto mb-8 mt-4 max-w-4xl">
   <h2 class="mb-4 flex items-center justify-center gap-1 text-center text-3xl">
     Información complementaria
   </h2>
@@ -43,7 +46,7 @@
         <span class="content">Categorías</span>
 
         <ol>
-          <!-- 2x2 BLD, 2x2 OH -->
+          <!-- 2x2 BLD, 2x2 OH -- >
           <li>
             <span class="content">2x2 BLD, 2x2 OH</span>
 
@@ -56,7 +59,7 @@
             </ol>
           </li>
 
-          <!-- FTO -->
+          <!-- FTO - ->
           <li>
             <span class="content">FTO</span>
 
@@ -69,7 +72,7 @@
             </ol>
           </li>
 
-          <!-- 3x3 Mirror -->
+          <!-- 3x3 Mirror - ->
           <li>
             <span class="content">3x3 Mirror</span>
 
@@ -92,7 +95,7 @@
         <span class="content">Notación</span>
 
         <ol>
-          <!-- 2x2 BLD, 2x2 OH -->
+          <!-- 2x2 BLD, 2x2 OH -- >
           <li>
             <span class="content">2x2 BLD, 2x2 OH</span>
 
@@ -105,7 +108,7 @@
             </ol>
           </li>
 
-          <!-- FTO -->
+          <!-- FTO -- >
           <li>
             <span class="content">FTO</span>
 
@@ -118,7 +121,7 @@
             </ol>
           </li>
 
-          <!-- 3x3 Mirror -->
+          <!-- 3x3 Mirror -- >
           <li>
             <span class="content">3x3 Mirror</span>
 
@@ -182,4 +185,4 @@
   section > ol > li > .content {
     font-size: 1.5rem;
   }
-</style>
+</style> -->

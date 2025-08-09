@@ -3,7 +3,6 @@
   import type { USER } from "@interfaces";
   import { getUsers, updateAllUserProfiles } from "@helpers/API";
 
-  import PlusIcon from "@icons/Plus.svelte";
   import PaginatorComponent from "@components/PaginatorComponent.svelte";
   import SearchUser from "$lib/components/SearchUser.svelte";
   import { goto } from "$app/navigation";
@@ -12,6 +11,8 @@
   import UserField from "@components/UserField.svelte";
   import { Paginator } from "@classes/Paginator.svelte";
   import { NotificationService } from "@stores/notification.service";
+  import { PlusIcon, UsersIcon } from "lucide-svelte";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
 
   const notification = NotificationService.getInstance();
   const HEADER = "Usuarios";
@@ -118,98 +119,95 @@
 </script>
 
 <PrivateRouteGuard>
-  <div class="card mx-auto mb-8 mt-4 max-w-4xl">
-    <h1 class="text-center text-3xl">{HEADER}</h1>
+  <LoadingLayout {loading} {error} altError={false} reloadFunction={updateUsers}>
+    {#snippet title()}
+      <UsersIcon size="1.5rem" class="text-blue-400" />
+      {HEADER}
+    {/snippet}
 
-    <div class="actions gap-2">
-      <button class="btn btn-primary" onclick={addUser}>
-        <PlusIcon size="1.2rem" />
-        {ADD}
-      </button>
-
-      <SearchUser multiple={false} user={handleSearch} type="dropdown" />
-
-      <button class="btn btn-accent" onclick={updateAllProfiles}>Actualizar perfiles</button>
-    </div>
-
-    {#if loading}
-      <span class="loading loading-spinner loading-lg mx-auto"></span>
-    {:else if users.length > 0}
-      <PaginatorComponent {pg} update={updatePaginator} class="mb-4" />
-
-      <div class="overflow-x-auto max-w-full">
-        <table class="table table-zebra">
-          <thead>
-            <tr>
-              <th>#</th>
-              {#each columns as C}
-                {#if C.show}
-                  <th>{C.column}</th>
-                {/if}
-              {/each}
-            </tr>
-          </thead>
-
-          <tbody>
-            {#each users as u, pos}
-              <tr>
-                <td>{(pg.page - 1) * pg.limit + pos + 1}</td>
-
-                {#if columns[0].show}
-                  <td>
-                    <a href={"/admin/user/" + u.id} class="flex items-center gap-2 text-ellipsis">
-                      <UserField user={u} showAvatar fullName />
-                    </a>
-                  </td>
-                {/if}
-
-                {#if columns[1].show}
-                  <td>{u.username}</td>
-                {/if}
-
-                {#if columns[2].show}
-                  <td>
-                    {u.ci || "-"}
-                    <div>{u.sex} / {u.age} años</div>
-                  </td>
-                {/if}
-
-                {#if columns[3].show}
-                  <td>{u.email || "-"}</td>
-                {/if}
-                {#if columns[4].show}
-                  <td>{u.province || "-"}</td>
-                {/if}
-                {#if columns[5].show}
-                  <td>{u.municipality || "-"}</td>
-                {/if}
-                {#if columns[6].show}
-                  <td>{u.credit} CUP</td>
-                {/if}
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-
-      <PaginatorComponent {pg} update={updatePaginator} class="mt-4" />
-
-      <div class="actions">
+    {#snippet content()}
+      <div class="actions gap-2">
         <button class="btn btn-primary" onclick={addUser}>
           <PlusIcon size="1.2rem" />
           {ADD}
         </button>
-      </div>
-    {:else if error}
-      <span class="text-center text-red-500!">
-        Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-      </span>
 
-      <button class="btn btn-primary mt-8" onclick={updateUsers}>Recargar</button>
-    {:else}
-      <span class="text-center">No hay usuarios todavía</span>
-    {/if}
-  </div>
+        <SearchUser multiple={false} user={handleSearch} type="dropdown" />
+
+        <button class="btn btn-accent" onclick={updateAllProfiles}>Actualizar perfiles</button>
+      </div>
+
+      {#if users.length > 0}
+        <PaginatorComponent {pg} update={updatePaginator} class="mb-4" />
+
+        <div class="overflow-x-auto max-w-full rounded-lg border border-base-content/10">
+          <table class="table table-zebra">
+            <thead>
+              <tr>
+                <th>#</th>
+                {#each columns as C}
+                  {#if C.show}
+                    <th>{C.column}</th>
+                  {/if}
+                {/each}
+              </tr>
+            </thead>
+
+            <tbody>
+              {#each users as u, pos}
+                <tr>
+                  <td>{(pg.page - 1) * pg.limit + pos + 1}</td>
+
+                  {#if columns[0].show}
+                    <td>
+                      <a href={"/admin/user/" + u.id} class="flex items-center gap-2 text-ellipsis">
+                        <UserField user={u} showAvatar fullName />
+                      </a>
+                    </td>
+                  {/if}
+
+                  {#if columns[1].show}
+                    <td>{u.username}</td>
+                  {/if}
+
+                  {#if columns[2].show}
+                    <td>
+                      {u.ci || "-"}
+                      <div>{u.sex} / {u.age} años</div>
+                    </td>
+                  {/if}
+
+                  {#if columns[3].show}
+                    <td>{u.email || "-"}</td>
+                  {/if}
+                  {#if columns[4].show}
+                    <td>{u.province || "-"}</td>
+                  {/if}
+                  {#if columns[5].show}
+                    <td>{u.municipality || "-"}</td>
+                  {/if}
+                  {#if columns[6].show}
+                    <td>{u.credit} CUP</td>
+                  {/if}
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
+
+        <PaginatorComponent {pg} update={updatePaginator} class="mt-4" />
+
+        <div class="actions">
+          <button class="btn btn-primary" onclick={addUser}>
+            <PlusIcon size="1.2rem" />
+            {ADD}
+          </button>
+        </div>
+      {:else}
+        <span class="text-center">No hay usuarios todavía</span>
+      {/if}
+    {/snippet}
+  </LoadingLayout>
 </PrivateRouteGuard>
 
 <style lang="postcss">

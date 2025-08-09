@@ -8,6 +8,8 @@
   import UserField from "@components/UserField.svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
+  import { UsersIcon } from "lucide-svelte";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
 
   let error = $state(false);
   let loading = $state(false);
@@ -47,15 +49,15 @@
   });
 </script>
 
-<card class="card mx-auto mb-8 mt-4 max-w-4xl">
-  <h1 class="flex items-center justify-center gap-1 text-center text-4xl">Competidores</h1>
+<LoadingLayout {loading} {error} altError={users.length <= 0} reloadFunction={updateData}>
+  {#snippet title()}
+    <UsersIcon size="1.5rem" class="text-blue-300" /> Competidores
+  {/snippet}
 
-  {#if loading}
-    <span class="loading loading-spinner loading-lg mx-auto"></span>
-  {:else if users.length > 0}
+  {#snippet content()}
     <PaginatorComponent showNextPrev={!$screen.isMobile} update={updateData} bind:pg class="mb-4" />
 
-    <div class="overflow-x-auto w-full">
+    <div class="overflow-x-auto w-full rounded-lg border border-base-content/10">
       <table class="table table-zebra">
         <thead>
           <tr>
@@ -80,13 +82,9 @@
     </div>
 
     <PaginatorComponent showNextPrev={!$screen.isMobile} update={updateData} bind:pg class="mb-4" />
-  {:else if error}
-    <span class="text-center text-red-500!">
-      Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
-    </span>
+  {/snippet}
 
-    <button class="btn btn-primary mt-8" onclick={updateData}>Recargar</button>
-  {:else}
+  {#snippet altErrorContent()}
     <span class="text-center">No hay resultados disponibles</span>
-  {/if}
-</card>
+  {/snippet}
+</LoadingLayout>

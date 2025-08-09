@@ -4,8 +4,8 @@
   import { mod } from "@helpers/math";
   import { preventDefault } from "@helpers/object";
   import { weakRandomUUID } from "@helpers/strings";
-  import ExpandIcon from "@icons/ChevronDown.svelte";
   import type { Placement, Side } from "@interfaces";
+  import { ChevronDownIcon } from "lucide-svelte";
 
   import { tick } from "svelte";
   import { twMerge } from "tailwind-merge";
@@ -177,7 +177,7 @@
       {placeholder}
     {/if}
 
-    <ExpandIcon size="1.2rem" class="ml-auto" />
+    <ChevronDownIcon size="1.2rem" class="ml-auto" />
   </div>
 
   <ul

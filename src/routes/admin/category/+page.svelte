@@ -2,45 +2,60 @@
   import { onMount } from "svelte";
   import type { CATEGORY } from "@interfaces";
   import { getCategories } from "@helpers/API";
-  import PlusIcon from "@icons/Plus.svelte";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { goto } from "$app/navigation";
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
+  import { PlusIcon } from "lucide-svelte";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
 
   const HEADER = "Categorías";
   const ADD = "Añadir categoría";
 
-  let categories: CATEGORY[] = [];
+  let categories: CATEGORY[] = $state([]);
+  let loading = $state(false);
+  let error = $state(false);
 
   function addCategory() {
     goto("/admin/category/new");
   }
 
-  onMount(() => {
+  function updateData() {
+    loading = true;
+    error = false;
+
     getCategories()
       .then(res => {
         if (!res) {
+          error = true;
           return;
         }
         categories = res.results.sort((a, b) => (a.name < b.name ? -1 : 1));
       })
-      .catch(err => console.dir(err));
+      .catch(() => (error = true))
+      .finally(() => (loading = false));
+  }
+
+  onMount(() => {
+    updateData();
   });
 </script>
 
 <PrivateRouteGuard>
-  <div class="card mt-4 max-w-lg mx-auto mb-8">
-    <h1 class="text-3xl text-center">{HEADER}</h1>
+  <LoadingLayout class="max-w-lg" {loading} {error} altError={categories.length <= 0} reloadFunction={updateData}>
+    {#snippet title()}
+      <WcaCategory icon="333" size="1.5rem" class="text-yellow-400" buttonClass="p-[.1rem]!" />
+      {HEADER}
+    {/snippet}
 
-    <div class="actions">
-      <button class="btn btn-primary" onclick={addCategory}>
-        <PlusIcon size="1.2rem" />
-        {ADD}
-      </button>
-    </div>
+    {#snippet content()}
+      <div class="actions">
+        <button class="btn btn-primary" onclick={addCategory}>
+          <PlusIcon size="1.2rem" />
+          {ADD}
+        </button>
+      </div>
 
-    {#if categories.length > 0}
-      <div class="overflow-x-auto w-full">
+      <div class="overflow-x-auto w-full rounded-lg border border-base-content/10">
         <table class="table table-zebra">
           <thead>
             <tr>
@@ -68,8 +83,8 @@
           {ADD}
         </button>
       </div>
-    {/if}
-  </div>
+    {/snippet}
+  </LoadingLayout>
 </PrivateRouteGuard>
 
 <style lang="postcss">

@@ -1,11 +1,14 @@
 <script lang="ts">
-  import CubeIcon from "@icons/Cube.svelte";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { BoxIcon } from "lucide-svelte";
 </script>
 
-<div class="card mx-auto mb-8 mt-4 max-w-4xl">
-  <h1 class="mb-4 flex items-center justify-center gap-1 text-center text-4xl">
-    <CubeIcon class="text-primary-500 dark:text-primary-400" /> CCA
-  </h1>
+<LoadingLayout loading={false} error={false} altError={false} reloadFunction={() => {}}>
+  {#snippet title()}
+    <BoxIcon class="text-primary" /> CCA
+  {/snippet}
 
-  <span>La información de la CCA aún no está disponible.</span>
-</div>
+  {#snippet content()}
+    <span>La información de la CCA aún no está disponible.</span>
+  {/snippet}
+</LoadingLayout>

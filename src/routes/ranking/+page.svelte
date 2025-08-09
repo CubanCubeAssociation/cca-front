@@ -20,10 +20,10 @@
   import { Paginator } from "@classes/Paginator.svelte";
   import Award from "@components/Award.svelte";
   import UserField from "@components/UserField.svelte";
-  import RankingIcon from "@icons/SortNumericAscending.svelte";
-  import ReloadIcon from "@icons/Reload.svelte";
   import { contestNameToLink } from "@helpers/routing";
   import { twMerge } from "tailwind-merge";
+  import { ArrowDown01Icon, RefreshCwIcon } from "lucide-svelte";
+  import LoadingLayout from "@components/LoadingLayout.svelte";
 
   const notification = NotificationService.getInstance();
   const debug = false;
@@ -122,57 +122,62 @@
   });
 </script>
 
-<div class="card mx-auto mb-8 mt-4 max-w-4xl">
-  <h1 class="mb-2 flex items-center justify-center gap-1 text-center text-4xl">
-    <RankingIcon size="2rem" class="text-green-400 dark:text-green-300" /> Ranking
-  </h1>
+<LoadingLayout
+  {loading}
+  {error}
+  altError={rankingResults.length <= 0}
+  reloadFunction={refreshRankingData}
+>
+  {#snippet title()}
+    <ArrowDown01Icon size="1.5rem" class="text-green-400" /> Ranking
+  {/snippet}
 
-  <div class="actions mb-2 flex flex-wrap justify-center gap-4">
-    <Select
-      bind:value={category}
-      items={categories}
-      transform={e => e}
-      label={e => e.name}
-      placement="right"
-      hasIcon={e => e.scrambler}
-      onChange={e => getRankingInfo(e.id, type)}
-    />
+  {#snippet content()}
+    <div class="actions mb-2 flex flex-wrap justify-center items-center gap-4">
+      <Select
+        bind:value={category}
+        items={categories}
+        transform={e => e}
+        label={e => e.name}
+        placement="right"
+        hasIcon={e => e.scrambler}
+        onChange={e => getRankingInfo(e.id, type)}
+      />
 
-    <Select
-      bind:value={type}
-      items={["Single", "Media"]}
-      transform={e => e}
-      label={e => e}
-      placement="right"
-      onChange={e => getRankingInfo(category?.id || "", e)}
-    />
+      <Select
+        bind:value={type}
+        items={["Single", "Media"]}
+        transform={e => e}
+        label={e => e}
+        placement="right"
+        onChange={e => getRankingInfo(category?.id || "", e)}
+      />
 
-    <!-- <Select
-      bind:value={province}
-      items={[null, ...PROVINCIAS]}
-      transform={e => e}
-      label={e => (e ? e.nombre : "Cuba")}
-      placement="right"
-      placeholder="Provincia"
-    /> -->
+      <!-- <Select
+        bind:value={province}
+        items={[null, ...PROVINCIAS]}
+        transform={e => e}
+        label={e => (e ? e.nombre : "Cuba")}
+        placement="right"
+        placeholder="Provincia"
+      /> -->
 
-    {#if minRole($userStore, "admin")}
-      <div class="dropdown dropdown-hover">
-        <div tabindex="0" role="button" class="btn m-1"><ReloadIcon size="1rem" /></div>
-        <ul class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-          <li><a href="?#" onclick={handleUpdateCategory}>Actualizar Categoría</a></li>
-          <li><a href="?#" onclick={handleUpdateRanking}>Actualizar General</a></li>
-        </ul>
-      </div>
-    {/if}
-  </div>
+      {#if minRole($userStore, "admin")}
+        <div class="dropdown dropdown-hover">
+          <div tabindex="0" role="button" class="btn btn-primary m-1">
+            <RefreshCwIcon size="1rem" />
+          </div>
+          <ul class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+            <li><a href="?#" onclick={handleUpdateCategory}>Actualizar Categoría</a></li>
+            <li><a href="?#" onclick={handleUpdateRanking}>Actualizar General</a></li>
+          </ul>
+        </div>
+      {/if}
+    </div>
 
-  {#if loading}
-    <span class="loading loading-spinner loading-lg mx-auto"></span>
-  {:else if rankingResults.length > 0}
     <PaginatorComponent showNextPrev={!$screen.isMobile} bind:pg />
 
-    <div class="overflow-x-auto w-full">
+    <div class="overflow-x-auto w-full rounded-lg border border-base-content/10">
       <table class="table table-zebra">
         <thead>
           <tr>
@@ -232,8 +237,10 @@
     </div>
 
     <PaginatorComponent showNextPrev={!$screen.isMobile} bind:pg class="mt-4" />
-  {:else if error}
-    <span class="text-center text-red-500!">
+  {/snippet}
+
+  {#snippet errorContent()}
+    <span class="text-center text-error">
       Ha ocurrido un error. Por favor revise su conexión y vuelva a intentarlo.
     </span>
 
@@ -243,7 +250,9 @@
     >
       Recargar
     </button>
-  {:else}
+  {/snippet}
+
+  {#snippet altErrorContent()}
     <span class="text-center">No hay resultados disponibles para {category?.name} {type}</span>
-  {/if}
-</div>
+  {/snippet}
+</LoadingLayout>

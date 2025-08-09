@@ -26,6 +26,7 @@
     "@types/eslint": "9.6.0",
     "autoprefixer": "10.4.20",
     "daisyui": "5.0.20",
+    "eruda": "^3.4.3",
     "eslint": "9.7.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-svelte": "2.36.0",
@@ -37,7 +38,6 @@
     "prettier-plugin-tailwindcss": "0.6.11",
     "svelte": "5.0.0",
     "svelte-check": "4.0.0",
-    "svelte-material-icons": "3.0.4",
     "tailwindcss": "4.1.4",
     "ts-node": "10.9.2",
     "typescript": "5.2.2",
@@ -48,7 +48,7 @@
   "dependencies": {
     "echarts": "5.5.0",
     "ky": "0.33.3",
-    "lucide-svelte": "0.469.0",
+    "lucide-svelte": "0.537.0",
     "moment": "2.29.4",
     "svelte-easy-crop": "3.0.0",
     "tailwind-merge": "2.2.0"
