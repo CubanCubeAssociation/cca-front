@@ -273,6 +273,8 @@ export interface USER_PROFILE {
   contests: { name: string; date: Date }[];
   totalContests: number;
   rankSummary: RANK_SUMMARY[];
+  elo: number;
+  sor: number;
 }
 
 export const PuzzleTypeName = [

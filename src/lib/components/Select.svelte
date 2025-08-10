@@ -229,16 +229,3 @@
     {/each}
   </ul>
 </div>
-
-<!-- 
-<Dropdown
-  bind:open={showOptions}
-  containerClass={"max-h-[20rem] overflow-y-auto z-50 w-max bg-gray-700! [&>div]:hidden rounded-md " +
-    (useFixed ? " fixed! " : "") +
-    (type === "color"
-      ? " [&>ul]:grid-cols-[repeat(var(--grid-w),1fr)] [&>ul]:grid [&>ul>div]:hidden  "
-      : "")}
-  {placement}
-  style={"--grid-w: " + gridW}
-  trigger="click"
-></Dropdown> -->

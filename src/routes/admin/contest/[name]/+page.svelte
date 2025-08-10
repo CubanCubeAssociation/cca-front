@@ -935,7 +935,7 @@
   <h2 class="text-center text-xl mb-4">Eliminar competencia</h2>
 
   <div class="flex flex-col items-center justify-center">
-    <CircleAlertIcon class="mx-auto mt-2 mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" />
+    <CircleAlertIcon class="mx-auto mt-2 mb-4 text-gray-400 w-12 h-12" />
 
     <h4 class="text-center mb-4">¿Desea eliminar la competencia "{contest.name}"?</h4>
 

@@ -38,7 +38,12 @@
       }
 
       res.pop();
-      displayName = [...res[0], ...res[res.length - 2], ...res[res.length - 1]].join(" ");
+
+      if (res.length < 3) {
+        displayName = res.reduce((acc, e) => [...acc, ...e], []).join(" ");
+      } else {
+        displayName = [...res[0], ...res[res.length - 2], ...res[res.length - 1]].join(" ");
+      }
     }
   });
 </script>

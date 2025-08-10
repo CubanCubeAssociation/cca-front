@@ -192,9 +192,31 @@ export async function removeContest(c: CONTEST): Promise<any> {
 }
 
 // USER
-export async function getUsers(page: number, limit = 10): Promise<USER_RESULT> {
+interface IGetUsers {
+  page: number;
+  limit?: number;
+  name?: string;
+  username?: string;
+  role?: string;
+  sortBy?: string;
+  province?: string;
+}
+
+export async function getUsers({
+  page,
+  limit = 10,
+  sortBy = "name",
+  province,
+}: IGetUsers): Promise<USER_RESULT> {
+  let params = new URLSearchParams();
+
+  params.set("page", page + "");
+  limit && params.set("limit", limit + "");
+  sortBy && params.set("sortBy", sortBy);
+  province && params.set("province", province);
+
   if (tokenNeedsRefresh()) await refreshToken();
-  return await ky.get(API + `/users?page=${page}&limit=${limit}`, commonAuth()).json();
+  return await ky.get(API + `/users?${params.toString()}`, commonAuth()).json();
 }
 
 export async function getUser(id: string): Promise<USER> {
@@ -359,12 +381,23 @@ export async function updateResults() {
     .json();
 }
 
+export async function updateAll() {
+  if (tokenNeedsRefresh()) await refreshToken();
+
+  return await ky
+    .get(API + "/results/updateAll", {
+      ...commonAuth(),
+    })
+    .json();
+}
+
 export async function getRanking(category: string, type: "Single" | "Media"): Promise<RANKING[]> {
   if (tokenNeedsRefresh()) await refreshToken();
 
   return await ky
     .get(API + `/results/ranking/${category}/${type}`, {
       ...commonAuth(),
+      timeout: false,
     })
     .json();
 }

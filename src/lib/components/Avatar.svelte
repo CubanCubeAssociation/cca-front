@@ -9,9 +9,10 @@
     user: USER_LIKE | null | undefined;
     showName?: boolean;
     size?: "xs" | "sm" | "md" | "lg" | "xl";
+    class?: string;
   }
 
-  let { user, showName, size }: IAvatarProps = $props();
+  let { user, showName, size, class: _cl = $bindable("") }: IAvatarProps = $props();
 
   const sizeClasses: Record<IAvatarProps["size"] & string, string> = {
     xs: "w-6",
@@ -22,17 +23,17 @@
   };
 </script>
 
-<div class="avatar">
+<div class={twMerge("avatar", _cl)}>
   <div
     class={twMerge(
       "ring-offset-base-100 rounded-full ring ring-offset-2",
       sizeClasses[size || "sm"],
       user?.role === "root"
-        ? "ring-purple-500! dark:ring-purple-400!"
+        ? "ring-purple-500 "
         : user?.role === "admin"
-          ? "ring-primary-500! dark:ring-primary-400!"
+          ? "ring-primary"
           : user?.role === "delegate"
-            ? "ring-green-500! dark:ring-green-400!"
+            ? "ring-green-500"
             : ""
     )}
   >

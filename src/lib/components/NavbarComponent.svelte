@@ -3,7 +3,7 @@
   import { isAuth, minRole } from "@helpers/auth";
   import CcaLogo from "@components/CCALogo.svelte";
   import WcaCategory from "./wca/WCACategory.svelte";
-  import { logout } from "@helpers/API";
+  import { logout, updateAll } from "@helpers/API";
   import { NotificationService } from "@stores/notification.service";
   import { ROLES } from "@constants";
   import { getReturnURL } from "@helpers/strings";
@@ -15,6 +15,7 @@
     LogInIcon,
     LogOutIcon,
     MenuIcon,
+    RefreshCcwIcon,
     ScrollIcon,
     SwordsIcon,
     TrendingUpDownIcon,
@@ -124,6 +125,32 @@
                   buttonClass="p-[.1rem]!"
                 />
                 Categorías
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="?"
+                onclick={() => {
+                  updateAll()
+                    .then(() => {
+                      notification.addNotification({
+                        header: "Actualizado",
+                        text: "Se han actualizado todos los datos correctamente",
+                      });
+                    })
+                    .catch(error => {
+                      console.dir(error);
+                      notification.addNotification({
+                        header: "Error",
+                        text: "Ha ocurrido un error al actualizar",
+                      });
+                    });
+                  avatarDropdownOpen = false;
+                }}
+              >
+                <RefreshCcwIcon size="1rem" class="text-accent" />
+                Actualizar todo
               </a>
             </li>
           {/if}

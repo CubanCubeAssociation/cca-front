@@ -58,9 +58,7 @@
 {#if open}
   <div class="alert">
     {#if !fixed}
-      <button
-        class="btn absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 p-0 h-min rounded-full"
-      >
+      <button onclick={close} class="btn absolute top-0 right-0 ml-2 -mt-2 p-0 h-min rounded-full">
         <CircleXIcon />
       </button>
     {/if}
@@ -79,7 +77,7 @@
     {/if}
     <div class="tx-text ms-3 text-sm font-normal">
       <span class="tx-text text-lg font-bold">{header}</span>
-      <div class="mb-2 mt-2 text-sm font-normal">{text}</div>
+      <p class="mb-2 mt-2 text-sm font-normal whitespace-break-spaces">{text}</p>
       <div bind:innerHTML={html} contenteditable="false"></div>
 
       {#if (actions || []).length}
@@ -98,3 +96,9 @@
     </div>
   </div>
 {/if}
+
+<style>
+  .alert {
+    width: min(25rem, calc(100vw - 3rem));
+  }
+</style>

@@ -275,7 +275,7 @@
         >
           {#if !tempAvatar}
             <UploadIcon size="3rem" />
-            <p class="inline mb-2 text-xs text-gray-500 dark:text-gray-400 w-full px-1">
+            <p class="inline mb-2 text-xs text-gray-500 w-full px-1">
               Click para subir o arrastre la imagen
             </p>
           {:else}

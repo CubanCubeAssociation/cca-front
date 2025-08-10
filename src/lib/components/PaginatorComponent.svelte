@@ -86,13 +86,10 @@
   }
 
   .paginator-item button {
-    /* @apply grid h-8 w-8 cursor-pointer select-none place-items-center rounded-md bg-secondary/40
-    shadow-md transition-all duration-300 hover:bg-secondary/60 hover:text-gray-200; */
     @apply btn btn-secondary w-8 h-8 p-0;
   }
 
   .paginator-item.selected button {
     @apply btn-primary;
-    /* @apply bg-secondary/80 text-gray-200 hover:bg-secondary/60; */
   }
 </style>

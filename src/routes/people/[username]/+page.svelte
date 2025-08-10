@@ -16,7 +16,16 @@
   import Avatar from "@components/Avatar.svelte";
   import { contestNameToLink } from "@helpers/routing";
   import { twMerge } from "tailwind-merge";
-  import { BadgeCheckIcon, MapPinIcon } from "lucide-svelte";
+  import {
+    BadgeCheckIcon,
+    ClockIcon,
+    FingerprintIcon,
+    HandCoinsIcon,
+    MapPinIcon,
+    MarsIcon,
+    SigmaIcon,
+    VenusIcon,
+  } from "lucide-svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
 
   interface USER_CONTEST_RESULT {
@@ -63,6 +72,7 @@
     confine: true,
   };
 
+  const size = "1.1rem";
   let profile: USER_PROFILE | null = $state(null);
   let categories: CATEGORY[] = $state([]);
   let stepPercentSerie: HTMLDivElement;
@@ -550,48 +560,65 @@
       <aside class="w-full md:max-w-[16rem] h-fit">
         <!-- Profile -->
         <section id="profile">
-          <Avatar size="xl" user={profile?.user || null} />
-          <h1 class="font-bold text-lg">
+          <Avatar size="xl" user={profile?.user || null} class="mx-auto" />
+          <h1 class="font-bold text-lg mx-auto">
             <UserField
               fullName
               class="w-fit! text-center font-bold"
               user={profile?.user || { username: "", name: "", role: "user" }}
             />
           </h1>
-          <span class="text-sm flex items-center gap-1">
-            <MapPinIcon size="1.1rem" class="text-yellow-200" />
+
+          <span class="text-sm flex items-center gap-1 text-yellow-200">
+            <MapPinIcon {size} />
             {profile?.user.province}
           </span>
           <span class="text-sm flex items-center gap-1">
             <a
               href={`/people/${profile?.user.username || "#"}`}
-              class="block truncate text-sm font-medium text-pink-400"
+              class="flex items-center gap-1 truncate text-sm font-medium text-pink-400"
             >
-              CCA ID: {profile?.user.username}
+              <FingerprintIcon {size} />
+              CCA-ID: {profile?.user.username}
             </a>
           </span>
           <span class="text-sm flex items-center gap-1">
-            Sexo: {profile?.user ? (profile?.user.sex === "M" ? "Masculino" : "Femenino") : ""}
+            <SigmaIcon {size} />
+            SoR: {profile?.sor}
           </span>
-          <span class="text-sm flex items-center gap-1">Edad: {profile?.user.age}</span>
+          <span class="text-sm flex items-center gap-1">
+            {#if profile?.user.sex === "F"}
+              <VenusIcon {size} />
+            {:else}
+              <MarsIcon {size} />
+            {/if}
+            Sexo: {profile?.user ? (profile?.user.sex === "F" ? "Femenino" : "Masculino") : ""}
+          </span>
+          <span class="text-sm flex items-center gap-1">
+            <ClockIcon {size} />
+            Edad: {profile?.user.age}
+          </span>
 
           {#if minRole($userStore, "delegate")}
-            <span class="text-sm flex items-center gap-1">Crédito: {profile?.user.credit} CUP</span>
             <span class="text-sm flex items-center gap-1">
-              {profile?.user.email}
-
+              <HandCoinsIcon {size} />
+              Crédito: {profile?.user.credit} CUP
+            </span>
+            <span class="text-sm flex items-center gap-1">
               {#if profile?.user.isEmailVerified || true}
-                <BadgeCheckIcon size="1rem" class="text-green-300" />
+                <BadgeCheckIcon {size} class="text-green-300" />
               {/if}
+
+              {profile?.user.email}
             </span>
           {/if}
         </section>
 
         <!-- ELO -->
         <section id="profile-elo">
-          <h2 class="text-center mb-4 text-2xl">ELO: {ELO}</h2>
+          <h2 class="text-center mb-4 text-xl">ELO: {ELO}</h2>
 
-          <div class="grid w-full overflow-hidden h-[20rem]" bind:this={stepPercentSerie}></div>
+          <div class="grid w-full overflow-hidden h-[15rem]" bind:this={stepPercentSerie}></div>
         </section>
       </aside>
 
@@ -625,7 +652,7 @@
         <!-- Records personales -->
         {#if userRanks.length}
           <section>
-            <h2 class="text-center mb-4 text-2xl">Récords personales</h2>
+            <h2 class="text-center text-2xl">Récords personales</h2>
 
             <div
               class="overflow-x-auto max-h-[30rem] w-full rounded-lg border border-base-content/10"
@@ -961,12 +988,12 @@
   }
 
   aside > section {
-    @apply border border-gray-400 dark:border-gray-700 py-4 px-2 rounded-md shadow-md 
+    @apply border border-gray-400 py-4 px-2 rounded-md shadow-md 
       bg-[#fff1] grid place-items-center;
   }
 
   #profile {
-    @apply grid place-items-center gap-2 h-fit;
+    @apply grid place-items-start gap-2 h-fit;
   }
 
   .podium-list {

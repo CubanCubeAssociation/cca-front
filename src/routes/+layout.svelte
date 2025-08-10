@@ -9,10 +9,10 @@
   import FooterComponent from "@components/FooterComponent.svelte";
   import type { LayoutServerData } from "./$types";
   import { DOMAIN } from "@constants";
-  import { page } from "$app/stores";
   import { checkAuth, initializeUserService } from "@stores/user.service";
+  import { page } from "$app/state";
 
-  import("eruda").then(eruda => eruda.default.init());
+  // import("eruda").then(eruda => eruda.default.init());
 
   let { children, data }: { children: any; data: LayoutServerData } = $props();
 
@@ -32,7 +32,7 @@
       description: d.description,
       applicationCategory: "Utility",
       operatingSystem: "all",
-      url: `${DOMAIN}` + $page.url.pathname,
+      url: `${DOMAIN}` + page.url.pathname,
     })}</${"script"}>`;
   }
 

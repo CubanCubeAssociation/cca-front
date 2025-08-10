@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
+  import { page } from "$app/state";
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import SearchUser from "@components/SearchUser.svelte";
   import UserField from "@components/UserField.svelte";
@@ -7,6 +9,7 @@
   import { metricMean, metricStdDev, metricTrendLSV } from "@helpers/statistics";
   import { timer } from "@helpers/timer";
   import type { CATEGORY, FORMAT, USER, USER_PROFILE } from "@interfaces";
+  import { NotificationService } from "@stores/notification.service";
   import { ArrowDownIcon, ArrowUpIcon, TrendingUpDownIcon } from "lucide-svelte";
   import { onMount } from "svelte";
 
@@ -22,13 +25,14 @@
     trend: number;
   }
 
-  let userA: USER | null = $state(null);
-  let userB: USER | null = $state(null);
+  const notService = NotificationService.getInstance();
 
   let timeSerie: HTMLDivElement | null = $state(null);
   let timeChart: echarts.ECharts | null = $state(null);
   let userProfileA: USER_PROFILE | null = $state(null);
   let userProfileB: USER_PROFILE | null = $state(null);
+  let userA: USER | null = $state(null);
+  let userB: USER | null = $state(null);
   let categories: CATEGORY[] = $state([]);
   let formats: FORMAT[] = $state([]);
   let loading = $state(false);
@@ -129,12 +133,36 @@
       .finally(() => (loading = false));
   }
 
-  function updateUserData(u: any, variant: "A" | "B") {
-    variant === "A" ? (userA = u) : (userB = u);
-    getUserProfile(u.username).then(p => {
-      variant === "A" ? (userProfileA = p) : (userProfileB = p);
-      updateStatistics(p, variant);
-    });
+  function updateUserData(username: string, variant: "A" | "B") {
+    let query = new URLSearchParams(page.url.searchParams.toString());
+    query.set("user" + variant, username);
+    goto(`?${query.toString()}`);
+
+    getUserProfile(username)
+      .then(p => {
+        if (variant === "A") {
+          userProfileA = p;
+          userA = userProfileA.user;
+        } else {
+          userProfileB = p;
+          userB = userProfileB.user;
+        }
+
+        updateStatistics(p, variant);
+      })
+      .catch(err => {
+        if (err.response.status === 404) {
+          notService.addNotification({
+            header: "Error",
+            text: `No se pudo encontrar ningún usuario con ID "${username}"`,
+          });
+        }
+        console.dir(err);
+      });
+  }
+
+  function SoR(acc: number, e: any) {
+    return acc + e.position;
   }
 
   // function updateCharts(variant: "A" | "B") {
@@ -293,6 +321,16 @@
 
   onMount(() => {
     getBaseData();
+
+    let params = new URLSearchParams(page.url.searchParams.toString());
+
+    if (params.has("userA")) {
+      updateUserData(params.get("userA")!, "A");
+    }
+
+    if (params.has("userB")) {
+      updateUserData(params.get("userB")!, "B");
+    }
   });
 </script>
 
@@ -306,14 +344,20 @@
       <SearchUser
         placeholder="Nombre o ID 1"
         class="text-blue-400"
-        user={u => updateUserData(u, "A")}
+        user={u => {
+          userA = u;
+          updateUserData(u.username, "A");
+        }}
         type="dropdown"
       />
 
       <SearchUser
         placeholder="Nombre o ID 2"
         class="text-orange-400"
-        user={u => updateUserData(u, "B")}
+        user={u => {
+          userB = u;
+          updateUserData(u.username, "B");
+        }}
         type="dropdown"
       />
     </div>
@@ -336,12 +380,12 @@
       {@const placesA = getPlaces(userProfileA)}
       {@const placesB = getPlaces(userProfileB)}
 
-      <div class="flex flex-wrap gap-4 justify-center items-start">
+      <div class="flex flex-wrap gap-4 justify-center items-start max-w-full">
         <!-- Categorías comunes -->
         <div
-          class="category-ranking overflow-x-auto max-w-full rounded-box border border-base-content/5 bg-base-100"
+          class="category-ranking overflow-x-auto w-full rounded-box border border-base-content/5 bg-base-100"
         >
-          <table class="table">
+          <table class="table table-zebra">
             <thead>
               <tr>
                 <th></th>
@@ -434,28 +478,28 @@
         <div
           class="general-results overflow-x-auto rounded-box border border-base-content/5 bg-base-100"
         >
-          <table class="table">
+          <table class="table table-zebra">
             <thead>
               <tr>
                 <th></th>
                 <th>
-                  {userA ? userA.name.split(" ")[0] : "Usuario 1"}
+                  {userProfileA.user ? userProfileA.user.name.split(" ")[0] : "Usuario 1"}
                 </th>
                 <th>
-                  {userB ? userB.name.split(" ")[0] : "Usuario 2"}
+                  {userProfileB.user ? userProfileB.user.name.split(" ")[0] : "Usuario 2"}
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>SoR</td>
-                <td>{rnd()}</td>
-                <td>{rnd()}</td>
+                <td>{userProfileA.sor}</td>
+                <td>{userProfileB.sor}</td>
               </tr>
               <tr>
                 <td>ELO</td>
-                <td>{placesA.reduce((acc, e) => acc + e[2], 0)}</td>
-                <td>{placesB.reduce((acc, e) => acc + e[2], 0)}</td>
+                <td>{userProfileA.elo}</td>
+                <td>{userProfileB.elo}</td>
               </tr>
               <tr>
                 <td>Récords nacionales</td>
@@ -504,11 +548,11 @@
     @apply text-base-content font-bold;
   }
 
-  .general-results tr > :nth-child(2) {
+  .general-results tbody tr > :nth-child(2) {
     @apply text-blue-400;
   }
 
-  .general-results tr > :nth-child(3) {
+  .general-results tbody tr > :nth-child(3) {
     @apply text-orange-400;
   }
 

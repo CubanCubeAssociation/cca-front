@@ -68,7 +68,7 @@
     loading = true;
     error = false;
 
-    getUsers(pg.page)
+    getUsers({ page: pg.page, limit: pg.limit })
       .then(res => {
         if (!res) {
           error = true;
