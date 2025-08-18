@@ -17,7 +17,6 @@
   import Modal from "./Modal.svelte";
   import { onMount } from "svelte";
   import { weakRandomUUID } from "@helpers/strings";
-  import { time } from "echarts";
   import { isFinite } from "@helpers/math";
 
   interface IResultTableProps {

@@ -130,7 +130,7 @@
         });
         sortedEntries = getSortedEntries(categoryMap, 1);
       })
-      .catch(err => (error = true))
+      .catch(() => (error = true))
       .finally(() => (loading = false));
   }
 

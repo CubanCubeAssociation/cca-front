@@ -231,7 +231,9 @@ function getMoveLength(sequence: string[], puzzle: PuzzleType, order: number): n
         return sequence.reduce((acc: any[], e) => [...acc, ...e.split(/\s+/)], []).length;
       }
     }
-  } catch {}
+  } catch {
+    void 0;
+  }
 
   return 0;
 }

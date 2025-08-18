@@ -267,7 +267,7 @@ export class ScrambleParser {
       if (m) {
         for (let n = 1; n <= 4; n += 1) {
           const mv = ~~m[n];
-          mv && res.push([n, mv]);
+          if (mv) res.push([n, mv]);
         }
       }
 
@@ -444,7 +444,11 @@ export class ScrambleParser {
           res.push([-3, parts[i][1] === "2" ? 2 : parts[i][1] === "'" ? -1 : 1]);
         } else if (/\d+/.test(parts[i])) {
           const turns = parseInt(parts[i].replace("=", "").slice(1, 3));
-          parts[i][0] === "d" ? (d = turns) : (u = turns);
+          if (parts[i][0] === "d") {
+            d = turns;
+          } else {
+            u = turns;
+          }
         } else {
           if (pins.length === 4) {
             res.push([parseInt(pins.replace(/U/g, "1").replace(/d/g, "0"), 2), u, d]);

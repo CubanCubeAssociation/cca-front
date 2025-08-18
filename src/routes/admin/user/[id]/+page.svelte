@@ -12,6 +12,7 @@
     DollarSignIcon,
     IdCardIcon,
     KeyRoundIcon,
+    LockKeyholeIcon,
     MailIcon,
     SaveIcon,
     TrashIcon,
@@ -21,9 +22,13 @@
   import { createEmptyUser, preventDefault } from "@helpers/object";
   import { page } from "$app/state";
   import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { NotificationService } from "@stores/notification.service";
+  import type { USER } from "@interfaces";
+  import { SITEMAP } from "@helpers/routing";
 
   const WIDTH = 200;
   const HEIGHT = WIDTH;
+  const notification = NotificationService.getInstance();
 
   let id = $state("");
   let loading = $state(false);
@@ -32,6 +37,9 @@
 
   let municipios: string[] = $state([]);
   let showModal = $state(false);
+  let showUpdatePasswordModal = $state(false);
+  let tempPassword = $state("");
+  let tempConfirmPassword = $state("");
   let cropData = {
     x: 0,
     y: 0,
@@ -39,12 +47,29 @@
     height: HEIGHT,
   };
 
-  function exit() {
-    if (user.id === $userStore?.id) {
-      $userStore = user;
+  function handleUserChange(u: USER, header: string) {
+    if (u.id === $userStore?.id) {
+      $userStore = u;
     }
 
-    goto("/admin/user");
+    notification.addNotification({
+      header,
+      text: `Se ha ${header.toLowerCase()} correctamente el usuario "${u.name}"`,
+      actions: [
+        {
+          text: "Volver",
+          color: "btn-primary",
+          callback() {
+            goto(SITEMAP.admin.user);
+          },
+        },
+        {
+          text: "Aceptar",
+          color: "btn-success",
+          callback() {},
+        },
+      ],
+    });
   }
 
   function save(ev: Event) {
@@ -54,11 +79,11 @@
 
     if (id != "new") {
       updateUser(user)
-        .then(exit)
+        .then(u => handleUserChange(u, "Actualizado"))
         .catch(err => console.log("ERROR: ", err));
     } else {
       createUser(user)
-        .then(exit)
+        .then(u => handleUserChange(u, "Creado"))
         .catch(err => console.log("ERROR: ", err));
     }
   }
@@ -119,7 +144,15 @@
     showModal = false;
 
     removeUser(user)
-      .then(exit)
+      .then(() => {
+        notification.addNotification({
+          header: "Eliminado",
+          text: `Se ha eliminado correctamente el usuario "${user.name}"`,
+          timeout: 2000,
+        });
+
+        setTimeout(() => goto(SITEMAP.admin.user), 2000);
+      })
       .catch(err => console.log("ERROR: ", err));
   }
 
@@ -131,51 +164,51 @@
   let croppedData = $state("");
   let showCropModal = $state(false);
 
-  function readImageFile(f: File) {
-    let reader = new FileReader();
-    let img = new Image();
+  // function readImageFile(f: File) {
+  //   let reader = new FileReader();
+  //   let img = new Image();
 
-    reader.onload = () => {
-      img.onload = () => {
-        let cnv = document.createElement("canvas");
-        let ctx = cnv.getContext("2d");
+  //   reader.onload = () => {
+  //     img.onload = () => {
+  //       let cnv = document.createElement("canvas");
+  //       let ctx = cnv.getContext("2d");
 
-        cnv.width = img.width;
-        cnv.height = img.height;
+  //       cnv.width = img.width;
+  //       cnv.height = img.height;
 
-        ctx?.drawImage(img, 0, 0, img.width, img.height);
+  //       ctx?.drawImage(img, 0, 0, img.width, img.height);
 
-        tempAvatar = cnv.toDataURL();
-        croppedData = tempAvatar;
-        showCropModal = true;
-      };
+  //       tempAvatar = cnv.toDataURL();
+  //       croppedData = tempAvatar;
+  //       showCropModal = true;
+  //     };
 
-      img.src = reader.result?.toString() || "";
-    };
+  //     img.src = reader.result?.toString() || "";
+  //   };
 
-    reader.readAsDataURL(f);
-  }
+  //   reader.readAsDataURL(f);
+  // }
 
-  function dropHandle(event: any) {
-    tempAvatar = "";
-    event.preventDefault();
+  // function dropHandle(event: any) {
+  //   tempAvatar = "";
+  //   event.preventDefault();
 
-    if (event.dataTransfer.items) {
-      [...event.dataTransfer.items].forEach(item => {
-        if (item.kind === "file") {
-          readImageFile(item.getAsFile() as File);
-        }
-      });
-    }
-  }
+  //   if (event.dataTransfer.items) {
+  //     [...event.dataTransfer.items].forEach(item => {
+  //       if (item.kind === "file") {
+  //         readImageFile(item.getAsFile() as File);
+  //       }
+  //     });
+  //   }
+  // }
 
-  function handleChange(event: any) {
-    const files = event.target.files;
+  // function handleChange(event: any) {
+  //   const files = event.target.files;
 
-    if (files.length > 0) {
-      readImageFile(files[0]);
-    }
-  }
+  //   if (files.length > 0) {
+  //     readImageFile(files[0]);
+  //   }
+  // }
 
   function cropImage() {
     let img = new Image(WIDTH, HEIGHT);
@@ -212,7 +245,7 @@
     getUser(id)
       .then(u => {
         if (!u) {
-          return goto("/login");
+          return goto(SITEMAP.login);
         }
         user = u;
         tempAvatar = getAvatarRoute(u.username || "");
@@ -428,6 +461,14 @@
             </button>
           {/if}
 
+          <button
+            class="btn btn-warning"
+            onclick={preventDefault(() => (showUpdatePasswordModal = true))}
+          >
+            <LockKeyholeIcon size="1.2rem" />
+            Cambiar contraseña
+          </button>
+
           <button type="submit" class="btn btn-primary gap-2">
             <SaveIcon size="1.2rem" />
             {id === "new" ? "Crear" : "Guardar"}
@@ -469,5 +510,61 @@
   <div class="flex gap-2 mt-4 justify-center">
     <button class="btn" onclick={() => (showCropModal = false)}>Cancelar</button>
     <button class="btn btn-primary" onclick={cropImage}>Recortar</button>
+  </div>
+</Modal>
+
+<Modal
+  bind:show={showUpdatePasswordModal}
+  onclose={() => {
+    tempPassword = "";
+    tempConfirmPassword = "";
+  }}
+>
+  <h2 class="text-xl text-center mb-4">Cambiar contraseña</h2>
+  <div class="flex flex-col items-center justify-center">
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Nueva contraseña</legend>
+      <label class="input">
+        <KeyRoundIcon />
+        <input
+          bind:value={tempPassword}
+          type="password"
+          class="grow"
+          placeholder="Contraseña"
+          autocomplete="off"
+          required
+        />
+      </label>
+    </fieldset>
+
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend">Confirmar contraseña</legend>
+      <label class="input">
+        <KeyRoundIcon />
+        <input
+          bind:value={tempConfirmPassword}
+          type="password"
+          class="grow"
+          placeholder="Confirmar contraseña"
+          autocomplete="off"
+          required
+        />
+      </label>
+    </fieldset>
+
+    <div class="flex gap-2 mt-4">
+      <button class="btn" onclick={() => (showUpdatePasswordModal = false)}>Cancelar</button>
+      <button
+        class="btn btn-primary"
+        disabled={!tempPassword || tempPassword != tempConfirmPassword}
+        onclick={() => {
+          user.password = tempPassword;
+          showUpdatePasswordModal = false;
+        }}
+      >
+        <SaveIcon size="1.2rem" />
+        <span class="ml-1">Actualizar</span>
+      </button>
+    </div>
   </div>
 </Modal>

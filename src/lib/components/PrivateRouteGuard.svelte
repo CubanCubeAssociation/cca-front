@@ -1,6 +1,6 @@
 <script lang="ts">
   import { userStore } from "@stores/user";
-  import { tokenStore } from "@stores/token";
+
   import { redirectToLogin, refreshToken } from "@helpers/API";
   import { browser } from "$app/environment";
 
@@ -8,11 +8,7 @@
 
   (async () => {
     if (!browser) return;
-    if (
-      !$userStore ||
-      !$tokenStore ||
-      new Date($tokenStore.access.expires).getTime() < Date.now()
-    ) {
+    if (!$userStore) {
       if (debug) console.log("Trying to refresh token");
 
       if (await refreshToken()) {

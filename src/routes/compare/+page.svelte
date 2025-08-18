@@ -27,8 +27,8 @@
 
   const notService = NotificationService.getInstance();
 
-  let timeSerie: HTMLDivElement | null = $state(null);
-  let timeChart: echarts.ECharts | null = $state(null);
+  // let timeSerie: HTMLDivElement | null = $state(null);
+  // let timeChart: echarts.ECharts | null = $state(null);
   let userProfileA: USER_PROFILE | null = $state(null);
   let userProfileB: USER_PROFILE | null = $state(null);
   let userA: USER | null = $state(null);
@@ -63,10 +63,6 @@
     summary.unshift(["WR", records.wr.results.length, records.wr.points]);
 
     return summary;
-  }
-
-  function rnd() {
-    return Math.round(Math.random() * 123);
   }
 
   function updateStatistics(p: USER_PROFILE, variant: "A" | "B") {
@@ -104,7 +100,7 @@
       });
     });
 
-    Object.entries(catData).forEach(([_, metrics]) => {
+    Object.entries(catData).forEach(([, metrics]) => {
       metrics.results.sort((a, b) => {
         if (contestPos[a.contest] != contestPos[b.contest]) {
           return contestPos[a.contest] - contestPos[b.contest];
@@ -159,10 +155,6 @@
         }
         console.dir(err);
       });
-  }
-
-  function SoR(acc: number, e: any) {
-    return acc + e.position;
   }
 
   // function updateCharts(variant: "A" | "B") {
@@ -534,10 +526,12 @@
             </tbody>
           </table>
         </div>
+
+        <!--  -->
       </div>
     {/if}
 
-    <div class="grid place-items-center h-[20rem] w-full" bind:this={timeSerie}></div>
+    <!-- <div class="grid place-items-center h-[20rem] w-full" bind:this={timeSerie}></div> -->
   {/snippet}
 </LoadingLayout>
 

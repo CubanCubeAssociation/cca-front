@@ -2,7 +2,6 @@ import {
   PENALTY,
   type CATEGORY,
   type CONTEST,
-  type CONTESTANT,
   type FORMAT,
   type ROUND,
   type SOLVE,
@@ -184,6 +183,8 @@ export function createEmptyUser(): USER {
     role: "user",
     isEmailVerified: false,
     age: 0,
+    elo: 0,
+    sor: Infinity,
   };
 }
 

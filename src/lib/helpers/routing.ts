@@ -1,5 +1,23 @@
-import { DOMAIN } from "@constants";
-import { isFinite } from "./math";
+import { DOMAIN } from "@helpers/API";
+import { isFinite } from "@helpers/math";
+
+export const SITEMAP = {
+  home: "/",
+  admin: {
+    category: "/admin/category",
+    contest: "/admin/contest",
+    user: "/admin/user",
+  },
+  cca: "/cca",
+  compare: "/compare",
+  contests: "/contests",
+  people: "/people",
+  ranking: "/ranking",
+  records: "/records",
+  results: "/results",
+  login: "/login",
+  rules: "/rules",
+} as const;
 
 interface ContestParams {
   category: string;
@@ -23,7 +41,7 @@ export function contestNameToLink(name: string, params?: Partial<ContestParams>,
     queryString = "?" + queryString;
   }
 
-  return `${admin ? DOMAIN + "/admin/contest" : "/contests"}/${name.replace(/ /g, "-")}${queryString}`;
+  return `${admin ? DOMAIN + SITEMAP.admin.contest : SITEMAP.contests}/${name.replace(/ /g, "-")}${queryString}`;
 }
 
 export function contestParamName(paramName: string) {

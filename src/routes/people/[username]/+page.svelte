@@ -3,9 +3,6 @@
   import type { CATEGORY, FORMAT, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
   import { onDestroy, onMount } from "svelte";
   import { page } from "$app/state";
-  import UserField from "@components/UserField.svelte";
-  import { minRole } from "@helpers/auth";
-  import { userStore } from "$lib/stores/user";
   import Award from "@components/Award.svelte";
   import * as echarts from "echarts";
   import { goto } from "$app/navigation";
@@ -13,20 +10,10 @@
   import { timer } from "@helpers/timer";
   import moment from "moment";
   import { getBest, mean, stdDev, trendLSV } from "@helpers/statistics";
-  import Avatar from "@components/Avatar.svelte";
-  import { contestNameToLink } from "@helpers/routing";
+  import { contestNameToLink, SITEMAP } from "@helpers/routing";
   import { twMerge } from "tailwind-merge";
-  import {
-    BadgeCheckIcon,
-    ClockIcon,
-    FingerprintIcon,
-    HandCoinsIcon,
-    MapPinIcon,
-    MarsIcon,
-    SigmaIcon,
-    VenusIcon,
-  } from "lucide-svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
+  import UserProfileInfo from "@components/UserProfileInfo.svelte";
 
   interface USER_CONTEST_RESULT {
     round: number;
@@ -72,7 +59,6 @@
     confine: true,
   };
 
-  const size = "1.1rem";
   let profile: USER_PROFILE | null = $state(null);
   let categories: CATEGORY[] = $state([]);
   let stepPercentSerie: HTMLDivElement;
@@ -532,7 +518,7 @@
       formats = res[2];
 
       if (!profile) {
-        goto("/people", { replaceState: true });
+        goto(SITEMAP.people, { replaceState: true });
         return;
       }
 
@@ -560,58 +546,7 @@
       <aside class="w-full md:max-w-[16rem] h-fit">
         <!-- Profile -->
         <section id="profile">
-          <Avatar size="xl" user={profile?.user || null} class="mx-auto" />
-          <h1 class="font-bold text-lg mx-auto">
-            <UserField
-              fullName
-              class="w-fit! text-center font-bold"
-              user={profile?.user || { username: "", name: "", role: "user" }}
-            />
-          </h1>
-
-          <span class="text-sm flex items-center gap-1 text-yellow-200">
-            <MapPinIcon {size} />
-            {profile?.user.province}
-          </span>
-          <span class="text-sm flex items-center gap-1">
-            <a
-              href={`/people/${profile?.user.username || "#"}`}
-              class="flex items-center gap-1 truncate text-sm font-medium text-pink-400"
-            >
-              <FingerprintIcon {size} />
-              CCA-ID: {profile?.user.username}
-            </a>
-          </span>
-          <span class="text-sm flex items-center gap-1">
-            <SigmaIcon {size} />
-            SoR: {profile?.sor}
-          </span>
-          <span class="text-sm flex items-center gap-1">
-            {#if profile?.user.sex === "F"}
-              <VenusIcon {size} />
-            {:else}
-              <MarsIcon {size} />
-            {/if}
-            Sexo: {profile?.user ? (profile?.user.sex === "F" ? "Femenino" : "Masculino") : ""}
-          </span>
-          <span class="text-sm flex items-center gap-1">
-            <ClockIcon {size} />
-            Edad: {profile?.user.age}
-          </span>
-
-          {#if minRole($userStore, "delegate")}
-            <span class="text-sm flex items-center gap-1">
-              <HandCoinsIcon {size} />
-              Crédito: {profile?.user.credit} CUP
-            </span>
-            <span class="text-sm flex items-center gap-1">
-              {#if profile?.user.isEmailVerified || true}
-                <BadgeCheckIcon {size} class="text-green-300" />
-              {/if}
-
-              {profile?.user.email}
-            </span>
-          {/if}
+          <UserProfileInfo user={profile?.user || null} />
         </section>
 
         <!-- ELO -->
@@ -669,7 +604,7 @@
                 </thead>
 
                 <tbody>
-                  {#each userRanks as rank, p}
+                  {#each userRanks as rank}
                     <tr>
                       <td>
                         <div class="flex items-center">
@@ -982,14 +917,15 @@
 
 <style lang="postcss">
   @reference "tailwindcss";
+  @reference "../../../app.css";
 
   aside {
     @apply grid gap-4 w-full;
   }
 
   aside > section {
-    @apply border border-gray-400 py-4 px-2 rounded-md shadow-md 
-      bg-[#fff1] grid place-items-center;
+    @apply border border-base-content/30 py-4 px-2 rounded-md shadow-md 
+      bg-primary/5 grid place-items-center;
   }
 
   #profile {
@@ -997,7 +933,7 @@
   }
 
   .podium-list {
-    @apply flex justify-center w-full;
+    @apply flex justify-center w-full overflow-clip;
   }
 
   .podium-list li {

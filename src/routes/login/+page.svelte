@@ -7,6 +7,7 @@
   import { preventDefault } from "@helpers/object";
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import { LogInIcon, SendIcon } from "lucide-svelte";
+  import { SITEMAP } from "@helpers/routing";
 
   let email = "";
   let password = "";
@@ -18,13 +19,15 @@
     try {
       let res = await login(email, password);
 
+      console.log("RES: ", res);
+
       if (!res) {
         error = "Error de autenticación.";
         loading = false;
         return;
       }
       let ret = $page.url.searchParams.get("returnTo");
-      goto(ret || "/", { replaceState: true });
+      goto(ret || SITEMAP.home, { replaceState: true });
     } catch {
       error = "Email o contraseña inválidos.";
       loading = false;
@@ -38,7 +41,7 @@
   onMount(() => {
     if ($userStore) {
       let ret = $page.url.searchParams.get("returnTo");
-      goto(ret || "/", { replaceState: true });
+      goto(ret || SITEMAP.home, { replaceState: true });
     }
   });
 </script>

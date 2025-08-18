@@ -11,36 +11,27 @@ import type {
   USER_PROFILE,
   USER_RESULT,
 } from "@interfaces";
-import { tokenStore } from "@stores/token";
 import { userStore } from "@stores/user";
-import { API } from "@constants";
 import { get } from "svelte/store";
 import { tokenNeedsRefresh } from "./auth";
 import { goto } from "$app/navigation";
 import { page } from "$app/stores";
 import { getReturnURL } from "./strings";
+import { SITEMAP } from "./routing";
 
 const debug = false;
 
+// export const API = "http://localhost:3500/v1";
+// export const API = 'http://192.168.180.93:3500/v1';
+export const API = "https://cca-back.onrender.com/v1";
+// export const DOMAIN = "http://localhost:5173";
+export const DOMAIN = "https://cca-cuba.netlify.app";
+
 // Common internal helper function
-function getAuth(): string {
-  const tokens = get(tokenStore);
-  return "Bearer " + (tokens?.access.token || "");
-}
-
-function getRefreshToken(): string {
-  const tokens = get(tokenStore);
-  return tokens?.refresh.token || "";
-}
-
 function commonAuth() {
-  if (!get(tokenStore)) return {};
-
   return {
-    headers: {
-      Authorization: getAuth(),
-    },
-  };
+    credentials: "include",
+  } as const;
 }
 
 function withoutID(r: any): any {
@@ -64,17 +55,11 @@ export async function login(email: string, password: string): Promise<LOGIN_DATA
           email,
           password,
         },
+        credentials: "include",
       })
       .json();
 
     userStore.set(loginData.user);
-    tokenStore.set(loginData.tokens);
-
-    // document.cookie = `access_token=${loginData.tokens.access.token}; Path=/; Secure; HttpOnly`;
-    // document.cookie = `refresh_token=${loginData.tokens.refresh.token}; Path=/; Secure; HttpOnly`;
-
-    localStorage.setItem("user", JSON.stringify(loginData.user));
-    localStorage.setItem("tokens", JSON.stringify(loginData.tokens));
 
     return loginData;
   } catch {
@@ -88,9 +73,7 @@ export async function logout() {
   try {
     await ky
       .post(API + "/auth/logout", {
-        json: {
-          refreshToken: getRefreshToken(),
-        },
+        credentials: "include",
       })
       .json();
 
@@ -107,42 +90,27 @@ export async function logout() {
 }
 
 export async function refreshToken() {
-  if (debug) console.log("STORES: ", get(userStore), get(tokenStore));
+  return new Promise(res => {
+    if (debug) console.log("Refreshing token");
 
-  if (!get(userStore) || !get(tokenStore)) return false;
-
-  if (debug) console.log("Refreshing token");
-
-  try {
-    const tokens: LOGIN_DATA["tokens"] = await ky
-      .post(API + "/auth/refresh-tokens", {
-        json: { refreshToken: getRefreshToken() },
-      })
-      .json();
-
-    if (debug) console.log("TOKENS: ", tokens);
-
-    tokenStore.set(tokens);
-    localStorage.setItem("user", JSON.stringify(get(userStore)));
-    localStorage.setItem("tokens", JSON.stringify(tokens));
-    return true;
-  } catch (err) {
-    console.log("ERROR: ", err);
-  }
-
-  return false;
+    ky.post(API + "/auth/refresh-tokens", {
+      credentials: "include",
+    })
+      .json()
+      .then(() => res(true))
+      .catch(() => {
+        res(false);
+      });
+  });
 }
 
 export function clearSessionStores() {
   userStore.set(null);
-  tokenStore.set(null);
-  localStorage.removeItem("tokens");
-  localStorage.removeItem("user");
 }
 
 export function redirectToLogin() {
   clearSessionStores();
-  goto(encodeURI(`/login?returnTo=${getReturnURL(get(page).url)}`));
+  goto(encodeURI(`${SITEMAP.login}?returnTo=${getReturnURL(get(page).url)}`));
 }
 
 export function redirectOnUnauthorized(err: { response: Response }) {
@@ -159,17 +127,17 @@ export function redirectOnUnauthorized(err: { response: Response }) {
 
 // CONTEST
 export async function getContests(page: number, limit = 10): Promise<CONTEST_RESULT> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + `/contests?page=${page}&limit=${limit}`, commonAuth()).json();
 }
 
 export async function getContest(name: string): Promise<CONTEST> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + "/contests/" + name, commonAuth()).json();
 }
 
 export async function createContest(c: CONTEST): Promise<any> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky
     .post(API + "/contests", {
       json: withoutID(c),
@@ -179,7 +147,7 @@ export async function createContest(c: CONTEST): Promise<any> {
 }
 
 export async function updateContest(c: CONTEST, id: string): Promise<any> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.patch(API + "/contests/" + id, {
     json: withoutID(c),
     ...commonAuth(),
@@ -187,7 +155,7 @@ export async function updateContest(c: CONTEST, id: string): Promise<any> {
 }
 
 export async function removeContest(c: CONTEST): Promise<any> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.delete(API + "/contests/" + c.id, commonAuth());
 }
 
@@ -202,35 +170,39 @@ interface IGetUsers {
   province?: string;
 }
 
+export async function getOwnUser(): Promise<USER | null> {
+  return await ky.get(API + "/users/me", { credentials: "include" }).json();
+}
+
 export async function getUsers({
   page,
   limit = 10,
   sortBy = "name",
   province,
 }: IGetUsers): Promise<USER_RESULT> {
-  let params = new URLSearchParams();
+  const params = new URLSearchParams();
 
   params.set("page", page + "");
-  limit && params.set("limit", limit + "");
-  sortBy && params.set("sortBy", sortBy);
-  province && params.set("province", province);
+  if (limit) params.set("limit", limit + "");
+  if (sortBy) params.set("sortBy", sortBy);
+  if (province) params.set("province", province);
 
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + `/users?${params.toString()}`, commonAuth()).json();
 }
 
 export async function getUser(id: string): Promise<USER> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + "/users/" + id, commonAuth()).json();
 }
 
 export async function getUserByUsername(username: string): Promise<USER> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + "/users/username/" + username, commonAuth()).json();
 }
 
 export async function getUserProfile(username: string): Promise<USER_PROFILE> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + "/users/profile/" + username, commonAuth()).json();
 }
 
@@ -242,8 +214,8 @@ export async function searchUser(text: string, signal?: AbortSignal): Promise<US
   return await ky.get(API + "/users/search/" + text, { signal }).json();
 }
 
-export async function createUser(u: USER) {
-  if (tokenNeedsRefresh()) await refreshToken();
+export async function createUser(u: USER): Promise<USER> {
+  if (await tokenNeedsRefresh()) await refreshToken();
 
   const props = [
     "email",
@@ -264,14 +236,16 @@ export async function createUser(u: USER) {
     return acc;
   }, {} as any);
 
-  return await ky.post(API + "/users", {
-    json: newUser,
-    ...commonAuth(),
-  });
+  return await ky
+    .post(API + "/users", {
+      json: newUser,
+      ...commonAuth(),
+    })
+    .json();
 }
 
-export async function updateUser(u: USER) {
-  if (tokenNeedsRefresh()) await refreshToken();
+export async function updateUser(u: USER): Promise<USER> {
+  if (await tokenNeedsRefresh()) await refreshToken();
 
   const props = [
     "email",
@@ -292,14 +266,16 @@ export async function updateUser(u: USER) {
     return acc;
   }, {} as any);
 
-  return await ky.patch(API + "/users/" + u.id, {
-    json: newUser,
-    ...commonAuth(),
-  });
+  return await ky
+    .patch(API + "/users/" + u.id, {
+      json: newUser,
+      ...commonAuth(),
+    })
+    .json();
 }
 
 export async function removeUser(u: USER) {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.delete(API + "/users/" + u.id, {
     ...commonAuth(),
   });
@@ -317,12 +293,12 @@ export async function updateAllUserProfiles() {
 
 // CATEGORY
 export async function getCategories(): Promise<CATEGORY_RESULT> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + "/categories?limit=20", commonAuth()).json();
 }
 
 export async function getCategory(id: string): Promise<CATEGORY> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.get(API + "/categories/" + id, commonAuth()).json();
 }
 
@@ -334,12 +310,12 @@ export function getFormats(): FORMAT[] {
     { name: "Bo2", amount: 2, lMargin: 0, rMargin: 1 },
     { name: "Bo1", amount: 1, lMargin: 0, rMargin: 0 },
   ];
-  // if (tokenNeedsRefresh()) await refreshToken();
+  // if (await tokenNeedsRefresh()) await refreshToken();
   // return await ky.get(API + "/categories/formats", commonAuth()).json();
 }
 
 export async function createCategory(c: CATEGORY) {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.post(API + "/categories", {
     json: withoutID(c),
     ...commonAuth(),
@@ -347,7 +323,7 @@ export async function createCategory(c: CATEGORY) {
 }
 
 export async function updateCategory(c: CATEGORY) {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.patch(API + "/categories/" + c.id, {
     json: withoutID(c),
     ...commonAuth(),
@@ -355,7 +331,7 @@ export async function updateCategory(c: CATEGORY) {
 }
 
 export async function removeCategory(c: CATEGORY) {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky.delete(API + "/categories/" + c.id, {
     ...commonAuth(),
   });
@@ -363,7 +339,7 @@ export async function removeCategory(c: CATEGORY) {
 
 // RESULTS
 export async function getResults() {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
   return await ky
     .get(API + "/results/", {
       ...commonAuth(),
@@ -372,7 +348,7 @@ export async function getResults() {
 }
 
 export async function updateResults() {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
 
   return await ky
     .get(API + "/results/update", {
@@ -382,7 +358,7 @@ export async function updateResults() {
 }
 
 export async function updateAll() {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
 
   return await ky
     .get(API + "/results/updateAll", {
@@ -392,7 +368,7 @@ export async function updateAll() {
 }
 
 export async function getRanking(category: string, type: "Single" | "Media"): Promise<RANKING[]> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
 
   return await ky
     .get(API + `/results/ranking/${category}/${type}`, {
@@ -406,7 +382,7 @@ export async function updateRanking(
   category: string,
   type: "Single" | "Media"
 ): Promise<RANKING[]> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
 
   return await ky
     .get(API + `/results/ranking/${category}/${type}/update`, {
@@ -416,7 +392,7 @@ export async function updateRanking(
 }
 
 export async function updateRankings(): Promise<boolean> {
-  if (tokenNeedsRefresh()) await refreshToken();
+  if (await tokenNeedsRefresh()) await refreshToken();
 
   return await ky
     .get(API + `/results/ranking/update`, {

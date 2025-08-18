@@ -7,6 +7,7 @@
   import PrivateRouteGuard from "@components/PrivateRouteGuard.svelte";
   import { PlusIcon } from "lucide-svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { SITEMAP } from "@helpers/routing";
 
   const HEADER = "Categorías";
   const ADD = "Añadir categoría";
@@ -16,7 +17,7 @@
   let error = $state(false);
 
   function addCategory() {
-    goto("/admin/category/new");
+    goto(SITEMAP.admin.category + "/new");
   }
 
   function updateData() {
@@ -41,7 +42,13 @@
 </script>
 
 <PrivateRouteGuard>
-  <LoadingLayout class="max-w-lg" {loading} {error} altError={categories.length <= 0} reloadFunction={updateData}>
+  <LoadingLayout
+    class="max-w-lg"
+    {loading}
+    {error}
+    altError={categories.length <= 0}
+    reloadFunction={updateData}
+  >
     {#snippet title()}
       <WcaCategory icon="333" size="1.5rem" class="text-yellow-400" buttonClass="p-[.1rem]!" />
       {HEADER}
@@ -68,7 +75,7 @@
           <tbody>
             {#each categories as cat}
               <tr>
-                <td><a href={"/admin/category/" + cat.id}>{cat.name}</a></td>
+                <td><a href={SITEMAP.admin.category + "/" + cat.id}>{cat.name}</a></td>
                 <td><WcaCategory icon={cat.scrambler} /></td>
                 <td>{cat.scrambler}</td>
               </tr>

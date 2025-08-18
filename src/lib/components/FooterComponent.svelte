@@ -1,25 +1,26 @@
 <script lang="ts">
+  import { SITEMAP } from "@helpers/routing";
   import CcaLogo from "./CCALogo.svelte";
 </script>
 
 <footer class="footer sm:footer-horizontal bg-base-300 text-base-content p-10">
   <nav>
     <CcaLogo size="2rem" />
-    <a href="/contests" class="link link-hover">Competencias</a>
-    <a href="/records" class="link link-hover">Récords</a>
-    <a href="/ranking" class="link link-hover">Ranking</a>
-    <a href="/compare" class="link link-hover">Comparar</a>
+    <a href={SITEMAP.contests} class="link link-hover">Competencias</a>
+    <a href={SITEMAP.records} class="link link-hover">Récords</a>
+    <a href={SITEMAP.ranking} class="link link-hover">Ranking</a>
+    <a href={SITEMAP.compare} class="link link-hover">Comparar</a>
   </nav>
   <nav>
     <h6 class="footer-title">CCA</h6>
-    <a href="/people" class="link link-hover">Competidores</a>
-    <a href="/rules" class="link link-hover">Reglamento</a>
-    <a href="/cca" class="link link-hover">CCA</a>
+    <a href={SITEMAP.people} class="link link-hover">Competidores</a>
+    <a href={SITEMAP.rules} class="link link-hover">Reglamento</a>
+    <a href={SITEMAP.cca} class="link link-hover">CCA</a>
   </nav>
   <nav>
     <h6 class="footer-title">Social</h6>
     <div class="grid grid-flow-col gap-4">
-      <a href="/" aria-label="Twitter">
+      <a href={SITEMAP.home} aria-label="Twitter">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"

@@ -1,41 +1,55 @@
-import { browser } from "$app/environment";
 import { userStore } from "$lib/stores/user";
-import { tokenStore } from "$lib/stores/token";
 import { get } from "svelte/store";
-import { clearSessionStores, refreshToken } from "@helpers/API";
-import { isAuth } from "@helpers/auth";
+import { clearSessionStores, getOwnUser, refreshToken } from "@helpers/API";
 
 const debug = false;
 
-export async function checkAuth() {
-  if (!isAuth(get(userStore))) {
-    if (debug) console.log("Token does not exist or expired");
-
-    if (await refreshToken()) {
-      if (debug) console.log("Token updated app");
-      location.reload();
-    } else {
-      if (debug) console.log("clearSessionData");
-      clearSessionStores();
-    }
-  } else if (debug) console.log("IS AUTH");
+function checkCookies(name: string) {
+  return document.cookie.split("; ").filter(e => e.startsWith(name + "="));
 }
 
-export async function initializeUserService() {
-  if (!browser) return;
-  // console.log(
-  //   `LOCAL_STORAGE: <${localStorage.getItem("tokens")}> <${localStorage.getItem("user")}>`
-  // );
+export function checkAuth() {
+  let checkingAuth = false;
+  let waitForUser = false;
 
-  if (localStorage.getItem("tokens") && localStorage.getItem("user")) {
-    tokenStore.set(JSON.parse(localStorage.getItem("tokens")!));
-    userStore.set(JSON.parse(localStorage.getItem("user")!));
-    if (debug) console.log("Tokens initialized");
-  } else {
-    if (debug) console.log("clearSessionStores (localStorage not found)");
-    clearSessionStores();
-  }
+  const cb = async () => {
+    if (checkingAuth || waitForUser) return;
+    checkingAuth = true;
 
-  if (debug) console.log("Checking auth...");
-  await checkAuth();
+    if (
+      !window.cookieStore ||
+      !(await window.cookieStore.get("accessToken")) ||
+      checkCookies("accessToken").length === 0
+    ) {
+      clearSessionStores();
+    }
+
+    if (!get(userStore)) {
+      if (debug) console.log("Token does not exist or expired");
+
+      if (await refreshToken()) {
+        const user = await getOwnUser();
+
+        if (user) {
+          if (debug) console.log("IS AUTH");
+          userStore.set(user);
+        } else {
+          clearSessionStores();
+        }
+      } else {
+        waitForUser = true;
+
+        const ubsubs = userStore.subscribe(newUser => {
+          if (!newUser) return;
+          waitForUser = false;
+          ubsubs();
+        });
+      }
+    } else if (debug) console.log("IS AUTH");
+
+    checkingAuth = false;
+  };
+
+  cb();
+  return setInterval(() => cb(), 60_000);
 }

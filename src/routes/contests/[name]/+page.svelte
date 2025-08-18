@@ -35,7 +35,6 @@
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 text-green-200!";
 
-  let show404 = $state(false);
   let contest: CONTEST = $state(createEmptyContest());
   let roundGroup: ROUND[][][] = $state([]);
   let formats: FORMAT[] = $state([]);
@@ -75,8 +74,6 @@
       })
       .catch(e => {
         if (e.name === "HTTPError" && e.response.status === 404) {
-          show404 = true;
-        } else {
           error = true;
         }
       })

@@ -70,7 +70,7 @@
   let isCallbackCalled = false;
 
   function close(data: any) {
-    onclose && onclose(data || null);
+    if (onclose) onclose(data || null);
     show = false;
     isCallbackCalled = true;
   }

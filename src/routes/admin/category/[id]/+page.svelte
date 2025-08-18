@@ -18,6 +18,7 @@
   import { CircleAlertIcon, SendIcon, TrashIcon } from "lucide-svelte";
   import { page } from "$app/state";
   import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { SITEMAP } from "@helpers/routing";
 
   let id = "";
   let type: "update" | "create" = $state("update");
@@ -34,7 +35,7 @@
   }
 
   function exit() {
-    goto("/admin/category");
+    goto(SITEMAP.admin.category);
   }
 
   function save() {

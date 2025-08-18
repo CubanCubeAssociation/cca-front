@@ -15,6 +15,8 @@ export interface USER {
   role: ROLE;
   isEmailVerified: boolean;
   age: number;
+  sor: number;
+  elo: number;
   [key: string]: any;
 }
 

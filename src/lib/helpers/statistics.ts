@@ -39,7 +39,7 @@ export function mean(values: number[]): number {
 
 function cleanMetricData(results: METRIC_RESULT[], formats: FORMAT[], finite = true) {
   return results.reduce((acc, e) => {
-    let f = formats.find(fmt => fmt.name === e.format);
+    const f = formats.find(fmt => fmt.name === e.format);
     if (!f) return acc;
     return [...acc, ...e.times.slice(0, f.amount).filter(t => (finite ? t : true))];
   }, [] as number[]);

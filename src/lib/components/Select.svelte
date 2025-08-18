@@ -28,12 +28,9 @@
   export let iconKey = "icon";
   export let iconSize: string | null = "1.2rem";
   export let preferIcon = false;
-  export let open = () => {};
-  export let close = () => {};
 
   const selectID = "s" + weakRandomUUID().replace(/-/g, "");
 
-  let gridW = 1;
   let focused = 0;
   let dropdown: HTMLDivElement | null = null;
 
@@ -59,17 +56,6 @@
       list.children[pos].scrollIntoView({ block: "nearest" });
       tick().then(() => focusElement(list));
     }
-  }
-
-  function emitStatus(st: boolean) {
-    if (st) open();
-    if (!st) close();
-
-    if (st) focused = findValuePosition();
-  }
-
-  function updateGridW(list: readonly any[]) {
-    gridW = Math.ceil(Math.sqrt(list.length));
   }
 
   function focusElement(list: any) {
@@ -134,9 +120,6 @@
       }
     }
   }
-
-  // $: emitStatus(showOptions);
-  $: updateGridW(items);
 </script>
 
 <svelte:window on:keydown|capture={handleKeydown} />

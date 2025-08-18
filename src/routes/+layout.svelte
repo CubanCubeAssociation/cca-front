@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import "../app.css";
   import { screen } from "@stores/screen.store";
   import { NotificationService } from "@stores/notification.service";
@@ -8,9 +8,9 @@
   import NavbarComponent from "@components/NavbarComponent.svelte";
   import FooterComponent from "@components/FooterComponent.svelte";
   import type { LayoutServerData } from "./$types";
-  import { DOMAIN } from "@constants";
-  import { checkAuth, initializeUserService } from "@stores/user.service";
+  import { checkAuth } from "@stores/user.service";
   import { page } from "$app/state";
+  import { DOMAIN } from "@helpers/API";
 
   // import("eruda").then(eruda => eruda.default.init());
 
@@ -21,8 +21,6 @@
 
   let notifications: INotification[] = $state(<INotification[]>[]);
   let jsonld = $state("");
-
-  initializeUserService();
 
   function updateJSONLD(d: any) {
     jsonld = `<${"script"} type="application/ld+json">${JSON.stringify({
@@ -46,14 +44,18 @@
     };
   }
 
+  let itv: any;
+
   onMount(() => {
     subService.subscribe(v => {
       notifications = v;
     });
 
-    setInterval(() => checkAuth(), 60000);
+    itv = checkAuth();
     handleResize();
   });
+
+  onDestroy(() => clearInterval(itv));
 
   $effect(() => {
     updateJSONLD(data);

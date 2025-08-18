@@ -1,6 +1,6 @@
 <script lang="ts">
   import { userStore } from "@stores/user";
-  import { isAuth, minRole } from "@helpers/auth";
+  import { minRole } from "@helpers/auth";
   import CcaLogo from "@components/CCALogo.svelte";
   import WcaCategory from "./wca/WCACategory.svelte";
   import { logout, updateAll } from "@helpers/API";
@@ -10,7 +10,6 @@
   import { page } from "$app/state";
   import {
     ArrowDownNarrowWideIcon,
-    BoltIcon,
     BoxIcon,
     LogInIcon,
     LogOutIcon,
@@ -20,11 +19,11 @@
     SwordsIcon,
     TrendingUpDownIcon,
     TrophyIcon,
-    UserIcon,
     UsersIcon,
   } from "lucide-svelte";
   import { screen } from "@stores/screen.store";
   import Avatar from "./Avatar.svelte";
+  import { SITEMAP } from "@helpers/routing";
 
   const notification = NotificationService.getInstance();
 
@@ -69,7 +68,7 @@
                 {$userStore?.name}
               </span>
               <a
-                href={`/people/${$userStore?.username || "#"}`}
+                href={`${SITEMAP.people}/${$userStore?.username || "#"}`}
                 class="block truncate font-medium text-pink-400"
                 onclick={() => (avatarDropdownOpen = false)}
               >
@@ -90,34 +89,22 @@
           </div>
         </li>
 
-        <li>
-          <a href="/me/profile" onclick={() => (avatarDropdownOpen = false)}>
-            <UserIcon size="1rem" class="text-green-400" /> Perfil
-          </a>
-        </li>
-
-        <li>
-          <a href="/me/settings" onclick={() => (avatarDropdownOpen = false)}>
-            <BoltIcon size="1rem" class="text-gray-400" /> Configuración
-          </a>
-        </li>
-
         {#if minRole($userStore, "delegate")}
           <li>
-            <a href="/admin/user" onclick={() => (avatarDropdownOpen = false)}>
+            <a href={SITEMAP.admin.user} onclick={() => (avatarDropdownOpen = false)}>
               <UsersIcon size="1rem" class="text-blue-400" /> Usuarios
             </a>
           </li>
 
           <li>
-            <a href="/admin/contest" onclick={() => (avatarDropdownOpen = false)}>
+            <a href={SITEMAP.admin.contest} onclick={() => (avatarDropdownOpen = false)}>
               <SwordsIcon size="1rem" class="text-red-400" /> Competencias
             </a>
           </li>
 
           {#if minRole($userStore, "admin")}
             <li>
-              <a href="/admin/category" onclick={() => (avatarDropdownOpen = false)}>
+              <a href={SITEMAP.admin.category} onclick={() => (avatarDropdownOpen = false)}>
                 <WcaCategory
                   icon="333"
                   size="1rem"
@@ -185,7 +172,7 @@
 
 {#snippet navlist()}
   <li>
-    <a href="/contests">
+    <a href={SITEMAP.contests}>
       <SwordsIcon size="1.2rem" class="text-red-400" /> Competencias
     </a>
   </li>
@@ -199,22 +186,22 @@
 
       <ul>
         <li>
-          <a href="/records" onclick={() => (userDropdownOpen = false)}>
+          <a href={SITEMAP.records} onclick={() => (userDropdownOpen = false)}>
             <TrophyIcon size="1.2rem" class="text-yellow-300" /> Récords
           </a>
         </li>
         <li>
-          <a href="/ranking" onclick={() => (userDropdownOpen = false)}>
+          <a href={SITEMAP.ranking} onclick={() => (userDropdownOpen = false)}>
             <ArrowDownNarrowWideIcon size="1.2rem" class="text-green-300" /> Ranking
           </a>
         </li>
         <li>
-          <a href="/people" onclick={() => (userDropdownOpen = false)}>
+          <a href={SITEMAP.people} onclick={() => (userDropdownOpen = false)}>
             <UsersIcon size="1.2rem" class="text-blue-300" /> Competidores
           </a>
         </li>
         <li>
-          <a href="/compare" onclick={() => (userDropdownOpen = false)}>
+          <a href={SITEMAP.compare} onclick={() => (userDropdownOpen = false)}>
             <TrendingUpDownIcon size="1.2rem" class="text-orange-300" /> Comparar
           </a>
         </li>
@@ -223,21 +210,21 @@
   </li>
 
   <li>
-    <a href="/rules" class="flex items-center gap-1">
+    <a href={SITEMAP.rules} class="flex items-center gap-1">
       <ScrollIcon size="1.2rem" class="text-purple-300" /> Reglamento
     </a>
   </li>
 
   <li>
-    <a href="/cca" class="flex items-center gap-1">
+    <a href={SITEMAP.cca} class="flex items-center gap-1">
       <BoxIcon size="1.2rem" class="text-primary-400" /> CCA
     </a>
   </li>
 
-  {#if !isAuth($userStore)}
+  {#if !$userStore}
     <li>
       <a
-        href={encodeURI(`/login?returnTo=${getReturnURL(page.url)}`)}
+        href={encodeURI(`${SITEMAP.login}?returnTo=${getReturnURL(page.url)}`)}
         onclick={() => (userDropdownOpen = false)}
       >
         <LogInIcon size="1.2rem" class="text-accent" />
@@ -263,7 +250,7 @@
       </div>
     {/if}
 
-    <a href="/" class="btn btn-ghost text-xl">
+    <a href={SITEMAP.home} class="btn btn-ghost text-xl">
       <CcaLogo size="2rem" />
       <span class="ml-2 self-center whitespace-nowrap text-base font-semibold">CCA</span>
     </a>

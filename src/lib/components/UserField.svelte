@@ -1,6 +1,7 @@
 <script lang="ts">
   import { ShieldIcon, ShieldUserIcon } from "lucide-svelte";
   import Avatar from "./Avatar.svelte";
+  import { SITEMAP } from "@helpers/routing";
 
   interface IUserFieldProps {
     user: any;
@@ -54,7 +55,7 @@
   {/if}
 
   {#if link}
-    <a href={`/people/${user.username}`} class="hover:text-primary-300">
+    <a href={`${SITEMAP.people}/${user.username}`} class="hover:text-primary-300">
       {displayName}
     </a>
   {:else}

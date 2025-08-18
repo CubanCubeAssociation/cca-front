@@ -13,6 +13,7 @@
   import { NotificationService } from "@stores/notification.service";
   import { PlusIcon, UsersIcon } from "lucide-svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { SITEMAP } from "@helpers/routing";
 
   const notification = NotificationService.getInstance();
   const HEADER = "Usuarios";
@@ -61,7 +62,7 @@
   let pg = new Paginator([], 10);
 
   function addUser() {
-    goto("/admin/user/new");
+    goto(SITEMAP.admin.user + "/new");
   }
 
   function updateUsers() {
@@ -100,7 +101,7 @@
 
   function handleSearch(user: USER | USER[]) {
     if (Array.isArray(user)) return;
-    window.open(`/admin/user/${user.id}`, "_blank");
+    window.open(`${SITEMAP.admin.user}/${user.id}`, "_blank");
   }
 
   function updateAllProfiles() {
@@ -160,7 +161,10 @@
 
                   {#if columns[0].show}
                     <td>
-                      <a href={"/admin/user/" + u.id} class="flex items-center gap-2 text-ellipsis">
+                      <a
+                        href={SITEMAP.admin.user + "/" + u.id}
+                        class="flex items-center gap-2 text-ellipsis"
+                      >
                         <UserField user={u} showAvatar fullName />
                       </a>
                     </td>

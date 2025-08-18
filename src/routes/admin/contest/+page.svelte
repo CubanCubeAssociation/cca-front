@@ -14,6 +14,7 @@
   import { PlusIcon, SwordsIcon } from "lucide-svelte";
   import Indicator from "@components/Indicator.svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { SITEMAP } from "@helpers/routing";
 
   const notification = NotificationService.getInstance();
   const ADD = "Añadir competencia";
@@ -25,7 +26,7 @@
   let error = $state(false);
 
   function addContest() {
-    goto("/admin/contest/new");
+    goto(SITEMAP.admin.contest + "/new");
   }
 
   function refreshContestData() {
@@ -111,7 +112,7 @@
                 <tr>
                   <td>{(pg.page - 1) * pg.limit + pos + 1}</td>
                   <td>
-                    <a href={"/admin/contest/" + ct.name} class="flex items-center gap-2">
+                    <a href={SITEMAP.admin.contest + "/" + ct.name} class="flex items-center gap-2">
                       <div class="tooltip" data-tip={getStatus(ct.status)}>
                         <Indicator color={getIndicatorColor(ct.status)} />
                       </div>

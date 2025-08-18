@@ -64,6 +64,7 @@
   import ResultView from "@components/ResultView.svelte";
   import { twMerge } from "tailwind-merge";
   import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { SITEMAP } from "@helpers/routing";
 
   let name = $state("");
   const notification = NotificationService.getInstance();
@@ -93,7 +94,7 @@
   let error = $state(false);
 
   function exit() {
-    goto("/admin/contest");
+    goto(SITEMAP.admin.contest);
   }
 
   function save() {
@@ -121,7 +122,7 @@
     } else {
       createContest(cnt)
         .then((c: CONTEST) => {
-          goto("/admin/contest/" + c.name);
+          goto(SITEMAP.admin.contest + "/" + c.name);
         })
         .catch(err => {
           if (debug) console.log("ERROR: ", err);
@@ -262,10 +263,7 @@
         let contestants = getContestants(cat, r);
 
         if (contestants.length === 0) continue;
-        const cnt = contestants[0];
-
         round = createEmptyRound();
-
         addResult = true;
         return;
       }
@@ -670,7 +668,9 @@
             </div>
 
             {#if contest.contestants.length}
-              <div class="overflow-x-auto max-w-full result-table rounded-lg border border-base-content/10">
+              <div
+                class="overflow-x-auto max-w-full result-table rounded-lg border border-base-content/10"
+              >
                 <table class="table table-zebra">
                   <!-- head -->
                   <thead>

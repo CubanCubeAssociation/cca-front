@@ -1,5 +1,6 @@
 <script lang="ts">
   import WcaCategory from "@components/wca/WCACategory.svelte";
+  import { SITEMAP } from "@helpers/routing";
   import type { Scrambler } from "@interfaces";
   import { ChevronRightIcon } from "lucide-svelte";
 
@@ -20,7 +21,9 @@
     desarrollo mental de los niños y jóvenes.
   </p>
 
-  <a href="/cca"><button class="btn btn-info mt-4">Saber más <ChevronRightIcon size="1rem" /></button></a>
+  <a href={SITEMAP.cca}>
+    <button class="btn btn-info mt-4">Saber más <ChevronRightIcon size="1rem" /> </button>
+  </a>
 </main>
 
 <section id="popular" class="card">

@@ -8,7 +8,7 @@
   import Reconstructor from "./Reconstructor.svelte";
   import { CheckIcon, CopyIcon, ShareIcon } from "lucide-svelte";
   import { contestNameToLink } from "@helpers/routing";
-  import { DOMAIN } from "@constants";
+  import { DOMAIN } from "@helpers/API";
 
   interface SolveInfoProps {
     round: ROUND;

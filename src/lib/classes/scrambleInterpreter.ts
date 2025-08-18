@@ -332,13 +332,14 @@ class Solver {
         return [];
       case "Move":
         return [ast.value];
-      case "ParentesizedExpression":
+      case "ParentesizedExpression": {
         const seq = this.solve(ast.value.expr, simplify);
         let res: string[] = [];
         for (let i = 1, maxi = ast.value.cant; i <= maxi; i += 1) {
           res = [...res, ...seq];
         }
         return res;
+      }
       case "ConmutatorExpression": {
         let seq;
 
@@ -381,7 +382,7 @@ class Solver {
         return [ast];
       case "Move":
         return [ast];
-      case "ParentesizedExpression":
+      case "ParentesizedExpression": {
         const seq = this.flat(ast.value.expr);
         let res: IToken[] = [];
 
@@ -390,6 +391,7 @@ class Solver {
         }
 
         return res;
+      }
       case "ConmutatorExpression": {
         let seq: IToken[];
 
