@@ -18,6 +18,7 @@
   import { onMount } from "svelte";
   import { weakRandomUUID } from "@helpers/strings";
   import { isFinite } from "@helpers/math";
+  import Solve from "./Solve.svelte";
 
   interface IResultTableProps {
     rounds: ROUND[];
@@ -160,15 +161,18 @@
             >
               <button
                 class="flex justify-center text-base-content cursor-help"
-                class:best={isPos(rnd, p, 0)}
-                class:worst={isPos(rnd, p, format.amount - 1)}
                 onclick={preventDefault(() => {
                   selectedRound = rnd;
                   selectedSolve = rnd[tp];
                   showSolveInfoModal = true;
                 })}
               >
-                {sTimer(rnd[tp], true)}
+                <Solve
+                  time={rnd[tp].timeMillis}
+                  tag={rnd[tp].tag}
+                  best={isPos(rnd, p, 0)}
+                  worst={isPos(rnd, p, format.amount - 1)}
+                />
               </button>
             </td>
           {/each}

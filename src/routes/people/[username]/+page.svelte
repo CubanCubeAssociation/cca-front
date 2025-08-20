@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getCategories, getFormats, getUserProfile } from "@helpers/API";
-  import type { CATEGORY, FORMAT, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
+  import type { CATEGORY, FORMAT, ITIME, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
   import { onDestroy, onMount } from "svelte";
   import { page } from "$app/state";
   import Award from "@components/Award.svelte";
@@ -14,15 +14,13 @@
   import { twMerge } from "tailwind-merge";
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import UserProfileInfo from "@components/UserProfileInfo.svelte";
+  import Solve from "@components/Solve.svelte";
 
   interface USER_CONTEST_RESULT {
     round: number;
     place: number;
     average: number | null;
-    times: {
-      time: number | null;
-      tag: string;
-    }[];
+    times: ITIME[];
     format: string;
   }
 
@@ -843,13 +841,7 @@
                             })}
                             class="hover:text-primary-300"
                           >
-                            <span class="indicator flex justify-center text-green-400">
-                              {timer(bestTime.time || Infinity, true)}
-
-                              {#if bestTime.tag}
-                                <Award class="indicator-item mt-2" type={bestTime.tag} />
-                              {/if}
-                            </span>
+                            <Solve time={bestTime.time} tag={bestTime.tag} best />
                           </a>
                         </td>
                         <td>
@@ -862,9 +854,7 @@
                             })}
                             class="hover:text-primary-300"
                           >
-                            <span class="flex justify-center text-purple-400">
-                              {timer(result.average || Infinity, true)}
-                            </span>
+                            <Solve time={result.average} tag="" class="text-purple-400" />
                           </a>
                         </td>
 
@@ -878,17 +868,12 @@
                               })}
                               class="hover:text-primary-300"
                             >
-                              <span
-                                class="flex justify-center indicator"
-                                class:best={isPos(result.times, p1, 0)}
-                                class:worst={isPos(result.times, p1, format.amount - 1)}
-                              >
-                                {timer(t.time || Infinity, true)}
-
-                                {#if t.tag}
-                                  <Award class="indicator-item mt-2" type={t.tag} />
-                                {/if}
-                              </span>
+                              <Solve
+                                time={t.time}
+                                tag={t.tag}
+                                best={isPos(result.times, p1, 0)}
+                                worst={isPos(result.times, p1, format.amount - 1)}
+                              />
                             </a>
                           </td>
                         {/each}

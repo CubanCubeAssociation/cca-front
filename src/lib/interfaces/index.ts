@@ -86,6 +86,7 @@ export interface SOLVE {
   extra: number;
   reconstruction: string;
   time: string;
+  tag: TAG;
   timeMillis: string;
   penaltyType: PENALTY;
   penaltyDetails: string;
@@ -221,15 +222,19 @@ export interface INotification {
   actions?: NotificationAction[];
 }
 
+export type TAG = "NR" | "PR" | "PB" | "";
+
+export interface ITIME {
+  time: number | null;
+  tag: TAG;
+}
+
 interface USER_PROFILE_CONTEST {
   round: number;
   category: CATEGORY;
   contestName: string;
   average: number;
-  times: {
-    time: number | null;
-    tag: string;
-  }[];
+  times: ITIME[];
   format: string;
 }
 
