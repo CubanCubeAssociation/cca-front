@@ -226,7 +226,10 @@ interface USER_PROFILE_CONTEST {
   category: CATEGORY;
   contestName: string;
   average: number;
-  times: number[];
+  times: {
+    time: number | null;
+    tag: string;
+  }[];
   format: string;
 }
 

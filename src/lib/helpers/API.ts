@@ -400,3 +400,13 @@ export async function updateRankings(): Promise<boolean> {
     })
     .json();
 }
+
+export async function dumpData(): Promise<any> {
+  if (await tokenNeedsRefresh()) await refreshToken();
+
+  return await ky
+    .get(API + `/results/dumpData`, {
+      ...commonAuth(),
+    })
+    .json();
+}

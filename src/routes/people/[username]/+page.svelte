@@ -19,7 +19,10 @@
     round: number;
     place: number;
     average: number | null;
-    times: (number | null)[];
+    times: {
+      time: number | null;
+      tag: string;
+    }[];
     format: string;
   }
 
@@ -271,8 +274,8 @@
     timeChart?.resize();
   }
 
-  function isPos(times: (number | null)[], i: number, pos: number) {
-    let vals = times.map((s, p) => [s || Infinity, p]);
+  function isPos(times: USER_CONTEST_RESULT["times"], i: number, pos: number) {
+    let vals = times.map((s, p) => [s.time || Infinity, p]);
     vals.sort((a, b) => (a[0] != b[0] ? a[0] - b[0] : a[1] - b[1]));
     return vals[pos][1] === i;
   }
@@ -298,7 +301,7 @@
             let fm = formats.find(fm => fm.name === e1.format)?.amount || 5;
             averageData.push([averageX, e1.average || 0]);
             averageX += fm;
-            return e1.times.slice(0, fm);
+            return e1.times.slice(0, fm).map(e => e.time);
           }),
           ...acc,
         ],
@@ -710,10 +713,10 @@
                           <div class="flex items-center">
                             <WcaCategory icon={res.category?.scrambler} size="1.5rem" />
                             {res.category?.name} (<span
-                              class={res.type === "single"
-                                ? " text-green-400!"
-                                : " text-purple-400!"}
-                              >{res.type === "single" ? "Single" : "Media"}</span
+                              class={twMerge(
+                                "contents",
+                                res.type === "single" ? " text-green-400!" : " text-purple-400!"
+                              )}>{res.type === "single" ? "Single" : "Media"}</span
                             >)
                           </div>
                         </td>
@@ -730,6 +733,9 @@
                             class="hover:text-primary-300"
                           >
                             {timer(res.time || Infinity, true, true)}
+                            {#if res.tag}
+                              <Award class="indicator-item mt-2" type={res.tag} />
+                            {/if}
                           </a>
                         </td>
                         <td>
@@ -793,6 +799,10 @@
 
                     {#each contestData as result, rp}
                       {@const format = formats.find(fm => fm.name === result.format) || formats[0]}
+                      {@const bestTime = result.times.reduce(
+                        (acc, e) => (e.time && acc.time && e.time < acc.time ? e : acc),
+                        { time: Infinity, tag: "" }
+                      )}
 
                       <tr>
                         {#if rp === 0}
@@ -828,16 +838,17 @@
                           <a
                             href={contestNameToLink(cnt.name, {
                               category: selectedCategory.name,
-                              time: Math.min(...result.times.map(t => t || Infinity)) || Infinity,
+                              time: bestTime.time || Infinity,
                               username: profile?.user.username,
                             })}
                             class="hover:text-primary-300"
                           >
-                            <span class="flex justify-center text-green-400">
-                              {timer(
-                                Math.min(...result.times.map(t => t || Infinity)) || Infinity,
-                                true
-                              )}
+                            <span class="indicator flex justify-center text-green-400">
+                              {timer(bestTime.time || Infinity, true)}
+
+                              {#if bestTime.tag}
+                                <Award class="indicator-item mt-2" type={bestTime.tag} />
+                              {/if}
                             </span>
                           </a>
                         </td>
@@ -862,17 +873,21 @@
                             <a
                               href={contestNameToLink(cnt.name, {
                                 category: selectedCategory.name,
-                                time: t || Infinity,
+                                time: t.time || Infinity,
                                 username: profile?.user.username,
                               })}
                               class="hover:text-primary-300"
                             >
                               <span
-                                class="flex justify-center"
+                                class="flex justify-center indicator"
                                 class:best={isPos(result.times, p1, 0)}
                                 class:worst={isPos(result.times, p1, format.amount - 1)}
                               >
-                                {timer(t || Infinity, true)}
+                                {timer(t.time || Infinity, true)}
+
+                                {#if t.tag}
+                                  <Award class="indicator-item mt-2" type={t.tag} />
+                                {/if}
                               </span>
                             </a>
                           </td>

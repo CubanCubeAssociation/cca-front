@@ -3,7 +3,7 @@
   import { minRole } from "@helpers/auth";
   import CcaLogo from "@components/CCALogo.svelte";
   import WcaCategory from "./wca/WCACategory.svelte";
-  import { logout, updateAll } from "@helpers/API";
+  import { dumpData, logout, updateAll } from "@helpers/API";
   import { NotificationService } from "@stores/notification.service";
   import { ROLES } from "@constants";
   import { getReturnURL } from "@helpers/strings";
@@ -15,6 +15,7 @@
     LogOutIcon,
     MenuIcon,
     RefreshCcwIcon,
+    SaveIcon,
     ScrollIcon,
     SwordsIcon,
     TrendingUpDownIcon,
@@ -46,6 +47,42 @@
         avatarDropdownOpen = false;
       }
     }
+  }
+
+  function handleUpdateAll() {
+    updateAll()
+      .then(() => {
+        notification.addNotification({
+          header: "Actualizado",
+          text: "Se han actualizado todos los datos correctamente",
+        });
+      })
+      .catch(error => {
+        console.dir(error);
+        notification.addNotification({
+          header: "Error",
+          text: "Ha ocurrido un error al actualizar",
+        });
+      });
+    avatarDropdownOpen = false;
+  }
+
+  function handleDumpData() {
+    dumpData()
+      .then(data => {
+        let a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: "image/png" }));
+        a.download = `CCA-Backup-${new Date().getTime()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch(() => {
+        notification.addNotification({
+          header: "Error",
+          text: "Ha ocurrido un error al salvar la información",
+        });
+      });
   }
 </script>
 
@@ -116,28 +153,16 @@
             </li>
 
             <li>
-              <a
-                href="?"
-                onclick={() => {
-                  updateAll()
-                    .then(() => {
-                      notification.addNotification({
-                        header: "Actualizado",
-                        text: "Se han actualizado todos los datos correctamente",
-                      });
-                    })
-                    .catch(error => {
-                      console.dir(error);
-                      notification.addNotification({
-                        header: "Error",
-                        text: "Ha ocurrido un error al actualizar",
-                      });
-                    });
-                  avatarDropdownOpen = false;
-                }}
-              >
+              <a href="?" onclick={handleUpdateAll}>
                 <RefreshCcwIcon size="1rem" class="text-accent" />
                 Actualizar todo
+              </a>
+            </li>
+
+            <li>
+              <a href="?" onclick={handleDumpData}>
+                <SaveIcon size="1rem" class="text-success" />
+                Generar salva
               </a>
             </li>
           {/if}

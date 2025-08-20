@@ -36,8 +36,6 @@
 
     params.set("page", pg.page + "");
 
-    console.log("PRV: ", selectedProvince);
-
     if (selectedProvince.id != "0") {
       params.set("province", selectedProvince.nombre.replaceAll(/\s/g, "-"));
     } else {

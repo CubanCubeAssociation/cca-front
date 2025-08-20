@@ -1,18 +1,30 @@
 <script lang="ts">
   import { AwardIcon, TrophyIcon } from "lucide-svelte";
+  import { twMerge } from "tailwind-merge";
 
-  type AwardType = "neutral" | "gold" | "silver" | "bronze" | "NR" | "ANR" | "PR" | "APR";
+  type AwardType =
+    | "neutral"
+    | "gold"
+    | "silver"
+    | "bronze"
+    | "NR"
+    | "ANR"
+    | "PR"
+    | "APR"
+    | "PB"
+    | "";
 
   interface AwardProps {
-    type?: AwardType;
+    type?: AwardType | (string & {});
     variant?: "medal" | "trophy";
     size?: number;
+    class?: string;
   }
 
-  let { type = "neutral", variant = "medal", size = 1 }: AwardProps = $props();
+  let { type = "neutral", variant = "medal", size = 1, class: _cl }: AwardProps = $props();
 </script>
 
-<div class="relative flex justify-center">
+<div class={twMerge(_cl, "relative flex justify-center")}>
   {#if type === "neutral"}
     <TrophyIcon
       class="transition-all duration-200 text-purple-400 absolute -top-1 -right-1 translate-x-full"
@@ -52,7 +64,14 @@
   {:else if type === "PR"}
     <div class="tooltip tooltip-right" data-tip="Récord Provincial">
       <TrophyIcon
-        class="transition-all duration-200 text-purple-400 absolute -top-1 -right-1 translate-x-full"
+        class="transition-all duration-200 text-green-400 absolute -top-1 -right-1 translate-x-full"
+        size={0.8 * size + "rem"}
+      />
+    </div>
+  {:else if type === "PB"}
+    <div class="tooltip tooltip-right" data-tip="Récord Personal">
+      <TrophyIcon
+        class="transition-all duration-200 text-orange-400 absolute -top-1 -right-1 translate-x-full"
         size={0.8 * size + "rem"}
       />
     </div>
