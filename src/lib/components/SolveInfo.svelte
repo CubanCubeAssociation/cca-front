@@ -2,13 +2,14 @@
   import { sTimer } from "@helpers/timer";
   import { PENALTY, type CONTEST, type ROUND, type SOLVE } from "@interfaces";
   import UserField from "./UserField.svelte";
-  import { getPenaltyName } from "@helpers/strings";
+  import { getPenaltyName, getTagDescription } from "@helpers/strings";
   import WcaCategory from "./wca/WCACategory.svelte";
   import moment from "moment";
   import Reconstructor from "./Reconstructor.svelte";
   import { CheckIcon, CopyIcon, ShareIcon } from "lucide-svelte";
   import { contestNameToLink } from "@helpers/routing";
   import { DOMAIN } from "@helpers/API";
+  import Solve from "./Solve.svelte";
 
   interface SolveInfoProps {
     round: ROUND;
@@ -52,7 +53,17 @@
           </div>
         </td></tr
       >
-      <tr> <td>{solve.isAverage ? "Promedio" : "Tiempo"}</td> <td>{sTimer(solve, true)}</td></tr>
+      <tr>
+        <td>{solve.isAverage ? "Promedio" : "Tiempo"}</td>
+        <td>
+          <div class="flex items-center gap-2">
+            <Solve time={solve.timeMillis} tag="" />
+            {#if solve.tag}
+              ({getTagDescription(solve.tag)})
+            {/if}
+          </div>
+        </td></tr
+      >
       <tr> <td>Ronda</td> <td>{round.round}</td></tr>
       <tr> <td>Usuario</td> <td><UserField user={round.contestant} /> </td></tr>
       <tr>

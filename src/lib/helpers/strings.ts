@@ -1,6 +1,12 @@
 import { ScrambleParser } from "@classes/scramble-parser";
 import { Interpreter } from "@classes/scrambleInterpreter";
-import { PENALTY, type CONTEST, type IReconstruction, type PuzzleType } from "@interfaces";
+import {
+  PENALTY,
+  type CONTEST,
+  type IReconstruction,
+  type PuzzleType,
+  type TAG,
+} from "@interfaces";
 import { newArr } from "./object";
 
 export function getSearchParams(loc: string): Map<string, string> {
@@ -314,4 +320,11 @@ export function prettyScramble(scramble: string): string {
     .trim()
     .replace(/\s*<br>\s*/g, "\n")
     .replace(/(\n\s+)/g, "\n");
+}
+
+export function getTagDescription(t: TAG | (string & {})): string {
+  if (t === "NR") return "Récord Nacional";
+  if (t === "PR") return "Récord Provincial";
+  if (t === "PB") return "Récord Personal";
+  return "";
 }

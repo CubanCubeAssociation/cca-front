@@ -197,6 +197,7 @@ export function createEmptySolve(): SOLVE {
     penaltyDetails: "",
     isExtra: false,
     extra: -1,
+    tag: "",
   };
 }
 
@@ -204,6 +205,7 @@ export function createEmptyRound(): ROUND {
   return {
     id: "",
     average: 0,
+    tag: "",
     category: createEmptyCategory(),
     contestant: createEmptyUser(),
     round: 0,

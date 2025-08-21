@@ -185,19 +185,23 @@
           >
             <button
               class="flex justify-center text-base-content cursor-help"
-              class:best={isPos(rnd, p, 0)}
-              class:worst={isPos(rnd, p, format.amount - 1)}
               onclick={preventDefault(() => {
-                selectedRound = rnd;
-                selectedSolve = createEmptySolve();
-                selectedSolve.time = isFinite(rnd.average) ? rnd.average / 10 + "" : "DNF";
-                selectedSolve.timeMillis = isFinite(rnd.average) ? rnd.average + "" : "DNF";
-                selectedSolve.penaltyType = isFinite(rnd.average) ? PENALTY.NONE : PENALTY.DNF;
+                let _rnd = $state.snapshot(rnd);
+                selectedRound = _rnd;
+                selectedSolve.time = isFinite(_rnd.average) ? rnd.average / 10 + "" : "DNF";
+                selectedSolve.timeMillis = isFinite(_rnd.average) ? rnd.average + "" : "DNF";
+                selectedSolve.penaltyType = isFinite(_rnd.average) ? PENALTY.NONE : PENALTY.DNF;
                 selectedSolve.isAverage = true;
+                selectedSolve.tag = _rnd.tag;
                 showSolveInfoModal = true;
               })}
             >
-              {timer(rnd.average, true)}
+              <Solve
+                time={rnd.average}
+                tag={rnd.tag}
+                best={isPos(rnd, p, 0)}
+                worst={isPos(rnd, p, format.amount - 1)}
+              />
             </button>
           </td>
         </tr>
@@ -212,14 +216,6 @@
 
 <style lang="postcss">
   @reference "../../app.css";
-
-  .best {
-    @apply text-green-400;
-  }
-
-  .worst {
-    @apply text-red-400;
-  }
 
   .result-table span,
   .result-table button {

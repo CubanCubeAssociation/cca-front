@@ -105,6 +105,7 @@ export interface ROUND {
   e2: SOLVE;
   round: number;
   average: number;
+  tag: TAG;
   id: string;
 }
 

@@ -60,8 +60,6 @@
     let cx = ev.x,
       cy = ev.y;
 
-    console.log({ x1, y1, x2, y2, cx, cy }, closeOnClickOutside);
-
     if (closeOnClickOutside && ((cx - x1) * (cx - x2) > 0 || (cy - y1) * (cy - y2) > 0)) {
       close(null);
     }

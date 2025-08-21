@@ -15,6 +15,7 @@
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import UserProfileInfo from "@components/UserProfileInfo.svelte";
   import Solve from "@components/Solve.svelte";
+  import { getTagDescription } from "@helpers/strings";
 
   interface USER_CONTEST_RESULT {
     round: number;
@@ -280,9 +281,9 @@
 
   function getRecords(ur: typeof userRecords) {
     return [
-      { type: "WR", name: "Récord Mundial", results: ur.wr.results },
-      { type: "NR", name: "Récord Nacional", results: ur.nr.results },
-      { type: "PR", name: "Récord Provincial", results: ur.pr.results },
+      // { type: "WR", name: "Récord Mundial", results: ur.wr.results },
+      { type: "NR", name: getTagDescription("NR"), results: ur.nr.results },
+      { type: "PR", name: getTagDescription("PR"), results: ur.pr.results },
     ];
   }
 
