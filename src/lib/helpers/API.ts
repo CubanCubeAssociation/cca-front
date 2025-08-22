@@ -22,11 +22,11 @@ import { SITEMAP } from "./routing";
 
 const debug = false;
 
-export const API = "http://localhost:3500/v1";
+// export const API = "http://localhost:3500/v1";
 // export const API = 'http://192.168.180.93:3500/v1';
-// export const API = "https://cca-back.onrender.com/v1";
-export const DOMAIN = "http://localhost:5173";
-// export const DOMAIN = "https://cca-cuba.netlify.app";
+export const API = "https://cca-back.onrender.com/v1";
+// export const DOMAIN = "http://localhost:5173";
+export const DOMAIN = "https://cca-cuba.netlify.app";
 
 // Common internal helper function
 function commonAuth() {
