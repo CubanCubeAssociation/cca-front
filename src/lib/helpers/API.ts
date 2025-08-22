@@ -185,6 +185,22 @@ export async function removeContestUser(c: CONTEST, u: USER): Promise<boolean> {
     .json();
 }
 
+export async function modifyUserContest(
+  contestId: string,
+  userId: string,
+  ct: CONTEST_CATEGORY[]
+): Promise<boolean> {
+  if (await tokenNeedsRefresh()) await refreshToken();
+  return await ky
+    .post(API + `/contests/${contestId}/modify/${userId}`, {
+      json: {
+        categories: ct.map(category => category.category.id),
+      },
+      ...commonAuth(),
+    })
+    .json();
+}
+
 // USER
 interface IGetUsers {
   page: number;

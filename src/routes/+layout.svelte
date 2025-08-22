@@ -12,7 +12,7 @@
   import { page } from "$app/state";
   import { DOMAIN } from "@helpers/API";
 
-  // import("eruda").then(eruda => eruda.default.init());
+  import("eruda").then(eruda => eruda.default.init());
 
   let { children, data }: { children: any; data: LayoutServerData } = $props();
 

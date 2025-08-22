@@ -2,16 +2,23 @@
   import { onMount } from "svelte";
   import moment from "moment";
   import {
+    PERMISSIONS,
     STATUS_ORDER,
     type CONTEST,
     type CONTEST_STATUS,
     type FORMAT,
     type ROUND,
   } from "@interfaces";
-  import { getContest, getFormats, inscribeContestUser, removeContestUser } from "@helpers/API";
+  import {
+    getContest,
+    getFormats,
+    inscribeContestUser,
+    modifyUserContest,
+    removeContestUser,
+  } from "@helpers/API";
   import { getRoundsInfo } from "@helpers/statistics";
   import WcaCategory from "@components/wca/WCACategory.svelte";
-  import { minRole } from "@helpers/auth";
+  import { hasPermission, minRole } from "@helpers/auth";
   import { getIndicatorColor, getStatus } from "@helpers/strings";
   import { userStore } from "@stores/user";
   import ResultView from "@components/ResultView.svelte";
@@ -30,6 +37,7 @@
     OrbitIcon,
     PencilIcon,
     PuzzleIcon,
+    SaveIcon,
     SendIcon,
     UserMinusIcon,
     UserPlusIcon,
@@ -38,6 +46,7 @@
   import Modal from "@components/Modal.svelte";
   import { twMerge } from "tailwind-merge";
   import { NotificationService } from "@stores/notification.service";
+  import { ROLES } from "@constants";
 
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 text-green-200!";
@@ -65,7 +74,13 @@
       $userStore &&
       contest.contestants.some(ct => ct.user.id === $userStore.id)
   );
+  let canModifyCategories = $derived(
+    minRole($userStore, "admin") ||
+      hasPermission($userStore, PERMISSIONS.contest.modifyUserCategories)
+  );
   let showRemoveContestUserModal = $state(false);
+  let isModifying = $state(false);
+  let selectedUser = $state("");
 
   function before(state: CONTEST_STATUS) {
     let idx = STATUS_ORDER.indexOf(contest.status);
@@ -151,6 +166,31 @@
         })
       )
       .finally(() => (unsubscribeLoading = false));
+  }
+
+  function modifyCategories() {
+    if (!$userStore) return;
+
+    showInscriptionModal = false;
+
+    modifyUserContest(
+      contest.id,
+      selectedUser,
+      contest.categories.filter((_, p) => selectedCategories[p])
+    )
+      .then(() => {
+        notification.addNotification({
+          header: "Modificado",
+          text: "Se guardaron los cambios correctamente.",
+        });
+        updateData();
+      })
+      .catch(() => {
+        notification.addNotification({
+          header: "Error",
+          text: "Ha ocurrido un error al guardar los datos.",
+        });
+      });
   }
 
   onMount(() => {
@@ -268,7 +308,14 @@
 
       <div class="actions flex gap-2 flex-wrap">
         {#if canInscribe}
-          <button class="btn btn-primary relative" onclick={() => (showInscriptionModal = true)}>
+          <button
+            class="btn btn-primary relative"
+            onclick={() => {
+              showInscriptionModal = true;
+              isModifying = false;
+              selectedUser = $userStore?.id || "";
+            }}
+          >
             <UserPlusIcon size="1.2rem" /> Inscribirme
             {#if inscribeLoading}
               <div class="w-full h-full bg-primary absolute rounded-md grid p-1">
@@ -310,6 +357,9 @@
                 <th class="max-md:pr-0 max-md:pl-2">#</th>
                 <th class="max-md:px-2">Nombre</th>
                 <th class="min-w-[10rem]">Categorías</th>
+                {#if $userStore && contest.contestants.some(ct => ct.user.id === $userStore.id)}
+                  <th></th>
+                {/if}
               </tr>
             </thead>
 
@@ -327,6 +377,24 @@
                       {/each}
                     </div>
                   </td>
+
+                  {#if contest.status === "inscription" && ($userStore?.id === c.user.id || canModifyCategories)}
+                    <td class="max-w-[2rem]">
+                      <button
+                        onclick={() => {
+                          selectedCategories = contest.categories.map(ct =>
+                            c.categories.some(ct1 => ct1.id === ct.category.id)
+                          );
+                          isModifying = true;
+                          showInscriptionModal = true;
+                          selectedUser = c.user.id;
+                        }}
+                        class="btn btn-primary p-2"
+                      >
+                        <PencilIcon size="1.2rem" /></button
+                      >
+                    </td>
+                  {/if}
                 </tr>
               {/each}
             </tbody>
@@ -390,13 +458,23 @@
         showInscriptionModal = false;
       }}>Cancelar</button
     >
-    <button
-      class="btn btn-primary"
-      onclick={inscribeMe}
-      disabled={selectedCategories.every(c => !c)}
-    >
-      <SendIcon size="1.2rem" /> Inscribirme
-    </button>
+    {#if isModifying}
+      <button
+        class="btn btn-primary"
+        onclick={modifyCategories}
+        disabled={selectedCategories.every(c => !c)}
+      >
+        <SaveIcon size="1.2rem" /> Modificar
+      </button>
+    {:else}
+      <button
+        class="btn btn-primary"
+        onclick={inscribeMe}
+        disabled={selectedCategories.every(c => !c)}
+      >
+        <SendIcon size="1.2rem" /> Inscribirme
+      </button>
+    {/if}
   </div>
 </Modal>
 

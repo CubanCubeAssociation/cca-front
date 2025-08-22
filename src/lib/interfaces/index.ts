@@ -1,3 +1,67 @@
+export const PERMISSIONS = {
+  user: {
+    getOwn: "user:getOwn",
+    editOwn: "user:editOwn",
+    editUser: "user:editUser",
+    editName: "user:editName",
+    editCI: "user:editCI",
+    editProvince: "user:editProvince",
+    editMunicipality: "user:editMunicipality",
+    editCredit: "user:editCredit",
+    createUser: "user:createUser",
+    deleteUser: "user:deleteUser",
+    updateProfile: "user:updateProfile",
+    updateAllProfiles: "user:updateAllProfiles",
+  },
+  contest: {
+    getContests: "contest:getContests",
+    createContest: "contest:createContest",
+    editContest: "contest:editContest",
+    editUsers: "contest:editUsers",
+    editPaidUsers: "contest:editPaidUsers",
+    changeVisibility: "contest:changeVisibility",
+    deleteContest: "contest:deleteContest",
+    changeState: "contest:changeState",
+    approveResults: "contest:approveResults",
+    subscribeUser: "contest:subscribeUser",
+    unsubscribeUser: "contest:unsubscribeUser",
+    modifyUserCategories: "contest:modifyUserCategories",
+  },
+  category: {
+    createCategory: "category:createCategory",
+    editCategory: "category:editCategory",
+    getCategories: "category:getCategories",
+    deleteCategory: "category:deleteCategory",
+  },
+  solve: {
+    createSolve: "solve:createSolve",
+    editSolve: "solve:editSolve",
+    getSolves: "solve:getSolves",
+    deleteSolve: "solve:deleteSolve",
+    editSolveTime: "solve:editSolveTime",
+  },
+  results: {
+    updateResult: "result:update",
+    updateAll: "result:updateAll",
+    updateRanking: "result:updateRanking",
+    dumpData: "result:dumpData",
+  },
+} as const;
+
+type TUserPermissions = (typeof PERMISSIONS)["user"][keyof (typeof PERMISSIONS)["user"]];
+type TContestPermissions = (typeof PERMISSIONS)["contest"][keyof (typeof PERMISSIONS)["contest"]];
+type TCategoryPermissions =
+  (typeof PERMISSIONS)["category"][keyof (typeof PERMISSIONS)["category"]];
+type TSolvePermissions = (typeof PERMISSIONS)["solve"][keyof (typeof PERMISSIONS)["solve"]];
+type TResultPermissions = (typeof PERMISSIONS)["results"][keyof (typeof PERMISSIONS)["results"]];
+
+export type TPermission =
+  | TUserPermissions
+  | TContestPermissions
+  | TCategoryPermissions
+  | TSolvePermissions
+  | TResultPermissions;
+
 export type ROLE = "user" | "delegate" | "admin" | "root";
 export type SEX = "M" | "F";
 
@@ -13,6 +77,7 @@ export interface USER {
   municipality: string;
   credit: number;
   role: ROLE;
+  permissions: TPermission[];
   isEmailVerified: boolean;
   age: number;
   sor: number;
