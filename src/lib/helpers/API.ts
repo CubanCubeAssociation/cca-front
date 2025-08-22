@@ -30,8 +30,13 @@ export const DOMAIN = "https://cca-cuba.netlify.app";
 
 // Common internal helper function
 function commonAuth() {
+  let token = localStorage.getItem("accessToken");
+
   return {
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   } as const;
 }
 
