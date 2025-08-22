@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getCategories, getFormats, getUserProfile } from "@helpers/API";
-  import type { CATEGORY, FORMAT, ITIME, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
+  import type { CATEGORY, FORMAT, ITIME, TAG, USER_PROFILE, USER_RECORD_RESULT } from "@interfaces";
   import { onDestroy, onMount } from "svelte";
   import { page } from "$app/state";
   import Award from "@components/Award.svelte";
@@ -21,6 +21,7 @@
     round: number;
     place: number;
     average: number | null;
+    tag: TAG;
     times: ITIME[];
     format: string;
   }
@@ -96,7 +97,7 @@
 
     results.forEach(result => {
       result.contests.forEach(contest => {
-        const { category, round, average, times, format } = contest;
+        const { category, round, average, times, format, tag } = contest;
 
         if (!groupedData[category.name]) {
           groupedData[category.name] = {};
@@ -112,6 +113,7 @@
           average,
           times,
           format,
+          tag,
         });
       });
     });
@@ -855,7 +857,7 @@
                             })}
                             class="hover:text-primary-300"
                           >
-                            <Solve time={result.average} tag="" class="text-purple-400" />
+                            <Solve time={result.average} tag={result.tag} class="text-purple-400" />
                           </a>
                         </td>
 

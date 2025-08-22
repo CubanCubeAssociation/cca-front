@@ -77,7 +77,7 @@
             <th>Nombre</th>
             <th>Fecha</th>
             <th class="max-md:hidden">Hora</th>
-            <th class="min-w-[10rem]">Categorías</th>
+            <th class="min-w-[7rem]">Categorías</th>
           </tr>
         </thead>
 
@@ -86,7 +86,7 @@
             <tr>
               <td>{(pg.page - 1) * pg.limit + pos + 1}</td>
               <td>
-                <a href={contestNameToLink(r.name)} class="flex flex-wrap items-center gap-2">
+                <a href={contestNameToLink(r.name)} class="flex gap-2">
                   <div class="tooltip" data-tip={getStatus(r.status)}>
                     <Indicator color={getIndicatorColor(r.status)} />
                   </div>
@@ -122,3 +122,9 @@
     <span class="text-center">No hay competencias disponibles</span>
   {/snippet}
 </LoadingLayout>
+
+<style>
+  tr > * {
+    padding-inline: 0.5rem;
+  }
+</style>

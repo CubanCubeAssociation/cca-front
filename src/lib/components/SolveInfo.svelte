@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { sTimer } from "@helpers/timer";
   import { PENALTY, type CONTEST, type ROUND, type SOLVE } from "@interfaces";
   import UserField from "./UserField.svelte";
   import { getPenaltyName, getTagDescription } from "@helpers/strings";

@@ -8,7 +8,7 @@
     type FORMAT,
     type ROUND,
   } from "@interfaces";
-  import { getContest, getFormats } from "@helpers/API";
+  import { getContest, getFormats, inscribeContestUser, removeContestUser } from "@helpers/API";
   import { getRoundsInfo } from "@helpers/statistics";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { minRole } from "@helpers/auth";
@@ -22,6 +22,7 @@
   import { createEmptyContest } from "@helpers/object";
   import {
     CalendarIcon,
+    CircleAlertIcon,
     ClockIcon,
     DollarSignIcon,
     EyeIcon,
@@ -29,11 +30,18 @@
     OrbitIcon,
     PencilIcon,
     PuzzleIcon,
+    SendIcon,
+    UserMinusIcon,
+    UserPlusIcon,
   } from "lucide-svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
+  import Modal from "@components/Modal.svelte";
+  import { twMerge } from "tailwind-merge";
+  import { NotificationService } from "@stores/notification.service";
 
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 text-green-200!";
+  const notification = NotificationService.getInstance();
 
   let contest: CONTEST = $state(createEmptyContest());
   let roundGroup: ROUND[][][] = $state([]);
@@ -41,6 +49,23 @@
   let loading = $state(false);
   let error = $state(false);
   let name = $state("");
+  let canInscribe = $derived(
+    contest.name &&
+      contest.status === "inscription" &&
+      $userStore &&
+      !contest.contestants.some(ct => ct.user.id === $userStore.id)
+  );
+  let showInscriptionModal = $state(false);
+  let selectedCategories: boolean[] = $state([]);
+  let inscribeLoading = $state(false);
+  let unsubscribeLoading = $state(false);
+  let canUnsubscribe = $derived(
+    contest.name &&
+      contest.status === "inscription" &&
+      $userStore &&
+      contest.contestants.some(ct => ct.user.id === $userStore.id)
+  );
+  let showRemoveContestUserModal = $state(false);
 
   function before(state: CONTEST_STATUS) {
     let idx = STATUS_ORDER.indexOf(contest.status);
@@ -78,6 +103,54 @@
         }
       })
       .finally(() => (loading = false));
+  }
+
+  function inscribeMe() {
+    if (!$userStore) return;
+    inscribeLoading = true;
+    showInscriptionModal = false;
+
+    inscribeContestUser(
+      contest,
+      $userStore,
+      contest.categories.filter((_, p) => selectedCategories[p])
+    )
+      .then(() => {
+        notification.addNotification({
+          header: "Inscrito",
+          text: `Se ha inscrito en la competencia "${contest.name}".`,
+        });
+        updateData();
+      })
+      .catch(() =>
+        notification.addNotification({
+          header: "Error",
+          text: `Ha habido un error en la inscripción.`,
+        })
+      )
+      .finally(() => (inscribeLoading = false));
+  }
+
+  function unsubscribeMe() {
+    if (!$userStore) return;
+    unsubscribeLoading = true;
+    showRemoveContestUserModal = false;
+
+    removeContestUser(contest, $userStore)
+      .then(() => {
+        notification.addNotification({
+          header: "Hecho",
+          text: `Se ha dado de baja de la competencia "${contest.name}".`,
+        });
+        updateData();
+      })
+      .catch(() =>
+        notification.addNotification({
+          header: "Error",
+          text: `Ha habido un error al intentar darse de baja.`,
+        })
+      )
+      .finally(() => (unsubscribeLoading = false));
   }
 
   onMount(() => {
@@ -192,6 +265,34 @@
           </li>
         {/if}
       </ul>
+
+      <div class="actions flex gap-2 flex-wrap">
+        {#if canInscribe}
+          <button class="btn btn-primary relative" onclick={() => (showInscriptionModal = true)}>
+            <UserPlusIcon size="1.2rem" /> Inscribirme
+            {#if inscribeLoading}
+              <div class="w-full h-full bg-primary absolute rounded-md grid p-1">
+                <span class="loading loading-spinner loading-lg mx-auto mb-4"></span>
+              </div>
+            {/if}
+          </button>
+        {/if}
+
+        {#if canUnsubscribe}
+          <button
+            class="btn btn-warning relative"
+            onclick={() => (showRemoveContestUserModal = true)}
+          >
+            <UserMinusIcon size="1.2rem" /> Darme de baja
+
+            {#if unsubscribeLoading}
+              <div class="w-full h-full bg-warning absolute rounded-md grid p-1">
+                <span class="loading loading-spinner loading-lg mx-auto mb-4"></span>
+              </div>
+            {/if}
+          </button>
+        {/if}
+      </div>
     </div>
 
     {#if contest.contestants.length > 0}
@@ -261,6 +362,62 @@
   {/snippet}
 </LoadingLayout>
 
+<Modal bind:show={showInscriptionModal}>
+  <h2 class="text-2xl text-center mb-4">Seleccione las categorías</h2>
+
+  <div>
+    <ul class="flex items-center gap-2 justify-center flex-wrap">
+      {#each contest.categories as ct, p}
+        <li>
+          <button
+            class={twMerge("btn px-1 tooltip", selectedCategories[p] ? "btn-primary" : "btn-ghost")}
+            data-tip={ct.category.name}
+            onclick={() => {
+              selectedCategories[p] = !selectedCategories[p];
+            }}
+          >
+            <WcaCategory icon={ct.category.scrambler} size="1.5rem" />
+          </button>
+        </li>
+      {/each}
+    </ul>
+  </div>
+
+  <div class="flex gap-2 justify-center mt-4">
+    <button
+      class="btn btn-neutral"
+      onclick={() => {
+        showInscriptionModal = false;
+      }}>Cancelar</button
+    >
+    <button
+      class="btn btn-primary"
+      onclick={inscribeMe}
+      disabled={selectedCategories.every(c => !c)}
+    >
+      <SendIcon size="1.2rem" /> Inscribirme
+    </button>
+  </div>
+</Modal>
+
+<Modal bind:show={showRemoveContestUserModal}>
+  <h2 class="text-xl text-center mb-4">Salir de la competencia</h2>
+
+  <div class="flex flex-col items-center justify-center">
+    <CircleAlertIcon size="3rem" />
+
+    <h4 class="text-center">¿Desea salir de la competencia "{contest.name}"?</h4>
+
+    <div class="flex gap-2 mt-4">
+      <button class="btn" onclick={() => (showRemoveContestUserModal = false)}>Cancelar</button>
+      <button class="btn btn-error" onclick={unsubscribeMe}>
+        <UserMinusIcon size="1.2rem" />
+        <span class="ml-1">Salir</span>
+      </button>
+    </div>
+  </div>
+</Modal>
+
 <style lang="postcss">
   .info-list {
     grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
@@ -271,5 +428,9 @@
 
   .info-list li {
     @apply flex items-center;
+  }
+
+  tr > * {
+    padding-inline: 0.5rem;
   }
 </style>

@@ -3,7 +3,7 @@
   import CcaLogo from "./CCALogo.svelte";
 </script>
 
-<footer class="footer sm:footer-horizontal bg-base-300 text-base-content p-10">
+<footer class="footer sm:footer-horizontal max-sm:grid-cols-2 bg-base-300 text-base-content p-10">
   <nav>
     <CcaLogo size="2rem" />
     <a href={SITEMAP.contests} class="link link-hover">Competencias</a>

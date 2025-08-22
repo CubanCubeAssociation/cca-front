@@ -678,7 +678,7 @@
                       <th class="text-center">No.</th>
                       <th class="text-center">Nombre</th>
                       <th class="text-center">Usuario</th>
-                      <th class="text-center min-w-[10rem]">Categorías</th>
+                      <th class="text-center min-w-[7rem]">Categorías</th>
                       <th class="text-center">Pagó</th>
                       <th class="text-center">Inscripción</th>
                       <th class="text-center"></th>
@@ -962,3 +962,9 @@
     </button>
   </div>
 </Modal>
+
+<style>
+  tr > * {
+    padding-inline: 0.5rem;
+  }
+</style>

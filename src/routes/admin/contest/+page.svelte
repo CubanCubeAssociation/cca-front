@@ -102,8 +102,8 @@
                 <th>#</th>
                 <th>Nombre</th>
                 <th>Fecha</th>
-                <th>Hora</th>
-                <th class="min-w-[10rem]">Categorías</th>
+                <th class="max-md:hidden">Hora</th>
+                <th class="min-w-[7rem]">Categorías</th>
               </tr>
             </thead>
 
@@ -119,8 +119,13 @@
                       {ct.name}
                     </a>
                   </td>
-                  <td>{moment.utc(ct.date).format("DD/MM/YYYY")}</td>
-                  <td>{moment.utc(ct.date).format("hh:mm a")}</td>
+                  <td>
+                    {moment.utc(ct.date).format("DD/MM/YYYY")}
+                    <span class="md:hidden">{moment.utc(ct.date).format("hh:mm a")}</span>
+                  </td>
+                  <td class="max-md:hidden">
+                    {moment.utc(ct.date).format("hh:mm a")}
+                  </td>
                   <td>
                     <div class="flex w-full flex-wrap">
                       {#each ct.categories as cat}
@@ -155,5 +160,8 @@
   @reference "tailwindcss";
   .actions {
     @apply my-2 flex justify-start gap-2;
+  }
+  tr > * {
+    padding-inline: 0.5rem;
   }
 </style>

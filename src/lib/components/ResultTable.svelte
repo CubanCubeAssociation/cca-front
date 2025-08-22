@@ -1,7 +1,7 @@
 <script lang="ts">
   import Award from "./Award.svelte";
   import { minRole } from "@helpers/auth";
-  import { actualTime, sTimer, timer } from "@helpers/timer";
+  import { actualTime } from "@helpers/timer";
   import {
     PENALTY,
     type CONTEST,
