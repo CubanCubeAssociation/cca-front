@@ -1,4 +1,3 @@
-import { DOMAIN } from "@helpers/API";
 import { isFinite } from "@helpers/math";
 
 export const SITEMAP = {
@@ -41,7 +40,7 @@ export function contestNameToLink(name: string, params?: Partial<ContestParams>,
     queryString = "?" + queryString;
   }
 
-  return `${admin ? DOMAIN + SITEMAP.admin.contest : SITEMAP.contests}/${name.replace(/ /g, "-")}${queryString}`;
+  return `${admin ? SITEMAP.admin.contest : SITEMAP.contests}/${name.replace(/ /g, "-")}${queryString}`;
 }
 
 export function contestParamName(paramName: string) {

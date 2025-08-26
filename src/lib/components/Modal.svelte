@@ -1,6 +1,7 @@
 <script lang="ts">
   import { preventDefault } from "@helpers/object";
   import { XIcon } from "lucide-svelte";
+  import { twMerge } from "tailwind-merge";
 
   interface ModalProps {
     show?: boolean;
@@ -96,10 +97,9 @@
   onkeyup={keyUpHandler}
   onkeydown={keyDownHandler}
   oncancel={e => !cancel && e.preventDefault()}
-  class="modal mx-auto text-sm rounded-md show p-4 pt-3 overflow-visible backdrop-blur-md {_cl ||
-    ''}"
+  class="modal mx-auto text-sm rounded-md show p-4 pt-3 overflow-visible backdrop-blur-md"
 >
-  <div class="modal-box border bg-base-200 max-h-[calc(100vh-3rem)]">
+  <div class={twMerge("modal-box border bg-base-200 max-h-[calc(100vh-3rem)]", _cl)}>
     {#if cancel}
       <button
         tabindex="0"

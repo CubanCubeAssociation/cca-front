@@ -14,7 +14,7 @@
   export { cl as class };
   export let type: "color" | "select" = "select";
   export let placeholder: string = "";
-  export let value: any = placeholder;
+  export let value: any;
   export let items: readonly any[];
   export let onChange: (item: any, pos: number, arr: readonly any[]) => any = (item: any) => item;
   export let label: (item: any, pos: number) => string = (item: any) => (item || "").toString();

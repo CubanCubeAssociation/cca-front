@@ -46,7 +46,6 @@
   import Modal from "@components/Modal.svelte";
   import { twMerge } from "tailwind-merge";
   import { NotificationService } from "@stores/notification.service";
-  import { ROLES } from "@constants";
 
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 text-green-200!";

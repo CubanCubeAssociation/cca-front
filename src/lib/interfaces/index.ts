@@ -213,6 +213,8 @@ export interface RANKING {
     name: string;
     username: string;
     role: ROLE;
+    province: string;
+    sex: string;
   };
   contest: string;
   time: number;

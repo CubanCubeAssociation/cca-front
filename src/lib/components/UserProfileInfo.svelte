@@ -71,9 +71,8 @@
   $effect(() => {
     if (user) tempUser = clone($state.snapshot(user));
   });
-  $effect(() => tempUser && (updateMunicipalities(tempUser.province) as any));
+  $effect(() => updateMunicipalities(tempUser.province));
   $effect(() => {
-    if (!tempUser) return;
     tempUser.sex =
       tempUser.ci.length >= 10 ? (~~(tempUser.ci.at(9) || 0) % 2 === 0 ? "M" : "F") : tempUser.sex;
   });
@@ -82,14 +81,10 @@
 <div class="w-full grid">
   <Avatar size="xl" user={tempUser} class="mx-auto" />
   <h1 class="font-bold text-lg mx-auto">
-    <UserField
-      fullName
-      class="w-fit! text-center font-bold"
-      user={tempUser || { username: "", name: "", role: "user" }}
-    />
+    <UserField fullName class="w-fit! text-center font-bold" user={tempUser} />
   </h1>
 
-  {#if editMode && tempUser}
+  {#if editMode}
     <form onsubmit={preventDefault(saveUser)} class="grid sm:grid-cols-2 md:grid-cols-1 gap-2">
       <fieldset class="fieldset">
         <legend class="fieldset-legend">Provincia </legend>
@@ -193,49 +188,49 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 gap-2">
       <span class="text-sm flex items-center gap-1 text-yellow-200">
         <MapPinIcon {size} />
-        {tempUser?.province}
+        {user?.province}
       </span>
       <span class="text-sm flex items-center gap-1">
         <a
-          href={`${SITEMAP.people}/${tempUser?.username || "#"}`}
+          href={`${SITEMAP.people}/${user?.username || "#"}`}
           class="flex items-center gap-1 truncate text-sm font-medium text-pink-400"
         >
           <FingerprintIcon {size} />
-          CCA-ID: {tempUser?.username}
+          CCA-ID: {user?.username}
         </a>
       </span>
       <span class="text-sm flex items-center gap-1">
         <SigmaIcon {size} />
-        SoR: {tempUser?.sor}
+        SoR: {user?.sor}
       </span>
       <span class="text-sm flex items-center gap-1">
-        {#if tempUser?.sex === "F"}
+        {#if user?.sex === "F"}
           <VenusIcon {size} />
         {:else}
           <MarsIcon {size} />
         {/if}
-        Sexo: {tempUser ? (tempUser.sex === "F" ? "Femenino" : "Masculino") : ""}
+        Sexo: {user ? (user.sex === "F" ? "Femenino" : "Masculino") : ""}
       </span>
       <span class="text-sm flex items-center gap-1">
         <ClockIcon {size} />
-        Edad: {tempUser?.age}
+        Edad: {user?.age}
       </span>
 
-      {#if minRole($userStore, "delegate") || ($userStore && tempUser && $userStore.id === tempUser.id)}
+      {#if minRole($userStore, "delegate") || ($userStore && $userStore.id === user?.id)}
         <span class="text-sm flex items-center gap-1">
           <FingerprintIcon {size} />
-          CI: {tempUser?.ci}
+          CI: {user?.ci}
         </span>
         <span class="text-sm flex items-center gap-1">
           <HandCoinsIcon {size} />
-          Crédito: {tempUser?.credit} CUP
+          Crédito: {user?.credit} CUP
         </span>
         <span class="text-sm flex items-center gap-1">
           <MailIcon {size} />
 
-          {tempUser?.email}
+          {user?.email}
 
-          {#if tempUser?.isEmailVerified}
+          {#if user?.isEmailVerified}
             <BadgeCheckIcon {size} class="text-green-300" />
           {/if}
         </span>
@@ -244,8 +239,8 @@
           <button
             class="btn btn-primary w-full max-w-40"
             onclick={() => {
-              if (!tempUser) return;
-              tempUser = { ...tempUser };
+              if (!user) return;
+              tempUser = { ...user };
               editMode = true;
             }}
           >
@@ -283,7 +278,7 @@
           class="grow"
           placeholder="Contraseña"
           autocomplete="off"
-          pattern={`(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}`}
+          pattern={`(?=.*[A-Za-z])(?=.*\\d).{8,}`}
           required
         />
       </label>

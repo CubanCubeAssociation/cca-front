@@ -1,18 +1,16 @@
 <script lang="ts">
   import { userStore } from "@stores/user";
-
-  import { redirectToLogin, refreshToken } from "@helpers/API";
   import { browser } from "$app/environment";
+  import { getOwnUser, redirectToLogin } from "@helpers/API";
 
   const debug = true;
 
   (async () => {
     if (!browser) return;
     if (!$userStore) {
-      if (debug) console.log("Trying to refresh token");
+      if (debug) console.log("Trying to get user");
 
-      if (await refreshToken()) {
-        if (debug) console.log("Token updated");
+      if (await getOwnUser()) {
         return;
       }
 

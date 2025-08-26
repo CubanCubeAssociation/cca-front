@@ -25,8 +25,6 @@
         return;
       }
 
-      localStorage.setItem("accessToken", res.tokens.access.token);
-
       let ret = $page.url.searchParams.get("returnTo");
       goto(ret || SITEMAP.home, { replaceState: true });
     } catch {

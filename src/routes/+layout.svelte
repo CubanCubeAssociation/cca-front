@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
+  import { onMount } from "svelte";
   import "../app.css";
   import { screen } from "@stores/screen.store";
   import { NotificationService } from "@stores/notification.service";
@@ -8,9 +8,9 @@
   import NavbarComponent from "@components/NavbarComponent.svelte";
   import FooterComponent from "@components/FooterComponent.svelte";
   import type { LayoutServerData } from "./$types";
-  import { checkAuth } from "@stores/user.service";
   import { page } from "$app/state";
-  import { DOMAIN } from "@helpers/API";
+  import { DOMAIN, getOwnUser } from "@helpers/API";
+  import { userStore } from "$lib/stores/user";
 
   import("eruda").then(eruda => eruda.default.init());
 
@@ -44,18 +44,26 @@
     };
   }
 
-  let itv: any;
-
   onMount(() => {
+    getOwnUser();
+
     subService.subscribe(v => {
       notifications = v;
     });
-
-    itv = checkAuth();
     handleResize();
-  });
 
-  onDestroy(() => clearInterval(itv));
+    let handleOnline = () => {
+      if (!$userStore) {
+        getOwnUser();
+      }
+    };
+
+    window.addEventListener("online", handleOnline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+    };
+  });
 
   $effect(() => {
     updateJSONLD(data);
