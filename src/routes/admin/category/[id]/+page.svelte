@@ -159,6 +159,13 @@
         </fieldset>
 
         <fieldset class="fieldset">
+          <legend class="fieldset-legend">Longitud</legend>
+          <label class="input">
+            <input bind:value={category.length} type="number" class="grow" />
+          </label>
+        </fieldset>
+
+        <fieldset class="fieldset">
           <legend class="fieldset-legend">Formatos</legend>
 
           <ul class="flex gap-2">

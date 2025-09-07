@@ -10,16 +10,32 @@
     class?: string;
     best?: boolean;
     worst?: boolean;
+    reconstruction?: string;
+    decimals?: boolean;
+    suffix?: boolean;
   }
 
-  let { time, tag, class: _cl, best, worst }: ISolveProps = $props();
+  let {
+    time,
+    tag,
+    class: _cl,
+    best,
+    worst,
+    reconstruction,
+    decimals = true,
+    suffix = false,
+  }: ISolveProps = $props();
 </script>
 
-<span class={twMerge("flex justify-center indicator", _cl)} class:best class:worst>
-  {timer(!time || time === "DNS" || time === "DNF" ? Infinity : +time, true)}
+<span class={twMerge("flex relative justify-center indicator", _cl)} class:best class:worst>
+  {timer(!time || time === "DNS" || time === "DNF" ? Infinity : +time, decimals, suffix)}
 
   {#if tag}
     <Award class="indicator-item mt-2" type={tag} />
+  {/if}
+
+  {#if reconstruction}
+    <hr class="h-[.1rem] rounded-full animate-pulse bg-current border-0 w-full absolute bottom-0" />
   {/if}
 </span>
 

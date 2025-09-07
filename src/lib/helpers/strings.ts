@@ -322,9 +322,17 @@ export function prettyScramble(scramble: string): string {
     .replace(/(\n\s+)/g, "\n");
 }
 
-export function getTagDescription(t: TAG | (string & {})): string {
-  if (t === "NR") return "Récord Nacional";
-  if (t === "PR") return "Récord Provincial";
-  if (t === "PB") return "Récord Personal";
+export function getTagDescription(t: TAG | (string & {}), short = false): string {
+  if (t === "NR") return ["Récord Nacional", t][short ? 1 : 0];
+  if (t === "PR") return ["Récord Provincial", t][short ? 1 : 0];
+  if (t === "PB") return ["Récord Personal", t][short ? 1 : 0];
   return "";
+}
+
+export function randomCSSId() {
+  return btoa(randomUUID()).slice(0, 16);
+}
+
+export function copyToClipboard(s: string) {
+  return navigator.clipboard.writeText(s);
 }

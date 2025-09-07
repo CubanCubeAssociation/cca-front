@@ -181,6 +181,13 @@ export async function modifyUserContest(
   }).json();
 }
 
+export async function generateScrambles(contestId: string): Promise<CONTEST> {
+  if (await tokenNeedsRefresh()) await refreshToken();
+  return await API.post(`contests/${contestId}/generateScrambles`, {
+    timeout: 60000,
+  }).json();
+}
+
 // USER
 interface IGetUsers {
   page: number;
@@ -370,7 +377,7 @@ export async function updateResults() {
 export async function updateAll() {
   if (await tokenNeedsRefresh()) await refreshToken();
 
-  return await API.get("results/updateAll").json();
+  return await API.get("results/updateAll", { timeout: 60000 }).json();
 }
 
 export async function getRanking(

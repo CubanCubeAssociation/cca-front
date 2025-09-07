@@ -32,7 +32,8 @@
   const selectID = "s" + weakRandomUUID().replace(/-/g, "");
 
   let focused = 0;
-  let dropdown: HTMLDivElement | null = null;
+  let dropdown: HTMLDetailsElement | null = null;
+  let list: HTMLUListElement | null = null;
 
   function findValuePosition() {
     for (let i = 0, maxi = items.length; i < maxi; i += 1) {
@@ -44,27 +45,35 @@
     return -1;
   }
 
-  function handleClick() {
-    let list = document.querySelector(`#${selectID}`);
-
+  async function handleClick() {
     if (!list) return;
 
     let pos = findValuePosition();
 
     if (pos > -1) {
       focused = pos;
-      list.children[pos].scrollIntoView({ block: "nearest" });
-      tick().then(() => focusElement(list));
+
+      let itv = setInterval(() => {
+        if (dropdown && dropdown.getAttribute("open") != null) {
+          clearInterval(itv);
+        } else return;
+
+        list?.children[pos].scrollIntoView({
+          block: "nearest",
+          behavior: "instant",
+        });
+
+        focusElement(list);
+      }, 10);
     }
   }
 
   function focusElement(list: any) {
-    (list.children[focused].children[0] as HTMLButtonElement).focus();
+    (list.children[focused] as HTMLButtonElement).focus();
   }
 
   function handleKeydown(ev: KeyboardEvent) {
     if (!dropdown || !dropdown.matches(":focus-within")) return;
-    console.log("handleKeydown");
 
     if (ev.code === "Escape") {
       (dropdown.children[0] as any).blur();
@@ -81,7 +90,6 @@
 
     let list = document.querySelector(`#${selectID}`);
     if (!list) {
-      console.log("NO LIST");
       return;
     }
 
@@ -89,8 +97,6 @@
 
     if (ev.code === "ArrowUp" || ev.code === "ArrowDown") {
       focused = mod(ev.code === "ArrowUp" ? focused - 1 : focused + 1, list.children.length);
-
-      console.log("FOCUSED: ", focused);
 
       tick().then(() => focusElement(list));
       return;
@@ -120,16 +126,32 @@
       }
     }
   }
+
+  function handleCaptureClick(ev: MouseEvent) {
+    if (
+      !dropdown ||
+      dropdown.getAttribute("open") === null ||
+      dropdown.getAttribute("open") === "false"
+    )
+      return;
+
+    let tg = ev.target as HTMLElement | null;
+
+    while (tg) {
+      if (tg === dropdown) return;
+      tg = tg.parentElement;
+    }
+
+    dropdown.removeAttribute("open");
+  }
 </script>
 
-<svelte:window on:keydown|capture={handleKeydown} />
+<svelte:window on:keydown|capture={handleKeydown} onclickcapture={handleCaptureClick} />
 
-<div class="dropdown" bind:this={dropdown} data-dropdown={selectID}>
-  <div
-    tabindex={0}
-    role="button"
+<details class="dropdown" bind:this={dropdown} data-dropdown={selectID}>
+  <summary
     class={twMerge("btn border border-base-content/20 !rounded-lg gap-1 h-9 py-1 px-2 ", cl)}
-    onclick={preventDefault(handleClick)}
+    onclick={handleClick}
     {...$$restProps}
   >
     {#if items.some((a, p, i) => transform(a, p, i) === value)}
@@ -143,13 +165,18 @@
           [iconKey]: hasIcon(item[0]),
         })}
 
-        <svelte:component this={iconComponent} {...iconProps} noFallback />
+        <svelte:component
+          this={iconComponent}
+          {...iconProps}
+          class="pointer-events-none"
+          noFallback
+        />
       {/if}
 
       {#if !(hasIcon && iconComponent && preferIcon)}
         {#if type === "color"}
           <div
-            class="color w-4 h-4"
+            class="color w-4 h-4 pointer-events-none"
             style={"background-color: " + getColorByName(label(item[0], item[1])) + ";"}
           ></div>
         {:else}
@@ -161,12 +188,13 @@
     {/if}
 
     <ChevronDownIcon size="1.2rem" class="ml-auto" />
-  </div>
+  </summary>
 
   <ul
     id={selectID}
-    class="dropdown-content max-h-80 overflow-x-hidden overflow-y-auto menu
-      bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm grid"
+    bind:this={list}
+    class="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm
+      max-h-80 overflow-x-hidden overflow-y-auto grid"
   >
     {#each items as item, pos}
       <li>
@@ -186,6 +214,7 @@
             onChange(item, pos, items);
             (dropdown?.children[0] as any).blur();
             (e.target as any).blur();
+            dropdown?.removeAttribute("open");
           })}
         >
           {#if hasIcon && iconComponent}
@@ -211,4 +240,4 @@
       </li>
     {/each}
   </ul>
-</div>
+</details>

@@ -89,6 +89,10 @@
     @apply btn btn-secondary w-8 h-8 p-0;
   }
 
+  .paginator-item:not(.selected) button:not(:disabled) {
+    @apply btn-soft border border-secondary;
+  }
+
   .paginator-item.selected button {
     @apply btn-primary;
   }

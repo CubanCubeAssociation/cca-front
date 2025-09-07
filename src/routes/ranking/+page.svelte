@@ -99,8 +99,20 @@
         query.set("category", name);
 
         addQueryField(query, "type", type, "Single");
-        addQueryField(query, "province", selectedProvince?.nombre || "", "");
-        addQueryField(query, "sex", selectedSex?.sexo || "", "");
+
+        if (!selectedProvince || selectedProvince.id === "0") {
+          query.delete("province");
+          selectedProvince = undefined;
+        } else {
+          addQueryField(query, "province", selectedProvince.nombre);
+        }
+
+        if (!selectedSex || selectedSex.id === "0") {
+          query.delete("sex");
+          selectedSex = undefined;
+        } else {
+          addQueryField(query, "sex", selectedSex.sexo);
+        }
 
         goto(page.url.pathname + "?" + query.toString(), { replaceState: true });
       })
@@ -123,8 +135,8 @@
     let _province = (params.get("province") || "").toLowerCase();
     let _sex = (params.get("sex") || "").toLowerCase();
 
-    let prov = provinces.find(p => p.nombre.toLowerCase() === _province) || provinces[0];
-    let sx = sexs.find(s => s.sexo.toLowerCase() === _sex) || sexs[0];
+    let prov = provinces.slice(1).find(p => p.nombre.toLowerCase() === _province);
+    let sx = sexs.slice(1).find(s => s.sexo.toLowerCase() === _sex);
 
     selectedProvince = prov;
     selectedSex = sx;
@@ -136,8 +148,8 @@
       _type && _type.toLocaleLowerCase() === "media" ? "Media" : "Single",
       "Single"
     );
-    addQueryField(params, "province", prov.nombre, provinces[0].nombre);
-    addQueryField(params, "sex", sx.sexo, sexs[0].sexo);
+    addQueryField(params, "province", prov?.nombre || "", "");
+    addQueryField(params, "sex", sx?.sexo || "", "");
 
     goto(page.url.pathname + "?" + params.toString(), { replaceState: true });
 

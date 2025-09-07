@@ -5,20 +5,37 @@
   import WcaCategory from "./wca/WCACategory.svelte";
   import moment from "moment";
   import Reconstructor from "./Reconstructor.svelte";
-  import { CheckIcon, CopyIcon, ShareIcon } from "lucide-svelte";
+  import { CheckIcon, CopyIcon, SaveIcon, ShareIcon } from "lucide-svelte";
   import { contestNameToLink } from "@helpers/routing";
   import { DOMAIN } from "@helpers/API";
   import Solve from "./Solve.svelte";
+  import { preventDefault } from "@helpers/object";
+  import { pGenerateCubeBundle } from "@helpers/cube-draw";
+  import { Puzzle } from "@classes/puzzle/puzzle";
+  import { options } from "@constants";
+  import PuzzleImage from "./PuzzleImage.svelte";
 
   interface SolveInfoProps {
     round: ROUND;
     solve: SOLVE;
     contest: CONTEST;
+    allowEdit: boolean;
+    key: "t1" | "t2" | "t3" | "t4" | "t5" | null;
+    onreconstruction?: (round: ROUND, key: any, reconstruction: string) => any;
   }
 
-  let { round, solve, contest }: SolveInfoProps = $props();
+  let { round, solve, contest, key, allowEdit, onreconstruction }: SolveInfoProps = $props();
 
   let copied = $state(false);
+  let reconstruction = $state("");
+  let contestCategory = $derived(
+    contest.categories.find(cct => cct.category.id === round.category.id)
+  );
+  let scramble = $derived(
+    contestCategory?.scrambles[
+      contestCategory.amount * (round.round - 1) + parseInt(key?.slice(1) || "") - 1
+    ]
+  );
 
   function copyLink() {
     if (copied == true) return;
@@ -38,9 +55,39 @@
         setTimeout(() => (copied = false), 2000);
       });
   }
+
+  function saveReconstruction() {
+    onreconstruction?.(round, key, reconstruction);
+    reconstruction = "";
+  }
+
+  async function getImage(s: string) {
+    let op = options.get(round.category.scrambler);
+
+    if (!Array.isArray(op)) {
+      return pGenerateCubeBundle([Puzzle.fromSequence(s, op || { type: "rubik" })]);
+    }
+
+    return [""];
+  }
+
+  $effect(() => (reconstruction = solve.reconstruction) as any);
 </script>
 
 <div class="overflow-x-auto w-full rounded-lg border border-base-content/10">
+  <h3 class="flex gap-2 justify-center text-lg">
+    <UserField user={round.contestant} />
+    <Solve
+      time={solve.timeMillis}
+      tag=""
+      suffix
+      class={solve.isAverage ? "text-purple-500" : "text-green-500"}
+    />
+    {#if solve.tag}
+      <span class="text-info contents">({getTagDescription(solve.tag)})</span>
+    {/if}
+  </h3>
+
   <table class="table">
     <tbody>
       <tr>
@@ -49,42 +96,56 @@
           <div class="flex gap-2 items-center">
             <WcaCategory icon={round.category.scrambler} size="1.2rem" />
             {round.category.name}
+            <span class="text-info contents">(Ronda {round.round})</span>
           </div>
         </td></tr
       >
-      <tr>
-        <td>{solve.isAverage ? "Promedio" : "Tiempo"}</td>
-        <td>
-          <div class="flex items-center gap-2">
-            <Solve time={solve.timeMillis} tag="" />
-            {#if solve.tag}
-              ({getTagDescription(solve.tag)})
-            {/if}
-          </div>
-        </td></tr
-      >
-      <tr> <td>Ronda</td> <td>{round.round}</td></tr>
-      <tr> <td>Usuario</td> <td><UserField user={round.contestant} /> </td></tr>
+
       <tr>
         <td>Competencia</td>
         <td>
           {contest.name}
+          <span class="text-info contents">({moment(contest.date).format("DD/MM/YYYY")})</span>
         </td></tr
       >
-      <tr> <td>Fecha</td> <td>{moment(contest.date).format("DD/MM/YYYY")}</td></tr>
-      {#if solve.reconstruction}
+
+      {#if solve.penaltyType != PENALTY.NONE}
+        <tr> <td>Penalización</td> <td>{getPenaltyName(solve.penaltyType)}</td></tr>
+      {/if}
+
+      {#if !solve.isAverage}
         <tr>
-          <td>Reconstrucción</td>
-          <td>
-            <Reconstructor
-              reconstruction={solve.reconstruction}
-              scrambler={round.category.scrambler}
-            />
+          <td>Mezcla</td>
+          <td>{scramble}</td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            {#await getImage(scramble || "") then res}
+              <PuzzleImage src={res[0]} class="max-h-40" />
+            {/await}
           </td>
         </tr>
       {/if}
-      {#if solve.penaltyType != PENALTY.NONE}
-        <tr> <td>Penalización</td> <td>{getPenaltyName(solve.penaltyType)}</td></tr>
+
+      {#if solve.reconstruction || allowEdit}
+        <tr>
+          <td>Reconstrucción</td>
+          <td>
+            {#if allowEdit}
+              <textarea
+                bind:value={reconstruction}
+                rows={4}
+                class="textarea resize-y"
+                placeholder="Reconstrucción"
+              ></textarea>
+            {:else}
+              <Reconstructor
+                reconstruction={solve.reconstruction}
+                scrambler={round.category.scrambler}
+              />
+            {/if}
+          </td>
+        </tr>
       {/if}
     </tbody>
   </table>
@@ -99,7 +160,7 @@
   {/if}
 
   {#if navigator.clipboard}
-    <button class="btn btn-ghost" onclick={copyLink}>
+    <button class="btn btn-ghost" onclick={preventDefault(copyLink)}>
       {#if copied}
         <CheckIcon class="text-success" size="1.2rem" />
         Copiado
@@ -107,6 +168,13 @@
         <CopyIcon size="1.2rem" />
         Copiar Link
       {/if}
+    </button>
+  {/if}
+
+  {#if navigator.clipboard}
+    <button class="btn btn-primary" onclick={preventDefault(saveReconstruction)}>
+      <SaveIcon size="1.2rem" />
+      Guardar
     </button>
   {/if}
 </div>

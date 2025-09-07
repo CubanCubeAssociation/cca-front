@@ -8,7 +8,7 @@
 
 import { clone } from "@helpers/object";
 import type { PuzzleType } from "@interfaces";
-import { Puzzle } from "./puzzle";
+import { Puzzle } from "./puzzle/puzzle";
 
 /**
  * Tokenizer specs.

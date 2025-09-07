@@ -1,3 +1,9 @@
+import type { BezierSticker } from "@classes/puzzle/BezierSticker";
+import type { Piece } from "@classes/puzzle/Piece";
+import type { Sticker } from "@classes/puzzle/Sticker";
+import type { Vector3D } from "@classes/vector3d";
+import type { CubeMode } from "@constants";
+
 export const PERMISSIONS = {
   user: {
     getOwn: "user:getOwn",
@@ -26,6 +32,8 @@ export const PERMISSIONS = {
     subscribeUser: "contest:subscribeUser",
     unsubscribeUser: "contest:unsubscribeUser",
     modifyUserCategories: "contest:modifyUserCategories",
+    generateScrambles: "contest:generateScrambles",
+    seeScrambles: "contest:seeScrambles",
   },
   category: {
     createCategory: "category:createCategory",
@@ -124,6 +132,7 @@ export interface CATEGORY {
   name: string;
   scrambler: Scrambler;
   formats: string[];
+  length?: number;
 }
 
 export interface FORMAT {
@@ -137,6 +146,8 @@ export interface CONTEST_CATEGORY {
   category: CATEGORY;
   rounds: number;
   format: string;
+  scrambles: string[];
+  amount: number;
 }
 
 export enum PENALTY {
@@ -288,6 +299,7 @@ export interface INotification {
   fixed?: boolean;
   timeout?: number;
   actions?: NotificationAction[];
+  format?: "toast" | "modal";
 }
 
 export type TAG = "NR" | "PR" | "PB" | "";
@@ -414,4 +426,86 @@ export interface IPuzzleOrder {
   a: number;
   b: number;
   c: number;
+}
+
+export interface RoundCornersParams {
+  p: PuzzleInterface;
+  rd?: number | ((...args: any[]) => any);
+  scale?: number;
+  ppc?: number;
+  fn?: (st: Sticker) => boolean;
+  justScale?: boolean;
+  calcPath?: boolean;
+}
+
+export interface ToMoveResult {
+  pieces: Piece[];
+  ang: number;
+  center?: Vector3D;
+  dir?: Vector3D;
+  animationTime?: number;
+}
+
+export type EasingFunction = "ease" | "linear" | "easeIn" | "fastEasing" | "easeOut" | "easeInOut";
+
+export interface SequenceResult {
+  u: Vector3D;
+  ang: number;
+  pieces: string[];
+  center?: Vector3D;
+  easing?: EasingFunction;
+}
+
+export type AnyCallback = (...args: any[]) => any;
+
+export interface PiecesToMove {
+  pieces: Piece[];
+  u: Vector3D;
+  ang: number;
+  center?: Vector3D;
+  easing?: EasingFunction;
+}
+
+export interface PuzzleInterface {
+  pieces: Piece[];
+  palette: any;
+  rotation: {
+    x?: number;
+    y?: number;
+    z?: number;
+  };
+  center: Vector3D;
+  faceVectors: Vector3D[];
+  faceColors: string[];
+  getAllStickers: () => Sticker[] | BezierSticker[];
+  move: (m: any) => any;
+  roundParams: Omit<RoundCornersParams, "p">;
+  isRounded?: boolean;
+  dims?: number[];
+  raw?: any;
+  scramble?: () => any;
+  toMove?: (p: Piece, s: Sticker, dir: Vector3D, pinCode?: any) => ToMoveResult | ToMoveResult[];
+  applySequence?: (...args: any[]) => (SequenceResult | SequenceResult[])[];
+  toMoveSeq?: (move: string) => Required<ToMoveResult> | Required<ToMoveResult>[];
+  vectorsFromCamera?: AnyCallback;
+}
+
+export interface VectorLike3D {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export declare type CubeView = "plan" | "trans" | "2d" | "bird";
+
+export interface PuzzleOptions {
+  type: PuzzleType;
+  order?: number[];
+  mode?: CubeMode;
+  view?: CubeView;
+  tips?: number[];
+  headless?: boolean;
+  sequence?: string; // This field has no effects in the constructor
+  rounded?: boolean;
+  facelet?: string;
 }

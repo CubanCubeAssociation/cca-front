@@ -82,7 +82,8 @@ footer {
   margin-top: auto;
 }
 
-input[type="checkbox"] {
+input[type="checkbox"],
+input[type="radio"] {
   background-image: none;
 }
 

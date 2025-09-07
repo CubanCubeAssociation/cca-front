@@ -46,6 +46,7 @@
   let format: FORMAT = $state(formats[0]);
   let selectedRound = $state(createEmptyRound());
   let selectedSolve = $state(createEmptySolve());
+  let selectedRndKey: (typeof rndKeys)[number] | null = $state(null);
   let showSolveInfoModal = $state(false);
 
   function isPos(round: ROUND, i: number, pos: number) {
@@ -61,6 +62,21 @@
     if (edit) {
       edit(rnd);
     }
+  }
+
+  function handleReconstruction(round: ROUND, key: any, rec: string) {
+    let rnd = rounds.find(
+      r =>
+        r.category.id === round.category.id &&
+        r.contestant.username === round.contestant.username &&
+        r.round === round.round
+    );
+
+    showSolveInfoModal = false;
+
+    if (!rnd || !key || !selectedRndKey || selectedRndKey != key) return;
+
+    rnd[selectedRndKey].reconstruction = rec.replace(/^[\s]+/, "").replace(/[\s]+$/, "");
   }
 
   $effect(() => {
@@ -162,8 +178,10 @@
               <button
                 class="flex justify-center text-base-content cursor-help"
                 onclick={preventDefault(() => {
-                  selectedRound = rnd;
-                  selectedSolve = rnd[tp];
+                  let _rnd = $state.snapshot(rnd);
+                  selectedRound = _rnd;
+                  selectedRndKey = tp;
+                  selectedSolve = _rnd[tp];
                   showSolveInfoModal = true;
                 })}
               >
@@ -172,6 +190,7 @@
                   tag={rnd[tp].tag}
                   best={isPos(rnd, p, 0)}
                   worst={isPos(rnd, p, format.amount - 1)}
+                  reconstruction={rnd[tp].reconstruction}
                 />
               </button>
             </td>
@@ -193,6 +212,7 @@
                 selectedSolve.penaltyType = isFinite(_rnd.average) ? PENALTY.NONE : PENALTY.DNF;
                 selectedSolve.isAverage = true;
                 selectedSolve.tag = _rnd.tag;
+                selectedRndKey = null;
                 showSolveInfoModal = true;
               })}
             >
@@ -211,7 +231,14 @@
 </div>
 
 <Modal bind:show={showSolveInfoModal}>
-  <SolveInfo round={selectedRound} solve={selectedSolve} {contest} />
+  <SolveInfo
+    round={selectedRound}
+    solve={selectedSolve}
+    key={selectedRndKey}
+    {allowEdit}
+    {contest}
+    onreconstruction={handleReconstruction}
+  />
 </Modal>
 
 <style lang="postcss">

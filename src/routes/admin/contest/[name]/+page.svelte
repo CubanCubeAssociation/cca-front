@@ -43,13 +43,18 @@
   import {
     BeanIcon,
     CalendarIcon,
+    ChevronDownIcon,
+    ChevronUpIcon,
     CircleAlertIcon,
     DollarSignIcon,
     EditIcon,
+    EllipsisVerticalIcon,
     HardDriveIcon,
     ListOrderedIcon,
     MapPinIcon,
     PlusIcon,
+    ScrollText,
+    ScrollTextIcon,
     SendIcon,
     TrashIcon,
     UserIcon,
@@ -65,6 +70,10 @@
   import { twMerge } from "tailwind-merge";
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import { SITEMAP } from "@helpers/routing";
+  import PuzzleImage from "@components/PuzzleImage.svelte";
+  import { Puzzle } from "@classes/puzzle/puzzle";
+  import { options } from "@constants";
+  import { pGenerateCubeBundle } from "@helpers/cube-draw";
 
   let name = $state("");
   const notification = NotificationService.getInstance();
@@ -92,6 +101,9 @@
   let format: FORMAT = $state(createEmptyFormat());
   let loading = $state(false);
   let error = $state(false);
+  let images: string[][] = $state([]);
+  let showPuzzleImageModal = $state(false);
+  let selectedPuzzleImage = $state("");
 
   function exit() {
     goto(SITEMAP.admin.contest);
@@ -142,6 +154,8 @@
           category: ct,
           rounds: 1,
           format: formats.find(fm => fm.name === ct.formats[0])?.name || formats[0].name || "Ao5",
+          amount: 5,
+          scrambles: [],
         },
       ];
 
@@ -222,7 +236,6 @@
       c => c.user.username === selectedUser!.user.username
     ) as CONTESTANT;
     user.categories = selectedUser.categories;
-    contest = contest;
     editDialog = false;
   }
 
@@ -346,6 +359,31 @@
       .every(t => t.time && getInputColor(t) === "");
   }
 
+  function generateImages() {
+    let cats = contest.categories;
+    let puzzles: Puzzle[] = [];
+
+    for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
+      let op = options.get(cats[i].category.scrambler || "333") || { type: "rubik" };
+      if (!Array.isArray(op)) {
+        op.rounded = true;
+        puzzles.push(...cats[i].scrambles.map(scr => Puzzle.fromSequence(scr, op)));
+      }
+    }
+
+    pGenerateCubeBundle(puzzles).then(imgs => {
+      images.length = 0;
+
+      for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
+        let scrs = cats[i].scrambles.length;
+        images.push([]);
+        for (let j = 0, maxj = scrs; j < maxj; j += 1) {
+          images[i].push(imgs.shift() || "");
+        }
+      }
+    });
+  }
+
   function getContestData() {
     loading = true;
     error = false;
@@ -358,6 +396,7 @@
           return getContest(name).then(cnt => {
             if (!cnt) return;
             contest = cnt;
+            generateImages();
             if (debug) console.log("CONTEST: ", cnt);
             contest.date = moment.utc(contest.date).format("YYYY-MM-DDThh:mm");
             contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
@@ -375,6 +414,45 @@
       .finally(() => {
         loading = false;
       });
+  }
+
+  function removeScramble(p1: number, p2: number) {
+    const cat = contest.categories[p1];
+    notification.addNotification({
+      header: "Eliminar mezcla",
+      text: `¿Estás seguro que deseas eliminar la mezcla "${cat.scrambles[p2].trim()}"?`,
+      fixed: true,
+      actions: [
+        {
+          text: "Cancelar",
+          color: "btn-neutral",
+          callback: () => {},
+        },
+        {
+          text: "Eliminar",
+          color: "btn-error",
+          callback: () => (cat.scrambles = cat.scrambles.filter((_, pos) => pos != p2)),
+        },
+      ],
+      format: "modal",
+    });
+  }
+
+  function swap(arr: string[], p1: number, p2: number) {
+    let tmp = arr[p1];
+    arr[p1] = arr[p2];
+    arr[p2] = tmp;
+  }
+
+  function updateSingleImage(p1: number, p2: number) {
+    let scr = contest.categories[p1].scrambles[p2];
+    let opt = options.get(contest.categories[p1].category.scrambler) || { type: "rubik" };
+
+    if (!Array.isArray(opt)) {
+      pGenerateCubeBundle([Puzzle.fromSequence(scr, opt)]).then(res => {
+        images[p1][p2] = res[0];
+      });
+    }
   }
 
   onMount(() => {
@@ -396,6 +474,17 @@
   <LoadingLayout {loading} {error} altError={false} reloadFunction={getContestData}>
     {#snippet title()}
       {name === "new" ? "Crear competencia" : `Editar "${name}"`}
+
+      {#if name != "new"}
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-secondary btn-soft p-2">
+            <EllipsisVerticalIcon size="1.2rem" />
+          </div>
+          <ul class="dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-sm">
+            <li><button><ScrollTextIcon size="1.2rem" /> Generar mezclas</button></li>
+          </ul>
+        </div>
+      {/if}
     {/snippet}
 
     {#snippet content()}
@@ -406,7 +495,7 @@
             <input type="radio" name="contesttab" checked />
             <HardDriveIcon size="1.2rem" /> Datos
           </label>
-          <div class="tab-content border-base-300 bg-base-100 md:p-10">
+          <div class="tab-content border-base-300 bg-base-100 md:p-4">
             <div class="grid gap-4 md:grid-cols-3 sm:grid-cols-2">
               <!-- Nombre -->
               <fieldset class="fieldset">
@@ -620,7 +709,7 @@
             <input type="radio" name="contesttab" />
             <UsersIcon size="1.2rem" /> Competidores
           </label>
-          <div class="tab-content border-base-300 bg-base-100 md:p-10">
+          <div class="tab-content border-base-300 bg-base-100 md:p-4">
             <div class="w-full mb-4 flex items-center gap-2">
               <button class="btn btn-primary" onclick={preventDefault(() => (addDialog = true))}>
                 <PlusIcon /> Añadir competidor
@@ -658,8 +747,7 @@
                         );
                       });
                     }
-
-                    contest = contest;
+                    generateImages();
                   })}
                 >
                   Aplicar
@@ -750,13 +838,128 @@
             {/if}
           </div>
 
+          <!-- Mezclas -->
+          <label class="tab gap-2 text-accent">
+            <input type="radio" name="contesttab" />
+            <ScrollText size="1.2rem" /> Mezclas
+          </label>
+          <div class="tab-content border-base-300 bg-base-100 md:p-4">
+            <div class="tabs tabs-border">
+              {#each contest.categories as cat, p}
+                {#if cat.scrambles.length > 0}
+                  <label class="tab text-secondary">
+                    <input type="radio" name="contestScrambles" checked={p === 0} />
+                    <WcaCategory icon={cat.category.scrambler} size="1.2rem" />
+                    {cat.category.name}
+                  </label>
+                  <div class="tab-content border-base-300 bg-base-100 overflow-x-auto">
+                    <table class="table table-zebra">
+                      <tbody>
+                        {#each cat.scrambles as s, p1}
+                          {#if p1 % cat.amount === 0}
+                            <tr>
+                              <td colspan="4" class="text-center text-lg">
+                                Ronda {p1 / cat.amount + 1}
+                              </td>
+                            </tr>
+                          {/if}
+
+                          <tr data-scr={s}>
+                            <td>{(p1 % cat.amount) + 1}</td>
+                            <td class="text-center">
+                              <textarea
+                                bind:value={cat.scrambles[p1]}
+                                oninput={() => updateSingleImage(p, p1)}
+                                rows={2}
+                                class="textarea resize-y w-full"
+                                placeholder={"Mezcla " + (p1 + 1)}
+                              ></textarea>
+                            </td>
+                            <td class="w-1/3 max-sm:hidden">
+                              <PuzzleImage
+                                src={images[p][p1]}
+                                class="max-h-40"
+                                onclick={() => {
+                                  selectedPuzzleImage = images[p][p1];
+                                  showPuzzleImageModal = true;
+                                }}
+                              />
+                            </td>
+                            <td>
+                              {#if p1 > 0}
+                                <button
+                                  class="btn btn-accent btn-soft p-2"
+                                  onclick={preventDefault(() => {
+                                    swap(cat.scrambles, p1, p1 - 1);
+                                    swap(images[p], p1, p1 - 1);
+                                  })}
+                                >
+                                  <ChevronUpIcon size="1.2rem" />
+                                </button>
+                              {/if}
+
+                              {#if p1 < cat.scrambles.length - 1}
+                                <button
+                                  class="btn btn-accent btn-soft p-2"
+                                  onclick={preventDefault(() => {
+                                    swap(cat.scrambles, p1, p1 + 1);
+                                    swap(images[p], p1, p1 + 1);
+                                  })}
+                                >
+                                  <ChevronDownIcon size="1.2rem" />
+                                </button>
+                              {/if}
+
+                              <button
+                                class="btn btn-error btn-soft p-2"
+                                onclick={preventDefault(() => removeScramble(p, p1))}
+                              >
+                                <TrashIcon size="1.2rem" />
+                              </button>
+                            </td>
+                          </tr>
+                          <tr class="sm:hidden">
+                            <td colspan="4">
+                              <PuzzleImage
+                                src={images[p][p1]}
+                                class="max-h-40"
+                                onclick={() => {
+                                  selectedPuzzleImage = images[p][p1];
+                                  showPuzzleImageModal = true;
+                                }}
+                              />
+                            </td>
+                          </tr>
+                        {/each}
+                      </tbody>
+                    </table>
+
+                    {#if cat.scrambles.length < cat.amount * cat.rounds}
+                      <div class="flex items-center justify-center mt-4">
+                        <button
+                          class="btn btn-primary btn-soft"
+                          onclick={preventDefault(() => {
+                            cat.scrambles.push("");
+                            updateSingleImage(p, cat.scrambles.length - 1);
+                          })}
+                        >
+                          <PlusIcon size="1.2rem" /> Añadir mezcla
+                        </button>
+                      </div>
+                    {/if}
+                  </div>
+                {/if}
+              {/each}
+            </div>
+          </div>
+
           <!-- Resultados -->
           {#if name != "new"}
             <label class="tab gap-2 text-accent">
               <input type="radio" name="contesttab" />
               <ListOrderedIcon size="1.2rem" /> Resultados
             </label>
-            <div class="tab-content border-base-300 bg-base-100 md:p-10">
+            <div class="tab-content border-base-300 bg-base-100 md:p-4">
               <div class="w-full mb-4">
                 <button class="btn btn-primary" onclick={preventDefault(prepareResult)}>
                   <PlusIcon /> Agregar resultado
@@ -961,6 +1164,10 @@
       <span class="ml-1">Eliminar</span>
     </button>
   </div>
+</Modal>
+
+<Modal bind:show={showPuzzleImageModal}>
+  <PuzzleImage src={selectedPuzzleImage} class="max-h-[80svh]" />
 </Modal>
 
 <style>

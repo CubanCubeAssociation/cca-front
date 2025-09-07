@@ -20,6 +20,9 @@ importers:
       moment:
         specifier: 2.29.4
         version: 2.29.4
+      object-hash:
+        specifier: ^3.0.0
+        version: 3.0.0
       svelte-easy-crop:
         specifier: 3.0.0
         version: 3.0.0(svelte@5.0.0)
@@ -54,6 +57,9 @@ importers:
       '@types/eslint':
         specifier: 9.6.0
         version: 9.6.0
+      '@types/object-hash':
+        specifier: ^3.0.6
+        version: 3.0.6
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.4.21)
@@ -768,6 +774,9 @@ packages:
 
   '@types/node@24.0.1':
     resolution: {integrity: sha512-MX4Zioh39chHlDJbKmEgydJDS3tspMP/lnQC67G3SWsTnb9NeYVWOjkxpOSy4oMfPs4StcWHwBrvUb4ybfnuaw==}
+
+  '@types/object-hash@3.0.6':
+    resolution: {integrity: sha512-fOBV8C1FIu2ELinoILQ+ApxcUKz4ngq+IWUYrxSGjXzzjUALijilampwkMgEtJ+h2njAW3pi853QpzNVCHB73w==}
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
@@ -1488,6 +1497,10 @@ packages:
   npm-run-path@5.3.0:
     resolution: {integrity: sha512-ppwTtiJZq0O/ai0z7yfudtBpWIoxM8yE6nHi1X47eFR2EWORqfbu6CnPlNsjeN683eT0qG6H/Pyf9fCcvjnnnQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  object-hash@3.0.0:
+    resolution: {integrity: sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==}
+    engines: {node: '>= 6'}
 
   onetime@6.0.0:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
@@ -2480,6 +2493,8 @@ snapshots:
     dependencies:
       undici-types: 7.8.0
 
+  '@types/object-hash@3.0.6': {}
+
   '@types/resolve@1.20.2': {}
 
   '@typescript-eslint/eslint-plugin@8.0.0(@typescript-eslint/parser@8.0.0(eslint@9.7.0)(typescript@5.2.2))(eslint@9.7.0)(typescript@5.2.2)':
@@ -3233,6 +3248,8 @@ snapshots:
   npm-run-path@5.3.0:
     dependencies:
       path-key: 4.0.0
+
+  object-hash@3.0.0: {}
 
   onetime@6.0.0:
     dependencies:

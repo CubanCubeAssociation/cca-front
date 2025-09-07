@@ -4,6 +4,7 @@ import {
   type CONTEST,
   type FORMAT,
   type ROUND,
+  type Scrambler,
   type SOLVE,
   type USER,
 } from "@interfaces";
@@ -159,12 +160,12 @@ export function preventDefault(cb: (ev: Event) => any) {
   };
 }
 
-export function createEmptyCategory(): CATEGORY {
+export function createEmptyCategory(scr?: Scrambler): CATEGORY {
   return {
     formats: [],
     id: "",
     name: "",
-    scrambler: "333",
+    scrambler: scr || "333",
   };
 }
 
@@ -185,6 +186,7 @@ export function createEmptyUser(): USER {
     age: 0,
     elo: 0,
     sor: Infinity,
+    permissions: [],
   };
 }
 

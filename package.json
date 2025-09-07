@@ -25,6 +25,7 @@
     "@sveltejs/vite-plugin-svelte": "5.0.3",
     "@tailwindcss/vite": "4.1.4",
     "@types/eslint": "9.6.0",
+    "@types/object-hash": "^3.0.6",
     "autoprefixer": "10.4.20",
     "daisyui": "5.0.20",
     "eruda": "^3.4.3",
@@ -51,6 +52,7 @@
     "ky": "0.33.3",
     "lucide-svelte": "0.537.0",
     "moment": "2.29.4",
+    "object-hash": "^3.0.0",
     "svelte-easy-crop": "3.0.0",
     "tailwind-merge": "2.2.0"
   }
