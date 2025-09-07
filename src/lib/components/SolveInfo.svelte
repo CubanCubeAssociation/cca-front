@@ -75,15 +75,16 @@
 </script>
 
 <div class="overflow-x-auto w-full rounded-lg border border-base-content/10">
-  <h3 class="flex gap-2 justify-center text-lg">
-    <UserField user={round.contestant} />
+  <h3 class="[display:inherit] text-center text-lg">
+    <UserField user={round.contestant} class="!contents" />
     <Solve
       time={solve.timeMillis}
       tag=""
       suffix
-      class={solve.isAverage ? "text-purple-500" : "text-green-500"}
+      class={"contents " + (solve.isAverage ? "text-purple-500" : "text-green-500")}
     />
     {#if solve.tag}
+      <br />
       <span class="text-info contents">({getTagDescription(solve.tag)})</span>
     {/if}
   </h3>
@@ -171,7 +172,7 @@
     </button>
   {/if}
 
-  {#if navigator.clipboard}
+  {#if allowEdit}
     <button class="btn btn-primary" onclick={preventDefault(saveReconstruction)}>
       <SaveIcon size="1.2rem" />
       Guardar
