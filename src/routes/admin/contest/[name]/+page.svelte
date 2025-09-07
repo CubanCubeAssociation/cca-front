@@ -872,109 +872,107 @@
           <div class="tab-content border-base-300 bg-base-100 md:p-4">
             <div class="tabs tabs-border">
               {#each contest.categories as cat, p}
-                {#if cat.scrambles.length > 0}
-                  <label class="tab text-secondary">
-                    <input type="radio" name="contestScrambles" checked={p === 0} />
-                    <WcaCategory icon={cat.category.scrambler} size="1.2rem" />
-                    {cat.category.name}
-                  </label>
-                  <div class="tab-content border-base-300 bg-base-100 overflow-x-auto">
-                    <table class="table table-zebra">
-                      <tbody>
-                        {#each cat.scrambles as s, p1}
-                          {#if p1 % cat.amount === 0}
-                            <tr>
-                              <td colspan="4" class="text-center text-lg">
-                                Ronda {p1 / cat.amount + 1}
-                              </td>
-                            </tr>
-                          {/if}
-
-                          <tr data-scr={s}>
-                            <td>{(p1 % cat.amount) + 1}</td>
-                            <td class="text-center">
-                              <textarea
-                                bind:value={cat.scrambles[p1]}
-                                oninput={() => updateSingleImage(p, p1)}
-                                rows={2}
-                                class="textarea resize-y w-full"
-                                placeholder={"Mezcla " + (p1 + 1)}
-                              ></textarea>
+                <label class="tab text-secondary">
+                  <input type="radio" name="contestScrambles" checked={p === 0} />
+                  <WcaCategory icon={cat.category.scrambler} size="1.2rem" />
+                  {cat.category.name}
+                </label>
+                <div class="tab-content border-base-300 bg-base-100 overflow-x-auto">
+                  <table class="table table-zebra">
+                    <tbody>
+                      {#each cat.scrambles as s, p1}
+                        {#if p1 % cat.amount === 0}
+                          <tr>
+                            <td colspan="4" class="text-center text-lg">
+                              Ronda {p1 / cat.amount + 1}
                             </td>
-                            <td class="w-1/3 max-sm:hidden">
-                              <PuzzleImage
-                                src={images[p][p1]}
-                                class="max-h-40"
-                                onclick={() => {
-                                  selectedPuzzleImage = images[p][p1];
-                                  showPuzzleImageModal = true;
-                                }}
-                              />
-                            </td>
-                            <td>
-                              {#if p1 > 0}
-                                <button
-                                  class="btn btn-accent btn-soft p-2"
-                                  onclick={preventDefault(() => {
-                                    swap(cat.scrambles, p1, p1 - 1);
-                                    swap(images[p], p1, p1 - 1);
-                                  })}
-                                >
-                                  <ChevronUpIcon size="1.2rem" />
-                                </button>
-                              {/if}
+                          </tr>
+                        {/if}
 
-                              {#if p1 < cat.scrambles.length - 1}
-                                <button
-                                  class="btn btn-accent btn-soft p-2"
-                                  onclick={preventDefault(() => {
-                                    swap(cat.scrambles, p1, p1 + 1);
-                                    swap(images[p], p1, p1 + 1);
-                                  })}
-                                >
-                                  <ChevronDownIcon size="1.2rem" />
-                                </button>
-                              {/if}
-
+                        <tr data-scr={s}>
+                          <td>{(p1 % cat.amount) + 1}</td>
+                          <td class="text-center">
+                            <textarea
+                              bind:value={cat.scrambles[p1]}
+                              oninput={() => updateSingleImage(p, p1)}
+                              rows={2}
+                              class="textarea resize-y w-full"
+                              placeholder={"Mezcla " + (p1 + 1)}
+                            ></textarea>
+                          </td>
+                          <td class="w-1/3 max-sm:hidden">
+                            <PuzzleImage
+                              src={images[p][p1]}
+                              class="max-h-40"
+                              onclick={() => {
+                                selectedPuzzleImage = images[p][p1];
+                                showPuzzleImageModal = true;
+                              }}
+                            />
+                          </td>
+                          <td>
+                            {#if p1 > 0}
                               <button
-                                class="btn btn-error btn-soft p-2"
-                                onclick={preventDefault(() => removeScramble(p, p1))}
+                                class="btn btn-accent btn-soft p-2"
+                                onclick={preventDefault(() => {
+                                  swap(cat.scrambles, p1, p1 - 1);
+                                  swap(images[p], p1, p1 - 1);
+                                })}
                               >
-                                <TrashIcon size="1.2rem" />
+                                <ChevronUpIcon size="1.2rem" />
                               </button>
-                            </td>
-                          </tr>
-                          <tr class="sm:hidden">
-                            <td colspan="4">
-                              <PuzzleImage
-                                src={images[p][p1]}
-                                class="max-h-40"
-                                onclick={() => {
-                                  selectedPuzzleImage = images[p][p1];
-                                  showPuzzleImageModal = true;
-                                }}
-                              />
-                            </td>
-                          </tr>
-                        {/each}
-                      </tbody>
-                    </table>
+                            {/if}
 
-                    {#if cat.scrambles.length < cat.amount * cat.rounds}
-                      <div class="flex items-center justify-center mt-4">
-                        <button
-                          class="btn btn-primary btn-soft"
-                          onclick={preventDefault(() => {
-                            cat.scrambles.push("");
-                            updateSingleImage(p, cat.scrambles.length - 1);
-                          })}
-                        >
-                          <PlusIcon size="1.2rem" /> Añadir mezcla
-                        </button>
-                      </div>
-                    {/if}
-                  </div>
-                {/if}
+                            {#if p1 < cat.scrambles.length - 1}
+                              <button
+                                class="btn btn-accent btn-soft p-2"
+                                onclick={preventDefault(() => {
+                                  swap(cat.scrambles, p1, p1 + 1);
+                                  swap(images[p], p1, p1 + 1);
+                                })}
+                              >
+                                <ChevronDownIcon size="1.2rem" />
+                              </button>
+                            {/if}
+
+                            <button
+                              class="btn btn-error btn-soft p-2"
+                              onclick={preventDefault(() => removeScramble(p, p1))}
+                            >
+                              <TrashIcon size="1.2rem" />
+                            </button>
+                          </td>
+                        </tr>
+                        <tr class="sm:hidden">
+                          <td colspan="4">
+                            <PuzzleImage
+                              src={images[p][p1]}
+                              class="max-h-40"
+                              onclick={() => {
+                                selectedPuzzleImage = images[p][p1];
+                                showPuzzleImageModal = true;
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      {/each}
+                    </tbody>
+                  </table>
+
+                  {#if cat.scrambles.length < cat.amount * cat.rounds}
+                    <div class="flex items-center justify-center mt-4">
+                      <button
+                        class="btn btn-primary btn-soft"
+                        onclick={preventDefault(() => {
+                          cat.scrambles.push("");
+                          updateSingleImage(p, cat.scrambles.length - 1);
+                        })}
+                      >
+                        <PlusIcon size="1.2rem" /> Añadir mezcla
+                      </button>
+                    </div>
+                  {/if}
+                </div>
               {/each}
             </div>
           </div>
