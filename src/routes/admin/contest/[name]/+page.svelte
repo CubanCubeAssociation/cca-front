@@ -15,6 +15,7 @@
 
   import {
     createContest,
+    generateScrambles,
     getCategories,
     getContest,
     getFormats,
@@ -104,6 +105,7 @@
   let images: string[][] = $state([]);
   let showPuzzleImageModal = $state(false);
   let selectedPuzzleImage = $state("");
+  let generatingScrambles = $state(false);
 
   function exit() {
     goto(SITEMAP.admin.contest);
@@ -455,6 +457,26 @@
     }
   }
 
+  function genScrambles() {
+    generatingScrambles = true;
+
+    generateScrambles(contest.id)
+      .then(cnt => {
+        contest = cnt;
+        notification.addNotification({
+          header: "Hecho",
+          text: "Se generaron las mezclas de la competencia.",
+        });
+      })
+      .catch(() => {
+        notification.addNotification({
+          header: "Error",
+          text: "Hubo un error al generar las mezclas de la competencia.",
+        });
+      })
+      .finally(() => (generatingScrambles = false));
+  }
+
   onMount(() => {
     name = page.params.name.replaceAll("-", " ");
     getContestData();
@@ -481,7 +503,11 @@
             <EllipsisVerticalIcon size="1.2rem" />
           </div>
           <ul class="dropdown-content menu bg-base-200 rounded-box z-1 w-52 p-2 shadow-sm">
-            <li><button><ScrollTextIcon size="1.2rem" /> Generar mezclas</button></li>
+            <li>
+              <button onclick={genScrambles} disabled={generatingScrambles}>
+                <ScrollTextIcon size="1.2rem" /> Generar mezclas
+              </button>
+            </li>
           </ul>
         </div>
       {/if}
