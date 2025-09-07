@@ -89,8 +89,6 @@ export function fromModel(obj: any, model: MODEL) {
 
     const md = RMODEL.find(md => isModel(md, k));
 
-    // if (k === "format") console.log(k, v, md);
-
     if (md) {
       const p = md.startsWith("$") ? md.slice(1) : md.split(":");
 

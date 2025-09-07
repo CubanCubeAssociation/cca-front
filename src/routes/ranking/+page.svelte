@@ -90,7 +90,6 @@
           return;
         }
         rankingResults = c;
-        if (debug) console.log("RESULTS: ", rankingResults);
         let urlPage = parseInt(page.url.searchParams.get("page") || "1") || 1;
         pg.setData(rankingResults);
         pg.setPage(urlPage);

@@ -97,7 +97,6 @@
         const canvas = document.createElement("canvas");
         const W = toInt(img.width * f, 0);
         const H = toInt(img.height * f, 0);
-        console.log("W_H: ", img.width, img.height, W, H);
 
         canvas.width = W;
         canvas.height = H;

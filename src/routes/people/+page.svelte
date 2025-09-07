@@ -63,8 +63,7 @@
         users = res.results;
         error = false;
       })
-      .catch(err => {
-        console.log("ERROR: ", err);
+      .catch(() => {
         error = true;
       })
       .finally(() => {

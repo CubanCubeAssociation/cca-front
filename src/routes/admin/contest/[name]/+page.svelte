@@ -43,6 +43,7 @@
 
   import {
     BeanIcon,
+    BrushIcon,
     CalendarIcon,
     ChevronDownIcon,
     ChevronUpIcon,
@@ -106,6 +107,7 @@
   let showPuzzleImageModal = $state(false);
   let selectedPuzzleImage = $state("");
   let generatingScrambles = $state(false);
+  let autoFormat = $state(false);
 
   function exit() {
     goto(SITEMAP.admin.contest);
@@ -124,8 +126,7 @@
             timeout: 2000,
           });
         })
-        .catch(err => {
-          if (debug) console.log("ERROR: ", err);
+        .catch(() => {
           notification.addNotification({
             key: randomUUID(),
             header: "Error",
@@ -160,8 +161,6 @@
           scrambles: [],
         },
       ];
-
-      console.log(formats, formats.find(fm => fm.name === ct.formats[0]) || formats[0]);
     }
   }
 
@@ -245,7 +244,6 @@
     round = rnd;
     let cat = contest.categories.find(ct => ct.category.id === rnd.category.id);
     if (!cat) {
-      console.log("CAT = false");
       return;
     }
     format = formats.find(f => f.name === cat.format) || formats[0];
@@ -399,7 +397,6 @@
             if (!cnt) return;
             contest = cnt;
             generateImages();
-            if (debug) console.log("CONTEST: ", cnt);
             contest.date = moment.utc(contest.date).format("YYYY-MM-DDThh:mm");
             contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
             contest.inscriptionEnd = moment(contest.inscriptionEnd).format("YYYY-MM-DD");
@@ -506,6 +503,12 @@
             <li>
               <button onclick={genScrambles} disabled={generatingScrambles}>
                 <ScrollTextIcon size="1.2rem" /> Generar mezclas
+              </button>
+            </li>
+            <li>
+              <button onclick={() => (autoFormat = !autoFormat)}>
+                <BrushIcon size="1.2rem" />
+                {autoFormat ? "Desactivar" : "Activar"} formato automático
               </button>
             </li>
           </ul>
@@ -894,7 +897,16 @@
                           <td class="text-center">
                             <textarea
                               bind:value={cat.scrambles[p1]}
-                              oninput={() => updateSingleImage(p, p1)}
+                              oninput={() => {
+                                if (autoFormat) {
+                                  cat.scrambles[p1] = cat.scrambles[p1]
+                                    .split("\n")
+                                    .map(e => e.replace(/\s+/g, ""))
+                                    .join(" ");
+                                }
+
+                                updateSingleImage(p, p1);
+                              }}
                               rows={2}
                               class="textarea resize-y w-full"
                               placeholder={"Mezcla " + (p1 + 1)}

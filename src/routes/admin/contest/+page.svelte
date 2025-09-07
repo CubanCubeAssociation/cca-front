@@ -18,7 +18,6 @@
 
   const notification = NotificationService.getInstance();
   const ADD = "Añadir competencia";
-  const debug = false;
 
   let contests: CONTEST[] = $state([]);
   let pg = $state(new Paginator([], 10));
@@ -54,8 +53,7 @@
 
   function updateResult() {
     updateResults()
-      .then(res => {
-        if (debug) console.log("RESULT: ", res);
+      .then(() => {
         notification.addNotification({
           header: "Hecho",
           text: "Datos actualizados correctamente.",

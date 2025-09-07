@@ -110,7 +110,6 @@
       elem.scrollIntoView({ behavior: "smooth", block: "center" });
 
       setTimeout(() => {
-        console.log("ELEM: ", elem);
         elem.classList.add("highlighted");
         setTimeout(() => elem.classList.remove("highlighted"), 2000);
       }, 700);

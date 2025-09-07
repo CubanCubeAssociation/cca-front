@@ -33,7 +33,6 @@
 
     getContests(pg.page)
       .then(c => {
-        console.log("RES: ", c);
         if (!c) {
           error = true;
           return;

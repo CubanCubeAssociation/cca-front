@@ -167,8 +167,6 @@ export function getCircle(p1: Vector3D, p2: Vector3D, p3: Vector3D, PPC: number)
   );
   const pts: Vector3D[] = [];
 
-  console.log("ANG: ", ang);
-
   for (let j = 0; j <= PPC; j += 1) {
     const a = j / PPC;
     pts.push(p1.rotate(center, u, a * ang));

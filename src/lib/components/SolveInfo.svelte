@@ -5,7 +5,7 @@
   import WcaCategory from "./wca/WCACategory.svelte";
   import moment from "moment";
   import Reconstructor from "./Reconstructor.svelte";
-  import { CheckIcon, CopyIcon, SaveIcon, ShareIcon } from "lucide-svelte";
+  import { CheckIcon, CopyIcon, ExternalLink, SaveIcon, ShareIcon } from "lucide-svelte";
   import { contestNameToLink } from "@helpers/routing";
   import { DOMAIN } from "@helpers/API";
   import Solve from "./Solve.svelte";
@@ -136,7 +136,7 @@
               <textarea
                 bind:value={reconstruction}
                 rows={4}
-                class="textarea resize-y"
+                class="textarea resize-y w-full"
                 placeholder="Reconstrucción"
               ></textarea>
             {:else}
@@ -171,6 +171,25 @@
       {/if}
     </button>
   {/if}
+
+  <button
+    class="btn btn-secondary btn-soft"
+    onclick={preventDefault(() => {
+      let opts = options.get(round.category.scrambler) || { type: "rubik", order: 3 };
+      let opt = Array.isArray(opts) ? opts[0] : opts;
+
+      open(
+        `https://cubicdb.netlify.app/reconstructions?puzzle=${opt.type}&order=${
+          opt.order || -1
+        }&scramble=${encodeURI((scramble || "").replace(/ /g, "_"))}&reconstruction=${encodeURI(
+          solve.reconstruction.replace(/ /g, "_")
+        )}`,
+        "_blank"
+      );
+    })}
+  >
+    <ExternalLink size="1.2rem" /> Ver en CubicDB
+  </button>
 
   {#if allowEdit}
     <button class="btn btn-primary" onclick={preventDefault(saveReconstruction)}>

@@ -210,8 +210,6 @@ export async function getOwnUser() {
     .catch(err => {
       if (err.name !== "TimeoutError") {
         clearSessionStores();
-      } else {
-        console.dir(err);
       }
       return null;
     });
