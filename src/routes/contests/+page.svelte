@@ -33,6 +33,7 @@
 
     getContests(pg.page)
       .then(c => {
+        console.log("RES: ", c);
         if (!c) {
           error = true;
           return;
@@ -42,7 +43,10 @@
         pg = pg;
         goto(page.url.pathname + `/?page=${pg.page}`, { replaceState: true });
       })
-      .catch(() => (error = true))
+      .catch(err => {
+        console.dir(err);
+        error = true;
+      })
       .finally(() => (loading = false));
   }
 

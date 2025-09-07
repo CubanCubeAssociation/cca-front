@@ -130,8 +130,8 @@
 
       {#if solve.reconstruction || allowEdit}
         <tr>
-          <td>Reconstrucción</td>
-          <td>
+          <td colspan="2">
+            <span class="flex w-full justify-center">Reconstrucción</span>
             {#if allowEdit}
               <textarea
                 bind:value={reconstruction}

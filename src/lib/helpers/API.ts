@@ -23,6 +23,7 @@ export const DOMAIN = "https://cca-cuba.netlify.app";
 
 const API_URL = "https://cca-back.onrender.com/v1";
 // const API_URL = "http://localhost:3500/v1";
+// const API_URL = "http://172.20.10.5:3500/v1";
 const API = ky.create({
   prefixUrl: API_URL,
   credentials: "include",

@@ -249,13 +249,7 @@
 
   {#snippet content()}
     <div class="tabs tabs-border w-full">
-      <input
-        type="radio"
-        name="contestTab"
-        checked
-        class="tab text-primary"
-        aria-label="Información"
-      />
+      <input type="radio" name="contestTab" class="tab text-primary" aria-label="Información" />
       <div class="tab-content border-base-300 bg-base-100">
         <ul class="grid gap-2 info-list px-2 pt-2">
           <!-- Lugar -->
@@ -445,7 +439,13 @@
       </div>
 
       {#if (contest.status === "finished" || canSeeScrambles) && contest.categories.reduce((acc, e) => acc + e.scrambles.length, 0) > 0}
-        <input type="radio" name="contestTab" class="tab text-primary" aria-label="Mezclas" />
+        <input
+          type="radio"
+          name="contestTab"
+          class="tab text-primary"
+          checked
+          aria-label="Mezclas"
+        />
         <div class="tab-content border-base-300 bg-base-100 pt-4">
           <div class="tabs tabs-border">
             {#each contest.categories as cat, p}

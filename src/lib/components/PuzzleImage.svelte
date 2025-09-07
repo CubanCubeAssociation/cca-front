@@ -268,10 +268,9 @@
 
   :global(.puzzle-img > img, .puzzle-img > svg) {
     object-fit: contain;
-    height: auto;
-    margin: auto;
     max-height: inherit;
     max-width: 100%;
+    width: 100%;
   }
 
   :global(.puzzle-img.interactive path:not([data-position])) {

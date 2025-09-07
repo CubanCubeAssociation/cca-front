@@ -2,7 +2,18 @@ import { ROLES } from "@constants";
 import type { ROLE, TPermission, USER } from "@interfaces";
 
 export async function tokenNeedsRefresh() {
-  return !!cookieStore.get("accessToken");
+  const accessToken = localStorage.getItem("accessToken");
+  const accessTokenExpiry = localStorage.getItem("accessTokenExpiry");
+
+  if (!accessToken || !accessTokenExpiry) return true;
+
+  if (new Date(accessTokenExpiry).getTime() > Date.now()) {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("accessTokenExpiry");
+    return true;
+  }
+
+  return false;
 }
 
 export function isRole(user: USER | null, role: ROLE) {
