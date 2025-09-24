@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import moment from "moment";
   import {
     PERMISSIONS,
     STATUS_ORDER,
     type CONTEST,
+    type CONTEST_CATEGORY,
     type CONTEST_STATUS,
     type FORMAT,
     type ROUND,
@@ -50,10 +51,13 @@
   import { options } from "@constants";
   import { pGenerateCubeBundle } from "@helpers/cube-draw";
   import PuzzleImage from "@components/PuzzleImage.svelte";
+  import IMAGE_WORKER_URL from "./imageWorker?url";
 
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 text-green-200!";
   const notification = NotificationService.getInstance();
+
+  const worker = new Worker(IMAGE_WORKER_URL, { type: "module" });
 
   let contest: CONTEST = $state(createEmptyContest());
   let roundGroup: ROUND[][][] = $state([]);
@@ -103,28 +107,11 @@
   }
 
   function generateImages() {
-    let cats = contest.categories;
-    let puzzles: Puzzle[] = [];
+    worker.postMessage($state.snapshot(contest.categories));
+  }
 
-    for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
-      let op = options.get(cats[i].category.scrambler || "333") || { type: "rubik" };
-      if (!Array.isArray(op)) {
-        op.rounded = true;
-        puzzles.push(...cats[i].scrambles.map(scr => Puzzle.fromSequence(scr, op)));
-      }
-    }
-
-    pGenerateCubeBundle(puzzles).then(imgs => {
-      images.length = 0;
-
-      for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
-        let scrs = cats[i].scrambles.length;
-        images.push([]);
-        for (let j = 0, maxj = scrs; j < maxj; j += 1) {
-          images[i].push(imgs.shift() || "");
-        }
-      }
-    });
+  function updateImages(ev: any) {
+    images = ev.data;
   }
 
   function updateData() {
@@ -137,6 +124,7 @@
       .then(res => {
         formats = res[0];
         contest = res[1];
+        images = contest.categories.map(ct => ct.scrambles.map(() => ""));
         contest.date = moment.utc(contest.date).format("YYYY-MM-DDThh:mm");
         contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
         contest.inscriptionEnd = moment(contest.inscriptionEnd).format("YYYY-MM-DD");
@@ -230,6 +218,7 @@
   }
 
   onMount(() => {
+    worker.onmessage = updateImages;
     updateData();
   });
 </script>
@@ -472,7 +461,7 @@
                           <td class="text-center">{s}</td>
                           <td class="w-1/3 max-sm:hidden">
                             <PuzzleImage
-                              src={images[p][p1]}
+                              src={(images[p] || [])[p1] || ""}
                               class="max-h-40"
                               onclick={() => {
                                 selectedPuzzleImage = images[p][p1];
@@ -484,7 +473,7 @@
                         <tr class="sm:hidden">
                           <td colspan="3">
                             <PuzzleImage
-                              src={images[p][p1]}
+                              src={(images[p] || [])[p1] || ""}
                               class="max-h-40"
                               onclick={() => {
                                 selectedPuzzleImage = images[p][p1];

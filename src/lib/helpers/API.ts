@@ -110,6 +110,8 @@ export function redirectToLogin() {
 }
 
 export function redirectOnUnauthorized(err: { response: Response }) {
+  if (!err || !err.response) return;
+
   const status = err.response.status;
 
   switch (status) {

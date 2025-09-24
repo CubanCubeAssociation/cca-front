@@ -76,6 +76,8 @@
   import { Puzzle } from "@classes/puzzle/puzzle";
   import { options } from "@constants";
   import { pGenerateCubeBundle } from "@helpers/cube-draw";
+  import { setSeed } from "$lib/cstimer/lib/mathlib";
+  import { getScramble } from "$lib/cstimer/scramble";
 
   let name = $state("");
   const notification = NotificationService.getInstance();
@@ -396,6 +398,7 @@
           return getContest(name).then(cnt => {
             if (!cnt) return;
             contest = cnt;
+            images = contest.categories.map(ct => ct.scrambles.map(() => ""));
             generateImages();
             contest.date = moment.utc(contest.date).format("YYYY-MM-DDThh:mm");
             contest.inscriptionStart = moment(contest.inscriptionStart).format("YYYY-MM-DD");
@@ -454,24 +457,25 @@
     }
   }
 
-  function genScrambles() {
-    generatingScrambles = true;
+  async function genScrambles() {
+    setSeed(contest.gen, contest.seed);
+    const cats = contest.categories;
 
-    generateScrambles(contest.id)
-      .then(cnt => {
-        contest = cnt;
-        notification.addNotification({
-          header: "Hecho",
-          text: "Se generaron las mezclas de la competencia.",
-        });
-      })
-      .catch(() => {
-        notification.addNotification({
-          header: "Error",
-          text: "Hubo un error al generar las mezclas de la competencia.",
-        });
-      })
-      .finally(() => (generatingScrambles = false));
+    for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
+      const cct = cats[i];
+      const ct = cct.category;
+
+      cct.scrambles.length = 0;
+
+      for (let j = 0, maxj = cct.amount * cct.rounds; j < maxj; j += 1) {
+        cct.scrambles.push(getScramble(ct.scrambler, ct.length || 0, -1));
+      }
+    }
+
+    notification.addNotification({
+      header: "Mezclas generadas",
+      text: "Se han generado las mezclas correctamente",
+    });
   }
 
   onMount(() => {
