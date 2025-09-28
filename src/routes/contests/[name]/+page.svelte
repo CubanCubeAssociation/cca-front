@@ -47,13 +47,13 @@
   import { twMerge } from "tailwind-merge";
   import { NotificationService } from "@stores/notification.service";
   import PuzzleImage from "@components/PuzzleImage.svelte";
-  import IMAGE_WORKER_URL from "./imageWorker?url";
+  import { Puzzle } from "@classes/puzzle/puzzle";
+  import { options } from "@constants";
+  import { pGenerateCubeBundle } from "@helpers/cube-draw";
 
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 text-green-200!";
   const notification = NotificationService.getInstance();
-
-  const worker = new Worker(IMAGE_WORKER_URL, { type: "module" });
 
   let contest: CONTEST = $state(createEmptyContest());
   let roundGroup: ROUND[][][] = $state([]);
@@ -103,11 +103,28 @@
   }
 
   function generateImages() {
-    worker.postMessage($state.snapshot(contest.categories));
-  }
+    let cats = contest.categories;
+    const puzzles: Puzzle[] = [];
 
-  function updateImages(ev: any) {
-    images = ev.data;
+    for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
+      const op = options.get(cats[i].category.scrambler || "333") || { type: "rubik" };
+      if (!Array.isArray(op)) {
+        op.rounded = true;
+        puzzles.push(...cats[i].scrambles.map((scr: any) => Puzzle.fromSequence(scr, op)));
+      }
+    }
+
+    images.length = 0;
+
+    const imgs = pGenerateCubeBundle(puzzles);
+
+    for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
+      const scrs = cats[i].scrambles.length;
+      images.push([]);
+      for (let j = 0, maxj = scrs; j < maxj; j += 1) {
+        images[i].push(imgs.shift() || "");
+      }
+    }
   }
 
   function updateData() {
@@ -214,7 +231,6 @@
   }
 
   onMount(() => {
-    worker.onmessage = updateImages;
     updateData();
   });
 </script>
