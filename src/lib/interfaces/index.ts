@@ -1,4 +1,3 @@
-import type { BezierSticker } from "@classes/puzzle/BezierSticker";
 import type { Piece } from "@classes/puzzle/Piece";
 import type { Sticker } from "@classes/puzzle/Sticker";
 import type { Vector3D } from "@classes/vector3d";

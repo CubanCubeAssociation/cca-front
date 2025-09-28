@@ -32,7 +32,7 @@ export function RUBIK(n: number): PuzzleInterface {
   };
 
   Object.entries(faces).forEach(([e]) => {
-    let fn = e as FaceName;
+    const fn = e as FaceName;
     faces[e as FaceName] = Array.from({ length: n })
       .fill("")
       .map(() => Array.from({ length: n }).fill(fn as FaceName) as FaceName[]);
@@ -206,17 +206,17 @@ export function RUBIK(n: number): PuzzleInterface {
   }
 
   function doMove(f: typeof faces, move: ParsedMove) {
-    let [layers, base, dir, span] = move;
+    const [layers, base, dir, span] = move;
 
-    span = span || layers;
+    let sp = span || layers;
 
-    if (span === layers) {
+    if (sp === layers) {
       f[base] = rotateFace(f[base], dir);
     }
 
-    if (span === n) {
-      let e = Object.entries(faces);
-      let opBase = e[
+    if (sp === n) {
+      const e = Object.entries(faces);
+      const opBase = e[
         (e.reduce((acc, e, p) => (e[0] === base ? p : acc), -1) + 3) % 6
       ][0] as FaceName;
       f[opBase] = rotateFace(f[opBase], -dir);
@@ -226,7 +226,7 @@ export function RUBIK(n: number): PuzzleInterface {
 
     if (!cycle) return;
 
-    for (let k = layers - span; k < layers; k += 1) {
+    for (let k = layers - sp; k < layers; k += 1) {
       const strips = cycle.map(fn => fn(f, k).get());
       const shift = ((dir % cycle.length) + cycle.length) % cycle.length;
       const rotated = strips.map((_, i) => strips[(i - shift + cycle.length) % cycle.length]);
@@ -252,7 +252,7 @@ export function RUBIK(n: number): PuzzleInterface {
     const BOX_OFFSET = (BOX * (1 - BOX_FACTOR)) / 2;
     const RX = 3 / n + 0.4;
 
-    let getRect = (x: number, y: number, bx: number, by: number, fc: FaceName) => {
+    const getRect = (x: number, y: number, bx: number, by: number, fc: FaceName) => {
       return `<rect
   x="${bx * BOX + BOX_OFFSET + x * CW * BOX_FACTOR + OFFSET}"
   y="${by * BOX + BOX_OFFSET + y * CW * BOX_FACTOR + OFFSET}"
@@ -263,7 +263,7 @@ export function RUBIK(n: number): PuzzleInterface {
 />`;
     };
 
-    let allPieces = [
+    const allPieces = [
       ["U", 1, 0],
       ["L", 0, 1],
       ["F", 1, 1],

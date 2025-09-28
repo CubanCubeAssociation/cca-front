@@ -14,9 +14,7 @@
     { icon: "pyrso", name: "Pyraminx" },
   ];
   // console.time("puzzle");
-  // const puzzle = $state(
-  //   Puzzle.fromSequence(`U' R' B L' U B R' L l r b u`, { type: "pyraminx", rounded: true })
-  // );
+  // const puzzle = $state(Puzzle.fromSequence(`UR4- DR4- DL2- UL1- U6+ R3+ D5- L4+ ALL5- y2 U3- R3- D1+ L5+ ALL2- DR DL UL`, { type: "clock", rounded: true }));
   // console.timeEnd("puzzle");
 
   // let img = $state(pGenerateCubeBundle([puzzle])[0]);

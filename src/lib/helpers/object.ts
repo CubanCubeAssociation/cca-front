@@ -1,3 +1,8 @@
+import type { BezierCurve } from "@classes/puzzle/BezierCurve";
+import type { BezierSticker } from "@classes/puzzle/BezierSticker";
+import { roundStickerCorners } from "@classes/puzzle/puzzleUtils";
+import { Sticker } from "@classes/puzzle/Sticker";
+import { Vector3D } from "@classes/vector3d";
 import {
   PENALTY,
   type CATEGORY,
@@ -249,4 +254,41 @@ export function createEmptyFormat(): FORMAT {
 
 export function newArr(length: number): any[] {
   return Array.from({ length });
+}
+
+export function getRoundedPath(path: number[][], rd = 0.2): string {
+  const st = new Sticker(path.map(p => new Vector3D(p[0], p[1], 0)));
+  const pts = (roundStickerCorners(st, rd, 1, 10, true) as BezierSticker).parts;
+  const res: string[] = [];
+
+  for (let j = 0, maxj = pts.length; j < maxj; j += 1) {
+    if (pts[j] instanceof Vector3D) {
+      const pt = pts[j] as Vector3D;
+
+      if (j === 0) {
+        res.push(`M ${pt.x} ${pt.y}`);
+      } else {
+        res.push(`L ${pt.x} ${pt.y}`);
+      }
+    } else {
+      const bz = pts[j] as BezierCurve;
+      const pts1 = bz.anchors;
+
+      if (j === 0) {
+        res.push(`M ${pts1[0].x} ${pts1[0].y}`);
+      } else {
+        res.push(`L ${pts1[0].x} ${pts1[0].y}`);
+      }
+
+      if (pts1.length === 3) {
+        res.push(`Q ${pts1[1].x} ${pts1[1].y} ${pts1[2].x} ${pts1[2].y}`);
+      } else {
+        // ctx.bezierCurveTo(pts1[1].x, pts1[1].y, pts1[2].x, pts1[2].y, pts1[3].x, pts1[3].y);
+      }
+    }
+  }
+
+  res.push("Z");
+
+  return res.join(" ");
 }

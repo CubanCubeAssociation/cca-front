@@ -2766,7 +2766,7 @@ $clinit_CenterCube();
 $clinit_CornerCube();
 $clinit_EdgeCube();
 $clinit_FullCube_0();
-let searcher = new Search_4();
+const searcher = new Search_4();
 
 export function getRandomScramble() {
   return (scramble_333.getRandomScramble() + $randomState(searcher, Math)).replace(/\s+/g, " ");

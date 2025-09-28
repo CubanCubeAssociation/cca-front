@@ -68,16 +68,10 @@ function getRoundedSQ1Sticker(
 interface PROJECTED_VIEW_ARGS {
   cube: Puzzle;
   DIM: number;
-  format?: "raster" | "svg";
   printMode?: boolean;
 }
 
-export function projectedView({
-  cube,
-  DIM,
-  format = "svg",
-  printMode = false,
-}: PROJECTED_VIEW_ARGS): string {
+export function projectedView({ cube, DIM, printMode = false }: PROJECTED_VIEW_ARGS): string {
   let W = (DIM * 4) / 2;
   let H = (DIM * 3) / 2;
   const FACTOR = 2.1;

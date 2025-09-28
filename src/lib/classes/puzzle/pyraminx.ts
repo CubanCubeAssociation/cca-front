@@ -26,82 +26,82 @@ export function PYRAMINX(): PuzzleInterface {
   // URLB
   const cycles = {
     U: (count: number) => {
-      let times = ((count % 3) + 3) % 3;
+      const times = ((count % 3) + 3) % 3;
       for (let i = 0; i < times; i += 1) {
-        let NF = [0, -1, -1, 3, -1, 5, 6, -1, -1].map((v, p) => (v < 0 ? faces.F[p] : faces.R[v]));
-        let NR = [1, -1, -1, 4, -1, 3, 7, -1, -1].map((v, p) => (v < 0 ? faces.R[p] : faces.L[v]));
-        let NL = [-1, 0, -1, 5, 3, -1, -1, 6, -1].map((v, p) => (v < 0 ? faces.L[p] : faces.F[v]));
-        let ND = [...faces.D];
+        const NF = [0, -1, -1, 3, -1, 5, 6, -1, -1].map((v, p) => (v < 0 ? faces.F[p] : faces.R[v]));
+        const NR = [1, -1, -1, 4, -1, 3, 7, -1, -1].map((v, p) => (v < 0 ? faces.R[p] : faces.L[v]));
+        const NL = [-1, 0, -1, 5, 3, -1, -1, 6, -1].map((v, p) => (v < 0 ? faces.L[p] : faces.F[v]));
+        const ND = [...faces.D];
         update(NF, NR, NL, ND);
       }
     },
     R: (count: number) => {
-      let times = ((count % 3) + 3) % 3;
+      const times = ((count % 3) + 3) % 3;
       for (let i = 0; i < times; i += 1) {
-        let NF = [-1, -1, 0, -1, 5, 3, -1, -1, 6].map((v, p) => (v < 0 ? faces.F[p] : faces.D[v]));
-        let NR = [-1, 2, -1, 4, 5, -1, -1, 8, -1].map((v, p) => (v < 0 ? faces.R[p] : faces.F[v]));
-        let NL = [...faces.L];
-        let ND = [1, -1, -1, 4, -1, 3, 7, -1, -1].map((v, p) => (v < 0 ? faces.D[p] : faces.R[v]));
+        const NF = [-1, -1, 0, -1, 5, 3, -1, -1, 6].map((v, p) => (v < 0 ? faces.F[p] : faces.D[v]));
+        const NR = [-1, 2, -1, 4, 5, -1, -1, 8, -1].map((v, p) => (v < 0 ? faces.R[p] : faces.F[v]));
+        const NL = [...faces.L];
+        const ND = [1, -1, -1, 4, -1, 3, 7, -1, -1].map((v, p) => (v < 0 ? faces.D[p] : faces.R[v]));
         update(NF, NR, NL, ND);
       }
     },
     L: (count: number) => {
-      let times = ((count % 3) + 3) % 3;
+      const times = ((count % 3) + 3) % 3;
       for (let i = 0; i < times; i += 1) {
-        let NF = [-1, 0, -1, 5, 3, -1, -1, 6, -1].map((v, p) => (v < 0 ? faces.F[p] : faces.L[v]));
-        let NR = [...faces.R];
-        let NL = [1, -1, -1, 4, -1, 3, 7, -1, -1].map((v, p) => (v < 0 ? faces.L[p] : faces.D[v]));
-        let ND = [-1, 1, -1, 3, 4, -1, -1, 7, -1].map((v, p) => (v < 0 ? faces.D[p] : faces.F[v]));
+        const NF = [-1, 0, -1, 5, 3, -1, -1, 6, -1].map((v, p) => (v < 0 ? faces.F[p] : faces.L[v]));
+        const NR = [...faces.R];
+        const NL = [1, -1, -1, 4, -1, 3, 7, -1, -1].map((v, p) => (v < 0 ? faces.L[p] : faces.D[v]));
+        const ND = [-1, 1, -1, 3, 4, -1, -1, 7, -1].map((v, p) => (v < 0 ? faces.D[p] : faces.F[v]));
         update(NF, NR, NL, ND);
       }
     },
     B: (count: number) => {
-      let times = ((count % 3) + 3) % 3;
+      const times = ((count % 3) + 3) % 3;
       for (let i = 0; i < times; i += 1) {
-        let NF = [...faces.F];
-        let NR = [-1, -1, 2, -1, 4, 5, -1, -1, 8].map((v, p) => (v < 0 ? faces.R[p] : faces.D[v]));
-        let NL = [-1, -1, 2, -1, 4, 5, -1, -1, 8].map((v, p) => (v < 0 ? faces.L[p] : faces.R[v]));
-        let ND = [-1, -1, 2, -1, 4, 5, -1, -1, 8].map((v, p) => (v < 0 ? faces.D[p] : faces.L[v]));
+        const NF = [...faces.F];
+        const NR = [-1, -1, 2, -1, 4, 5, -1, -1, 8].map((v, p) => (v < 0 ? faces.R[p] : faces.D[v]));
+        const NL = [-1, -1, 2, -1, 4, 5, -1, -1, 8].map((v, p) => (v < 0 ? faces.L[p] : faces.R[v]));
+        const ND = [-1, -1, 2, -1, 4, 5, -1, -1, 8].map((v, p) => (v < 0 ? faces.D[p] : faces.L[v]));
         update(NF, NR, NL, ND);
       }
     },
     u: (count: number) => {
-      let times = ((count % 3) + 3) % 3;
+      const times = ((count % 3) + 3) % 3;
       for (let i = 0; i < times; i += 1) {
-        let NF = faces.F.map((v, p) => (p === 0 ? faces.R[0] : v));
-        let NR = faces.R.map((v, p) => (p === 0 ? faces.L[1] : v));
-        let NL = faces.L.map((v, p) => (p === 1 ? faces.F[0] : v));
-        let ND = [...faces.D];
+        const NF = faces.F.map((v, p) => (p === 0 ? faces.R[0] : v));
+        const NR = faces.R.map((v, p) => (p === 0 ? faces.L[1] : v));
+        const NL = faces.L.map((v, p) => (p === 1 ? faces.F[0] : v));
+        const ND = [...faces.D];
         update(NF, NR, NL, ND);
       }
     },
     r: (count: number) => {
-      let times = ((count % 3) + 3) % 3;
+      const times = ((count % 3) + 3) % 3;
       for (let i = 0; i < times; i += 1) {
-        let NF = faces.F.map((v, p) => (p === 2 ? faces.D[0] : v));
-        let NR = faces.R.map((v, p) => (p === 1 ? faces.F[2] : v));
-        let NL = [...faces.L];
-        let ND = faces.D.map((v, p) => (p === 0 ? faces.R[1] : v));
+        const NF = faces.F.map((v, p) => (p === 2 ? faces.D[0] : v));
+        const NR = faces.R.map((v, p) => (p === 1 ? faces.F[2] : v));
+        const NL = [...faces.L];
+        const ND = faces.D.map((v, p) => (p === 0 ? faces.R[1] : v));
         update(NF, NR, NL, ND);
       }
     },
     l: (count: number) => {
-      let times = ((count % 3) + 3) % 3;
+      const times = ((count % 3) + 3) % 3;
       for (let i = 0; i < times; i += 1) {
-        let NF = faces.F.map((v, p) => (p === 1 ? faces.L[0] : v));
-        let NR = [...faces.R];
-        let NL = faces.L.map((v, p) => (p === 0 ? faces.D[1] : v));
-        let ND = faces.D.map((v, p) => (p === 1 ? faces.F[1] : v));
+        const NF = faces.F.map((v, p) => (p === 1 ? faces.L[0] : v));
+        const NR = [...faces.R];
+        const NL = faces.L.map((v, p) => (p === 0 ? faces.D[1] : v));
+        const ND = faces.D.map((v, p) => (p === 1 ? faces.F[1] : v));
         update(NF, NR, NL, ND);
       }
     },
     b: (count: number) => {
-      let times = ((count % 3) + 3) % 3;
+      const times = ((count % 3) + 3) % 3;
       for (let i = 0; i < times; i += 1) {
-        let NF = [...faces.F];
-        let NR = faces.R.map((v, p) => (p === 2 ? faces.D[2] : v));
-        let NL = faces.L.map((v, p) => (p === 2 ? faces.R[2] : v));
-        let ND = faces.D.map((v, p) => (p === 2 ? faces.L[2] : v));
+        const NF = [...faces.F];
+        const NR = faces.R.map((v, p) => (p === 2 ? faces.D[2] : v));
+        const NL = faces.L.map((v, p) => (p === 2 ? faces.R[2] : v));
+        const ND = faces.D.map((v, p) => (p === 2 ? faces.L[2] : v));
         update(NF, NR, NL, ND);
       }
     },

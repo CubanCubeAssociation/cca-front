@@ -2,7 +2,6 @@ import { Color } from "@classes/Color";
 import type { BezierCurve } from "@classes/puzzle/BezierCurve";
 import { BezierSticker } from "@classes/puzzle/BezierSticker";
 import type { Sticker } from "@classes/puzzle/Sticker";
-import type { Puzzle } from "@classes/puzzle/puzzle";
 import { Vector2D } from "@classes/vector2-d";
 import { Vector3D } from "@classes/vector3d";
 import { CubeMode, getColorByName } from "@constants";
@@ -41,18 +40,6 @@ export interface IDrawer {
   fillStyle: string | CanvasGradient | CanvasPattern;
   lineWidth: number;
   lineCap: "butt" | "round" | "square";
-}
-
-function getTipColor(mode: CubeMode): string {
-  switch (mode) {
-    case CubeMode.DPLL: {
-      return getColorByName("white");
-    }
-
-    default: {
-      return getColorByName("black");
-    }
-  }
 }
 
 export function drawStickers(

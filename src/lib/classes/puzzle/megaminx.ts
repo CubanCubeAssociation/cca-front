@@ -57,81 +57,81 @@ export function MEGAMINX(): PuzzleInterface {
 
   const cycles = {
     R: (count: number) => {
-      let times = ((count % 5) + 5) % 5;
+      const times = ((count % 5) + 5) % 5;
 
       for (let i = 0; i < times; i += 1) {
-        let NU = faces.F.map((v, p) => ([1, 2, 6].some(e => e === p) ? faces.U[p] : v));
-        let NR = [3, 4, 0, 1, 2, 8, 9, 5, 6, 7, 10].map(n => faces.DR[n]);
-        let NF = [2, -1, -1, 0, 1, 7, -1, 9, 5, 6, 10].map((n, p) =>
+        const NU = faces.F.map((v, p) => ([1, 2, 6].some(e => e === p) ? faces.U[p] : v));
+        const NR = [3, 4, 0, 1, 2, 8, 9, 5, 6, 7, 10].map(n => faces.DR[n]);
+        const NF = [2, -1, -1, 0, 1, 7, -1, 9, 5, 6, 10].map((n, p) =>
           n < 0 ? faces.F[p] : faces.DL[n]
         );
-        let NL = [...faces.L];
-        let NBL = [-1, 3, 4, 0, -1, 7, 8, 9, 5, -1, 10].map((n, p) =>
+        const NL = [...faces.L];
+        const NBL = [-1, 3, 4, 0, -1, 7, 8, 9, 5, -1, 10].map((n, p) =>
           n < 0 ? faces.BL[p] : faces.U[n]
         );
-        let NBR = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.R[n]);
-        let NDR = [2, 3, 4, 0, 1, 7, 8, 9, 5, 6, 10].map(n => faces.D[n]);
-        let NDL = [4, 0, 1, -1, -1, 9, 5, 6, -1, 8, 10].map((n, p) =>
+        const NBR = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.R[n]);
+        const NDR = [2, 3, 4, 0, 1, 7, 8, 9, 5, 6, 10].map(n => faces.D[n]);
+        const NDL = [4, 0, 1, -1, -1, 9, 5, 6, -1, 8, 10].map((n, p) =>
           n < 0 ? faces.DL[p] : faces.DBL[n]
         );
-        let NDBL = [2, 3, -1, -1, 1, 7, 8, -1, 5, 6, 10].map((n, p) =>
+        const NDBL = [2, 3, -1, -1, 1, 7, 8, -1, 5, 6, 10].map((n, p) =>
           n < 0 ? faces.DBL[p] : faces.BL[n]
         );
-        let NB = [3, 4, 0, 1, 2, 8, 9, 5, 6, 7, 10].map(n => faces.BR[n]);
-        let NDBR = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.DBR[n]);
-        let ND = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.B[n]);
+        const NB = [3, 4, 0, 1, 2, 8, 9, 5, 6, 7, 10].map(n => faces.BR[n]);
+        const NDBR = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.DBR[n]);
+        const ND = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.B[n]);
 
         update(NU, NR, NF, NL, NBL, NBR, NDR, NDL, NDBL, NB, NDBR, ND);
       }
     },
 
     D: (count: number) => {
-      let times = ((count % 5) + 5) % 5;
+      const times = ((count % 5) + 5) % 5;
 
       for (let i = 0; i < times; i += 1) {
-        let NU = [...faces.U];
-        let NR = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
+        const NU = [...faces.U];
+        const NR = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
           n < 0 ? faces.R[p] : faces.F[n]
         );
-        let NF = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
+        const NF = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
           n < 0 ? faces.F[p] : faces.L[n]
         );
-        let NL = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
+        const NL = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
           n < 0 ? faces.L[p] : faces.BL[n]
         );
-        let NBL = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
+        const NBL = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
           n < 0 ? faces.BL[p] : faces.BR[n]
         );
-        let NBR = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
+        const NBR = [-1, -1, 2, 3, 4, -1, 6, 7, 8, 9, 10].map((n, p) =>
           n < 0 ? faces.BR[p] : faces.R[n]
         );
-        let NDR = [...faces.DL];
-        let NDL = [...faces.DBL];
-        let NDBL = [...faces.B];
-        let NB = [...faces.DBR];
-        let NDBR = [...faces.DR];
-        let ND = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.D[n]);
+        const NDR = [...faces.DL];
+        const NDL = [...faces.DBL];
+        const NDBL = [...faces.B];
+        const NB = [...faces.DBR];
+        const NDBR = [...faces.DR];
+        const ND = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.D[n]);
 
         update(NU, NR, NF, NL, NBL, NBR, NDR, NDL, NDBL, NB, NDBR, ND);
       }
     },
 
     U: (count: number) => {
-      let times = ((count % 5) + 5) % 5;
+      const times = ((count % 5) + 5) % 5;
 
       for (let i = 0; i < times; i += 1) {
-        let NU = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.U[n]);
-        let NR = faces.R.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.BR[p] : n));
-        let NF = faces.F.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.R[p] : n));
-        let NL = faces.L.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.F[p] : n));
-        let NBL = faces.BL.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.L[p] : n));
-        let NBR = faces.BR.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.BL[p] : n));
-        let NDR = [...faces.DR];
-        let NDL = [...faces.DL];
-        let NDBL = [...faces.DBL];
-        let NB = [...faces.B];
-        let NDBR = [...faces.DBR];
-        let ND = [...faces.D];
+        const NU = [1, 2, 3, 4, 0, 6, 7, 8, 9, 5, 10].map(n => faces.U[n]);
+        const NR = faces.R.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.BR[p] : n));
+        const NF = faces.F.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.R[p] : n));
+        const NL = faces.L.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.F[p] : n));
+        const NBL = faces.BL.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.L[p] : n));
+        const NBR = faces.BR.map((n, p) => ([0, 1, 5].some(p1 => p1 === p) ? faces.BL[p] : n));
+        const NDR = [...faces.DR];
+        const NDL = [...faces.DL];
+        const NDBL = [...faces.DBL];
+        const NB = [...faces.B];
+        const NDBR = [...faces.DBR];
+        const ND = [...faces.D];
 
         update(NU, NR, NF, NL, NBL, NBR, NDR, NDL, NDBL, NB, NDBR, ND);
       }

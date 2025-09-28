@@ -46,4 +46,8 @@ export class Vector2D {
     const len = this.abs();
     return new Vector2D(this.x / len, this.y / len);
   }
+
+  toArr() {
+    return [this.x, this.y];
+  }
 }

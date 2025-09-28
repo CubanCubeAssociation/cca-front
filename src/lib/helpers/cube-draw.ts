@@ -12,6 +12,7 @@ export function pGenerateCubeBundle(cubes: Puzzle[], width?: number, inCube = fa
   for (let i = 0, maxi = cubes.length; i < maxi; i += 1) {
     const W = width || 250;
     const cube = cubes[i];
+    // console.time("image-" + cube.type);
 
     if (["plan", "2d", "bird"].indexOf(cube.view) > -1) {
       cube.img =
@@ -23,6 +24,7 @@ export function pGenerateCubeBundle(cubes: Puzzle[], width?: number, inCube = fa
               : projectedView({ cube, DIM: W })
             : birdView(cube, W);
     }
+    // console.timeEnd("image-" + cube.type);
   }
 
   if (inCube) return [];

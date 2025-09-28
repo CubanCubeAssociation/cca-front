@@ -1,21 +1,15 @@
-import { Piece } from "./Piece";
 import { RIGHT, LEFT, BACK, UP, FRONT, DOWN } from "./../vector3d";
-import { Vector3D, CENTER } from "../../classes/vector3d";
 import type { PuzzleInterface } from "@interfaces";
 import { EPS, STANDARD_PALETTE } from "@constants";
 import { Sticker } from "./Sticker";
-import { assignColors, getAllStickers } from "./puzzleUtils";
-import { ScrambleParser } from "@classes/scramble-parser";
+import { getRoundedPath } from "@helpers/object";
+import { Vector2D } from "@classes/vector2-d";
 
 export function SQUARE1(): PuzzleInterface {
   const sq1: PuzzleInterface = {
     pieces: [],
     palette: STANDARD_PALETTE,
-    rotation: {},
-    center: new Vector3D(0, 0, 0),
     faceVectors: [],
-    getAllStickers: () => [],
-    faceColors: ["w", "b", "r", "y", "g", "o"],
     move: () => true,
     roundParams: {
       rd: (s: Sticker, i: number) => {
@@ -44,296 +38,207 @@ export function SQUARE1(): PuzzleInterface {
     },
   };
 
-  sq1.getAllStickers = getAllStickers.bind(sq1);
+  type FaceName = "U" | "R" | "F" | "D" | "L" | "B";
 
-  const L23 = 2 / 3;
-  const L1 = Math.sqrt(2);
-  const PI = Math.PI;
-  const PI_2 = PI / 2;
-  const PI_6 = PI / 6;
-
-  const BIG = (L1 * Math.sin(PI_6)) / Math.sin((7 * PI) / 12);
-
-  const pieces = sq1.pieces;
-
-  const pieceBig = new Piece([
-    new Sticker([
-      LEFT.add(BACK).add(UP),
-      LEFT.add(BACK).add(UP).add(FRONT.mul(BIG)),
-      UP,
-      LEFT.add(BACK).add(UP).add(RIGHT.mul(BIG)),
-    ]),
-    new Sticker(
-      [
-        LEFT.add(BACK).add(UP),
-        LEFT.add(BACK).add(UP).add(DOWN.mul(L23)),
-        LEFT.add(BACK).add(UP).add(DOWN.mul(L23)).add(FRONT.mul(BIG)),
-        LEFT.add(BACK).add(UP).add(FRONT.mul(BIG)),
-      ],
-      undefined,
-      [],
-      false,
-      "side-corner"
-    ),
-  ]);
-
-  pieceBig.stickers.push(pieceBig.stickers[0].add(DOWN.mul(L23)).reverse());
-  pieceBig.stickers.push(
-    pieceBig.stickers[1].reflect1(
-      CENTER,
-      Vector3D.cross(CENTER, LEFT.add(BACK), LEFT.add(BACK).add(UP)),
-      true
-    )
-  );
-
-  const pieceSmall = new Piece([
-    new Sticker(
-      [
-        RIGHT.add(UP).add(BACK).add(LEFT.mul(BIG)),
-        RIGHT.add(UP).add(BACK).add(LEFT.mul(BIG)).add(DOWN.mul(L23)),
-        LEFT.add(UP).add(BACK).add(RIGHT.mul(BIG)).add(DOWN.mul(L23)),
-        LEFT.add(UP).add(BACK).add(RIGHT.mul(BIG)),
-      ],
-      undefined,
-      [],
-      false,
-      "side-edge"
-    ),
-    new Sticker([
-      LEFT.add(UP).add(BACK).add(RIGHT.mul(BIG)),
-      UP,
-      RIGHT.add(UP).add(BACK).add(LEFT.mul(BIG)),
-    ]),
-  ]);
-
-  pieceBig.stickers.forEach(s => {
-    s.vecs = [UP.clone()];
-  });
-  pieceSmall.stickers.forEach(s => {
-    s.vecs = [UP.clone()];
-  });
-
-  const mid = new Piece([
-    new Sticker(
-      [
-        LEFT.add(BACK).add(UP).add(DOWN.mul(L23)),
-        LEFT.add(BACK).add(DOWN).add(UP.mul(L23)),
-        LEFT.add(FRONT).add(DOWN).add(UP.mul(L23)),
-        LEFT.add(FRONT).add(UP).add(DOWN.mul(L23)),
-      ],
-      undefined,
-      [],
-      false,
-      "side-equator"
-    ),
-    new Sticker(
-      [
-        LEFT.add(FRONT).add(DOWN).add(UP.mul(L23)),
-        LEFT.add(FRONT).add(DOWN).add(UP.mul(L23)).add(RIGHT.mul(BIG)),
-        LEFT.add(FRONT).add(UP).add(DOWN.mul(L23)).add(RIGHT.mul(BIG)),
-        LEFT.add(FRONT).add(UP).add(DOWN.mul(L23)),
-      ],
-      undefined,
-      [],
-      false,
-      "small-equator"
-    ),
-    new Sticker([
-      LEFT.add(FRONT).add(UP).add(DOWN.mul(L23)).add(RIGHT.mul(BIG)),
-      LEFT.add(FRONT).add(DOWN).add(UP.mul(L23)).add(RIGHT.mul(BIG)),
-      RIGHT.add(BACK).add(DOWN).add(UP.mul(L23)).add(LEFT.mul(BIG)),
-      RIGHT.add(BACK).add(UP).add(DOWN.mul(L23)).add(LEFT.mul(BIG)),
-    ]),
-    new Sticker([
-      LEFT.add(BACK).add(UP).add(DOWN.mul(L23)),
-      RIGHT.add(BACK).add(UP).add(DOWN.mul(L23)).add(LEFT.mul(BIG)),
-      RIGHT.add(BACK).add(DOWN).add(UP.mul(L23)).add(LEFT.mul(BIG)),
-      LEFT.add(BACK).add(DOWN).add(UP.mul(L23)),
-    ]),
-    new Sticker([
-      LEFT.add(BACK).add(UP).add(DOWN.mul(L23)),
-      LEFT.add(FRONT).add(UP).add(DOWN.mul(L23)),
-      LEFT.add(FRONT).add(UP).add(DOWN.mul(L23)).add(RIGHT.mul(BIG)),
-      RIGHT.add(BACK).add(UP).add(DOWN.mul(L23)).add(LEFT.mul(BIG)),
-    ]),
-    new Sticker([
-      LEFT.add(BACK).add(DOWN).add(UP.mul(L23)),
-      LEFT.add(FRONT).add(DOWN).add(UP.mul(L23)),
-      LEFT.add(FRONT).add(DOWN).add(UP.mul(L23)).add(RIGHT.mul(BIG)),
-      RIGHT.add(BACK).add(DOWN).add(UP.mul(L23)).add(LEFT.mul(BIG)),
-    ]).reverse(),
-  ]);
-
-  const vdir = mid.stickers[2].getOrientation();
-
-  mid.stickers.forEach(s => {
-    s.vecs = [vdir.mul(-1), UP.clone()];
-  });
-
-  for (let i = 0; i < 4; i += 1) {
-    pieces.push(pieceSmall.rotate(CENTER, UP, i * PI_2));
-    pieces.push(pieceBig.rotate(CENTER, UP, i * PI_2));
+  interface SQPiece {
+    l: 1 | 2;
+    c: FaceName[];
   }
 
-  for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
-    pieces.push(pieces[i].rotate(CENTER, RIGHT, PI));
-  }
-
-  pieces.push(mid);
-  pieces.push(mid.rotate(CENTER, UP, PI));
-
-  const planes = [
-    mid.stickers[2].clone().points, // /
-    pieceBig.stickers[2].clone().points.reverse(), // up
-    mid.stickers[5].clone().points, // down
-    mid.stickers[2].clone().points.map(p => p.rotate(CENTER, UP, PI_2, true)), // For simulator only /
-    [CENTER, UP, FRONT].map(v => v.add(LEFT.mul(2))), // x
-    [CENTER, RIGHT, FRONT].map(v => v.add(UP.mul(2))), // y
-    [CENTER, RIGHT, DOWN].map(v => v.add(FRONT.mul(2))), // z
-  ];
-
-  const trySingleMove = (mv: any): { pieces: Piece[]; u: Vector3D; ang: number } | null => {
-    const moveId = mv[0]; // 2
-    const turns = mv[1]; // 3
-    const pts1 = planes[moveId];
-    const u = Vector3D.cross(pts1[0], pts1[1], pts1[2]).unit();
-    const mu = u.mul(-1);
-    const ang = PI_6 * turns;
-
-    const pcs = [];
-
-    for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
-      const d = pieces[i].direction1(pts1[0], u, false, (x: Sticker) => !/[xd]/.test(x.color));
-
-      if (d === 0) {
-        console.log("Invalid move. Piece intersection detected.", "/UD"[moveId], turns, mv);
-        console.log("Piece: ", i, pieces[i], pts1);
-        return null;
-      }
-
-      if (d > 0) {
-        pcs.push(pieces[i]);
-      }
-    }
-
-    return {
-      pieces: pcs,
-      u: mu,
-      ang,
-    };
+  const faces: Record<string, SQPiece[]> = {
+    U: [
+      { l: 2, c: ["U", "L", "F"] }, // Start with the front-left piece of the / clockwise
+      { l: 1, c: ["U", "L"] },
+      { l: 2, c: ["U", "B", "L"] },
+      { l: 1, c: ["U", "B"] },
+      { l: 2, c: ["U", "R", "B"] },
+      { l: 1, c: ["U", "R"] },
+      { l: 2, c: ["U", "F", "R"] },
+      { l: 1, c: ["U", "F"] },
+    ],
+    E: [{ l: 1, c: ["F"] }],
+    D: [
+      { l: 2, c: ["D", "F", "L"] },
+      { l: 1, c: ["D", "L"] },
+      { l: 2, c: ["D", "L", "B"] },
+      { l: 1, c: ["D", "B"] },
+      { l: 2, c: ["D", "B", "R"] },
+      { l: 1, c: ["D", "R"] },
+      { l: 2, c: ["D", "R", "F"] },
+      { l: 1, c: ["D", "F"] },
+    ],
   };
 
-  const updateReverse = (u: Vector3D, ang: number) => {
-    planes[0].forEach(p => p.rotate(CENTER, u, ang, true));
+  const cycles = {
+    slash: () => {
+      let pos1 = 0;
+      let pos2 = 0;
+      const UF = faces.U;
+      const DF = faces.D;
 
-    const dirs = pieces
-      .slice(-2)
-      .map((p: Piece) => p.stickers.find(s => s.name === "side-equator")!.getOrientation());
-    const dirs1 = pieces
-      .slice(-2)
-      .map((p: Piece) => p.stickers.find(s => s.name === "small-equator")!.getOrientation());
-    const id = dirs[0].dot(LEFT) > 0 ? 0 : 1;
-    const pu = Vector3D.cross(planes[0][0], planes[0][1], planes[0][2]);
+      for (let i = 0, acc = 0, maxi = UF.length; i < maxi; i += 1) {
+        acc += UF[i].l;
+        if (acc === 6) {
+          pos1 = i;
+          break;
+        }
+      }
+      for (let i = 0, acc = 0, maxi = DF.length; i < maxi; i += 1) {
+        acc += DF[i].l;
+        if (acc === 6) {
+          pos2 = i;
+          break;
+        }
+      }
 
-    if (dirs1[id].dot(FRONT) * pu.dot(RIGHT) < 0) {
-      planes[0].reverse();
-    }
+      faces.E[0].l = faces.E[0].l === 1 ? 2 : 1;
+
+      const topSlice = UF.slice(pos1 + 1).reverse();
+      const bottomSlice = DF.slice(pos2 + 1).reverse();
+
+      faces.U = [...UF.slice(0, pos1 + 1), ...bottomSlice];
+      faces.D = [...DF.slice(0, pos2 + 1), ...topSlice];
+    },
+
+    U: (count: number) => {
+      const rcount = 12 - (((count % 12) + 12) % 12);
+      const fc = faces.U;
+      for (let i = 0, s = 0, maxi = fc.length; i < maxi; i += 1) {
+        s += fc[i].l;
+        if (s === rcount) {
+          faces.U = [...faces.U.slice(i + 1), ...faces.U.slice(0, i + 1)];
+          break;
+        }
+      }
+    },
+    D: (count: number) => {
+      const rcount = ((count % 12) + 12) % 12;
+      const fc = faces.D;
+      for (let i = 0, s = 0, maxi = fc.length; i < maxi; i += 1) {
+        s += fc[i].l;
+        if (s === rcount) {
+          faces.D = [...faces.D.slice(i + 1), ...faces.D.slice(0, i + 1)];
+          break;
+        }
+      }
+    },
   };
 
   sq1.move = function (moves: any[]) {
-    for (let m = 0, maxm = moves.length; m < maxm; m += 1) {
-      const mv = moves[m];
-      const pcs = trySingleMove(mv);
-
-      if (!pcs) {
-        return false;
-      }
-
-      const { u, ang } = pcs;
-      pcs.pieces.forEach(p => p.rotate(CENTER, u, ang, true));
-
-      if (mv[0] > 3) {
-        updateReverse(u, ang);
-      }
-    }
-    return true;
+    moves.forEach(mv => {
+      if (mv[0] === 0) cycles.slash();
+      else if (mv[0] === 1) cycles.U(mv[1]);
+      else if (mv[0] === 2) cycles.D(mv[1]);
+    });
   };
 
-  sq1.toMove = function (piece: Piece, sticker: Sticker, dir: Vector3D) {
-    const ang = dir.cross(UP).abs() < EPS ? (sticker.vecs.length > 1 ? PI / 2 : PI_6) : PI;
-    let toMovePieces: Piece[] = [];
+  const colors: Record<FaceName, keyof typeof STANDARD_PALETTE> = {
+    U: "white",
+    R: "blue",
+    F: "red",
+    D: "yellow",
+    L: "green",
+    B: "orange",
+  };
 
-    if (ang > PI_6 && dir.cross(UP).abs() > EPS) {
-      if (sq1.move([[0, 6]])) {
-        sq1.move([[0, 6]]);
-        toMovePieces = pieces.filter(p => p.direction1(dir.mul(0.06), dir) === 0);
-      } else if (sq1.move([[3, 6]])) {
-        sq1.move([[3, 6]]);
-        toMovePieces = pieces.filter(p => p.direction1(dir.mul(0.06), dir) === 0);
-      }
-    } else {
-      const mc = sticker.updateMassCenter();
-      const isBig = ang > PI_6;
-      toMovePieces = pieces.filter(p => {
-        return isBig ? p.direction1(mc, dir) === 0 : p.direction1(mc, dir) >= 0;
-      });
-    }
+  function getColor(fc: FaceName): string {
+    return STANDARD_PALETTE[colors[fc]];
+  }
 
-    return {
-      pieces: toMovePieces,
-      ang,
+  sq1.getImage = () => {
+    const W = 200;
+    const W_2 = W / 2;
+    const FACTOR = 0.5;
+    const LFactor = 1.3;
+    const L = W_2 * FACTOR;
+    const R = L * Math.tan(Math.PI / 12);
+    const EPath = (my: number) => [
+      [W_2, W_2],
+      [W_2 - R, W_2 + my * L],
+      [W_2 + R, W_2 + my * L],
+    ];
+    const CPath = (my: number) => [
+      [W_2, W_2],
+      [W_2 - L, W_2 + my * R],
+      [W_2 - L, W_2 + my * L],
+      [W_2 - R, W_2 + my * L],
+    ];
+
+    const convertPath = (
+      path: number[][],
+      REF: Vector2D,
+      OFF: number,
+      OX: number,
+      OY: number,
+      my: number
+    ): number[][] => {
+      return path.map(c =>
+        new Vector2D(c[0], c[1])
+          .sub(REF)
+          .rot(my * OFF)
+          .add(new Vector2D(REF.x + OX, REF.y + OY))
+          .toArr()
+      );
     };
-  };
 
-  // sq1.scramble = function () {
-  //   const scramble = ScrambleParser.parseSquare1(square1SolverGetRandomScramble());
-  //   sq1.move(scramble);
-  // };
+    const getFace = (fc: SQPiece[], OX: number, OY: number, my = 1) => {
+      const REF = new Vector2D(W_2, W_2);
+      const ANG = Math.PI / 6;
+      const res: string[] = [];
+      let acc = 0;
 
-  sq1.applySequence = function (seq: string[]) {
-    const moves = seq.reduce(
-      (acc: number[][], mv) => [...acc, ...ScrambleParser.parseSquare1(mv)],
-      []
-    );
-    const res: { u: Vector3D; ang: number; pieces: string[] }[] = [];
+      for (let i = 0, maxi = fc.length; i < maxi; i += 1) {
+        const pc = fc[i];
+        const OFF = acc * ANG + (pc.l === 1 ? ANG : 0);
+        const paths = [convertPath(pc.l === 1 ? EPath(my) : CPath(my), REF, OFF, OX, OY, my)];
+        if (pc.l === 1) {
+          const EP1 = EPath(my)
+            .slice(1)
+            .reverse()
+            .map(c => new Vector2D(c[0], c[1]).sub(REF).mul(LFactor).add(REF).toArr());
+          paths.push(convertPath([...EPath(my).slice(1), ...EP1], REF, OFF, OX, OY, my));
+        } else {
+          const pos = [
+            [1, 3],
+            [2, 4],
+          ];
 
-    for (let i = 0, maxi = moves.length; i < maxi; i += 1) {
-      let pcs;
-      const mv = moves[i];
+          if (my < 0) pos.reverse();
 
-      try {
-        pcs = trySingleMove(mv);
-      } catch (e) {
-        console.log("ERROR: ", seq[i], mv, e);
+          pos.forEach(p => {
+            const EP1 = CPath(my)
+              .slice(p[0], p[1])
+              .reverse()
+              .map(c => new Vector2D(c[0], c[1]).sub(REF).mul(LFactor).add(REF).toArr());
+            paths.push(convertPath([...CPath(my).slice(p[0], p[1]), ...EP1], REF, OFF, OX, OY, my));
+          });
+        }
+        acc += pc.l;
+        res.push(
+          paths
+            .map(
+              (path, p) =>
+                `<path d="${getRoundedPath(path, 0.15)}" fill="${getColor(fc[i].c[p])}" stroke="black" stroke-width="2" />`
+            )
+            .join("")
+        );
       }
 
-      if (!pcs) {
-        continue;
-      }
+      return res.join("");
+    };
 
-      const { u, ang } = pcs;
-
-      res.push({ u, ang, pieces: pcs.pieces.map(p => p.id) });
-
-      pcs.pieces.forEach(p => p.rotate(CENTER, u, ang, true));
-
-      if (mv[0] > 3) {
-        updateReverse(u, ang);
-      }
-    }
-
-    return res;
+    return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 200 400" class="NzJiZmJlZDYtZjgx">
+  ${getFace(faces.U, 0, 0)}
+  ${getFace(faces.D, 0, W, -1)}
+  <rect x="${W * 0.175}" y="${W * 0.95}" width="${W * 0.239}" height="${W * 0.09}"
+    rx="${W * 0.02}" ry="${W * 0.02}" stroke="black" stroke-width="2" fill=${getColor("F")} />
+  <rect x="${W * 0.414}" y="${W * 0.95}" width="${W * (faces.E[0].l & 1 ? 0.412 : 0.239)}" height="${W * 0.09}"
+    rx="${W * 0.02}" ry="${W * 0.02}" stroke="black" stroke-width="2" fill=${faces.E[0].l & 1 ? getColor("F") : getColor("B")} />
+</svg>`;
   };
 
   sq1.faceVectors = [UP, RIGHT, FRONT, DOWN, LEFT, BACK];
-
-  sq1.rotation = {
-    x: PI_6,
-    y: -PI_6,
-    z: 0,
-  };
-
-  assignColors(sq1, sq1.faceColors);
 
   return sq1;
 }

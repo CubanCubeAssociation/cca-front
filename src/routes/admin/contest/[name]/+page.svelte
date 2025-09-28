@@ -15,7 +15,6 @@
 
   import {
     createContest,
-    generateScrambles,
     getCategories,
     getContest,
     getFormats,
