@@ -1,289 +1,290 @@
-import { LEFT, UP, BACK, RIGHT, FRONT, DOWN, CENTER } from "@classes/vector3d";
-import { Vector3D } from "@classes/vector3d";
-import type { PiecesToMove, PuzzleInterface, ToMoveResult } from "@interfaces";
-import { EPS, STANDARD_PALETTE } from "@constants";
-import { Piece } from "./Piece";
-import { Sticker } from "./Sticker";
-import { assignColors, getAllStickers, random } from "./puzzleUtils";
-import { ScrambleParser } from "@classes/scramble-parser";
+import type { PuzzleInterface } from "@interfaces";
+import { STANDARD_PALETTE } from "@constants";
 
-export function RUBIK(_a: number, _b: number, _c: number): PuzzleInterface {
-  // const dims = [_a, _b, _c].sort();
-  const dims = [_a, _b, _c];
-  const a = dims[0],
-    b = dims[1],
-    c = dims[2];
-  const isCube = a == b && b == c;
-  const len = dims.reduce((m, e) => Math.min(m, 2 / e), 2);
-
+export function RUBIK(n: number): PuzzleInterface {
   const rubik: PuzzleInterface = {
-    pieces: [],
     palette: STANDARD_PALETTE,
-    rotation: {},
-    center: new Vector3D(0, 0, 0, true),
-    faceVectors: [],
-    getAllStickers: () => [],
-    dims,
-    faceColors: ["w", "r", "g", "y", "o", "b"],
     move: () => false,
+    getImage: () => "",
     roundParams: {
-      ppc: a < 10 ? 10 : a < 20 ? 5 : 2,
-      fn: (st: Sticker) => !(isCube && st.color === "x"),
+      ppc: n < 10 ? 10 : n < 20 ? 5 : 2,
     },
   };
 
-  const fc = rubik.faceColors;
+  type FaceName = "U" | "R" | "F" | "D" | "L" | "B";
+  type FaceColor = keyof typeof STANDARD_PALETTE;
+  const FACE_COLOR: Record<FaceName, FaceColor> = {
+    U: "white",
+    R: "red",
+    F: "green",
+    D: "yellow",
+    L: "orange",
+    B: "blue",
+  };
 
-  rubik.getAllStickers = getAllStickers.bind(rubik);
+  const faces: Record<FaceName, FaceName[][]> = {
+    U: [],
+    R: [],
+    F: [],
+    D: [],
+    L: [],
+    B: [],
+  };
 
-  const ref = LEFT.mul(a)
-    .add(BACK.mul(b))
-    .add(UP.mul(c))
-    .mul(len / 2);
+  Object.entries(faces).forEach(([e]) => {
+    let fn = e as FaceName;
+    faces[e as FaceName] = Array.from({ length: n })
+      .fill("")
+      .map(() => Array.from({ length: n }).fill(fn as FaceName) as FaceName[]);
+  });
 
-  const PI = Math.PI;
-  const PI_2 = PI / 2;
-  const vdir = [RIGHT, FRONT, UP];
-  const turns: { 0: Vector3D; 1: number }[] = [
-    [UP, PI_2 * (1 + (a === 1 ? 1 : (a ^ b) & 1))],
-    [FRONT, PI_2 * (1 + (a === 1 ? 1 : (a ^ c) & 1))],
-    [RIGHT, PI_2 * (1 + (a === 1 ? 1 : (b ^ c) & 1))],
-  ];
+  type Strip = { get(): FaceName[]; set(vals: FaceName[]): void };
+  type Selector = (f: Record<FaceName, FaceName[][]>, k: number) => Strip;
+  type ParsedMove = [layers: number, base: FaceName, dir: 1 | -1, exclude: number];
 
-  const pieces = rubik.pieces;
+  const cycles: Record<FaceName, Selector[]> = {
+    U: [
+      (f, k) => ({
+        get: () => f.F[k],
+        set: vals => {
+          f.F[k] = vals;
+        },
+      }),
+      (f, k) => ({
+        get: () => f.L[k],
+        set: vals => {
+          f.L[k] = vals;
+        },
+      }),
+      (f, k) => ({
+        get: () => f.B[k],
+        set: vals => {
+          f.B[k] = vals;
+        },
+      }),
+      (f, k) => ({
+        get: () => f.R[k],
+        set: vals => {
+          f.R[k] = vals;
+        },
+      }),
+    ],
 
-  for (let z = 0; z < c; z += 1) {
-    for (let y = 0; y < b; y += 1) {
-      for (let x = 0; x < a; x += 1) {
-        if (z > 0 && z < c - 1 && y > 0 && y < b - 1 && x > 0 && x < a - 1) continue;
+    D: [
+      (f, k) => ({
+        get: () => f.F[f.F.length - 1 - k],
+        set: vals => {
+          f.F[f.F.length - 1 - k] = vals;
+        },
+      }),
+      (f, k) => ({
+        get: () => f.R[f.R.length - 1 - k],
+        set: vals => {
+          f.R[f.R.length - 1 - k] = vals;
+        },
+      }),
+      (f, k) => ({
+        get: () => f.B[f.B.length - 1 - k],
+        set: vals => {
+          f.B[f.B.length - 1 - k] = vals;
+        },
+      }),
+      (f, k) => ({
+        get: () => f.L[f.L.length - 1 - k],
+        set: vals => {
+          f.L[f.L.length - 1 - k] = vals;
+        },
+      }),
+    ],
 
-        const anchor = ref.add(DOWN.mul(z).add(FRONT.mul(y)).add(RIGHT.mul(x)).mul(len));
-        const center = anchor.add(
-          FRONT.add(RIGHT)
-            .add(DOWN)
-            .mul(len / 2)
-        );
-        const p = new Piece();
-        const sUp = new Sticker(
-          [
-            anchor,
-            anchor.add(FRONT.mul(len)),
-            anchor.add(FRONT.add(RIGHT).mul(len)),
-            anchor.add(RIGHT.mul(len)),
-          ],
-          fc[0]
-        );
-        const sLeft = new Sticker(
-          [
-            anchor,
-            anchor.add(DOWN.mul(len)),
-            anchor.add(DOWN.add(FRONT).mul(len)),
-            anchor.add(FRONT.mul(len)),
-          ],
-          fc[4]
-        );
-        sUp.vecs = vdir.map(e => e.clone());
-        sLeft.vecs = vdir.map(e => e.clone());
-        if (!isCube || z == 0) p.stickers.push(sUp);
-        if (!isCube || x == a - 1) p.stickers.push(sLeft.rotate(center, UP, PI));
-        if (!isCube || y == b - 1) p.stickers.push(sLeft.rotate(center, UP, PI_2));
-        if (!isCube || z == c - 1) p.stickers.push(sUp.rotate(center, RIGHT, PI));
-        if (!isCube || x == 0) p.stickers.push(sLeft);
-        if (!isCube || y == 0) p.stickers.push(sLeft.rotate(center, UP, -PI_2));
+    R: [
+      (f, k) => ({
+        get: () => f.F.map(row => row[f.F.length - 1 - k]),
+        set: vals => f.F.forEach((row, i) => (row[f.F.length - 1 - k] = vals[i])),
+      }),
+      (f, k) => ({
+        get: () => f.U.map(row => row[f.U.length - 1 - k]),
+        set: vals => f.U.forEach((row, i) => (row[f.U.length - 1 - k] = vals[i])),
+      }),
+      (f, k) => ({
+        get: () => f.B.map(row => row[k]).reverse(),
+        set: vals => f.B.forEach((row, i) => (row[k] = vals[f.B.length - 1 - i])),
+      }),
+      (f, k) => ({
+        get: () => f.D.map(row => row[f.D.length - 1 - k]),
+        set: vals => f.D.forEach((row, i) => (row[f.D.length - 1 - k] = vals[i])),
+      }),
+    ],
 
-        if (p.stickers.length) {
-          if (p.stickers.length === 1 && isCube) {
-            if ((z == 0 || z == c - 1) && c > 1) {
-              p.stickers.push(p.stickers[0].rotate(center, RIGHT, PI));
-            } else if ((x == 0 || x == a - 1) && a > 1) {
-              p.stickers.push(p.stickers[0].rotate(center, UP, PI));
-            } else if ((y == 0 || y == b - 1) && b > 1) {
-              p.stickers.push(p.stickers[0].rotate(center, UP, PI));
-            }
-          }
-          p.updateMassCenter();
-          pieces.push(p);
-        }
+    L: [
+      (f, k) => ({
+        get: () => f.F.map(row => row[k]),
+        set: vals => f.F.forEach((row, i) => (row[k] = vals[i])),
+      }),
+      (f, k) => ({
+        get: () => f.D.map(row => row[k]),
+        set: vals => f.D.forEach((row, i) => (row[k] = vals[i])),
+      }),
+      (f, k) => ({
+        get: () => f.B.map(row => row[f.B.length - 1 - k]).reverse(),
+        set: vals => f.B.forEach((row, i) => (row[f.B.length - 1 - k] = vals[f.B.length - 1 - i])),
+      }),
+      (f, k) => ({
+        get: () => f.U.map(row => row[k]),
+        set: vals => f.U.forEach((row, i) => (row[k] = vals[i])),
+      }),
+    ],
+
+    F: [
+      (f, k) => ({
+        get: () => f.U[f.U.length - 1 - k],
+        set: vals => {
+          f.U[f.U.length - 1 - k] = vals;
+        },
+      }),
+      (f, k) => ({
+        get: () => f.R.map(row => row[k]),
+        set: vals => f.R.forEach((row, i) => (row[k] = vals[i])),
+      }),
+      (f, k) => ({
+        get: () => f.D[k].slice().reverse(),
+        set: vals => {
+          f.D[k] = vals.slice().reverse();
+        },
+      }),
+      (f, k) => ({
+        get: () => f.L.map(row => row[f.L.length - 1 - k]).reverse(),
+        set: vals => f.L.forEach((row, i) => (row[f.L.length - 1 - k] = vals[f.L.length - 1 - i])),
+      }),
+    ],
+
+    B: [
+      (f, k) => ({
+        get: () => f.U[k].slice().reverse(),
+        set: vals => {
+          f.U[k] = vals.slice().reverse();
+        },
+      }),
+      (f, k) => ({
+        get: () => f.L.map(row => row[k]),
+        set: vals => f.L.forEach((row, i) => (row[k] = vals[i])),
+      }),
+      (f, k) => ({
+        get: () => f.D[f.D.length - 1 - k],
+        set: vals => {
+          f.D[f.D.length - 1 - k] = vals;
+        },
+      }),
+      (f, k) => ({
+        get: () => f.R.map(row => row[f.R.length - 1 - k]).reverse(),
+        set: vals => f.R.forEach((row, i) => (row[f.R.length - 1 - k] = vals[f.R.length - 1 - i])),
+      }),
+    ],
+  };
+
+  function rotateFace(face: FaceName[][], count: number): FaceName[][] {
+    const n = face.length;
+    const times = ((count % 4) + 4) % 4;
+
+    const result = Array.from({ length: n }, () => Array(n).fill("") as FaceName[]);
+
+    const mapIndex = [
+      (i: number, j: number) => [i, j],
+      (i: number, j: number) => [j, n - 1 - i],
+      (i: number, j: number) => [n - 1 - i, n - 1 - j],
+      (i: number, j: number) => [n - 1 - j, i],
+    ];
+
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n; j++) {
+        const [ni, nj] = mapIndex[times](i, j);
+        result[ni][nj] = face[i][j];
       }
+    }
+
+    return result;
+  }
+
+  function doMove(f: typeof faces, move: ParsedMove) {
+    let [layers, base, dir, span] = move;
+
+    span = span || layers;
+
+    if (span === layers) {
+      f[base] = rotateFace(f[base], dir);
+    }
+
+    if (span === n) {
+      let e = Object.entries(faces);
+      let opBase = e[
+        (e.reduce((acc, e, p) => (e[0] === base ? p : acc), -1) + 3) % 6
+      ][0] as FaceName;
+      f[opBase] = rotateFace(f[opBase], -dir);
+    }
+
+    const cycle = cycles[base];
+
+    if (!cycle) return;
+
+    for (let k = layers - span; k < layers; k += 1) {
+      const strips = cycle.map(fn => fn(f, k).get());
+      const shift = ((dir % cycle.length) + cycle.length) % cycle.length;
+      const rotated = strips.map((_, i) => strips[(i - shift + cycle.length) % cycle.length]);
+
+      rotated.forEach((strip, i) => {
+        cycle[i](f, k).set(strip);
+      });
     }
   }
 
-  const MOVE_MAP = "URFDLB";
-
-  const ref1 = ref
-    .add(RIGHT.mul(a * len))
-    .add(FRONT.mul(b * len))
-    .add(DOWN.mul(c * len));
-
-  const planes = [
-    [ref, ref.add(FRONT), ref.add(RIGHT)],
-    [ref1, ref1.add(BACK), ref1.add(UP)],
-    [ref1, ref1.add(UP), ref1.add(LEFT)],
-    [ref1, ref1.add(LEFT), ref1.add(BACK)],
-    [ref, ref.add(DOWN), ref.add(FRONT)],
-    [ref, ref.add(RIGHT), ref.add(DOWN)],
-  ];
-
-  const trySingleMove = (mv: any): PiecesToMove | null => {
-    const moveId = MOVE_MAP.indexOf(mv[1]);
-    let layers = mv[0];
-    const turns = mv[2];
-    const span = mv[3];
-    const pts1 = planes[moveId];
-    const u = Vector3D.cross(pts1[0], pts1[1], pts1[2]).unit();
-    const mu = u.mul(-1);
-
-    // Check if the move involves the whole cube
-    [
-      [a, RIGHT],
-      [b, FRONT],
-      [c, UP],
-    ].forEach((e: any) => {
-      if (Math.abs(u.dot(e[1])) > EPS) {
-        layers = layers === e[0] ? e[0] + 1 : layers;
-      }
-    });
-
-    const pts2 = pts1.map(p => p.add(mu.mul(len * layers)));
-    const pts3 = pts2.map(p => p.add(u.mul(len * span)));
-    const ang = (Math.PI / 2) * turns;
-
-    const pcs = [];
-
-    for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
-      const d = pieces[i].direction1(pts2[0], u, true);
-
-      if (d === 0) {
-        console.log("Invalid move. Piece intersection detected.", "URFDLB"[moveId], turns, mv);
-        console.log(
-          "Piece: ",
-          i,
-          pieces[i],
-          pieces[i].stickers.map(st => st.direction1(pts2[0], u, true))
-        );
-        return null;
-      }
-
-      if (span) {
-        const d1 = pieces[i].direction1(pts3[0], u, true);
-
-        if (d * d1 < 0) {
-          pcs.push(pieces[i]);
-        }
-      } else if (d > 0) {
-        pcs.push(pieces[i]);
-      }
-    }
-
-    return {
-      pieces: pcs,
-      u: mu,
-      ang,
-    };
-  };
-
   rubik.move = function (moves: any[]) {
-    for (let m = 0, maxm = moves.length; m < maxm; m += 1) {
-      const mv = moves[m];
-      const pcs = trySingleMove(mv);
-
-      if (!pcs) {
-        return false;
-      }
-
-      const { u, ang } = pcs;
-      pcs.pieces.forEach(p => p.rotate(CENTER, u, ang, true));
-    }
-    return true;
+    moves.forEach(mv => doMove(faces, mv));
   };
 
-  rubik.toMove = function (piece: Piece, sticker: Sticker, dir: Vector3D) {
-    const mc = sticker.updateMassCenter();
-    const toMovePieces = pieces.filter(p => p.direction1(mc, dir) === 0);
-    const tn = turns.map(e => [e[0].cross(dir).abs2(), e[1]]).sort((a, b) => a[0] - b[0]);
-    return {
-      pieces: toMovePieces,
-      ang: tn[0][1],
+  rubik.getImage = () => {
+    const BOX = 100;
+    const W = BOX * 4;
+    const H = BOX * 3;
+    const CW = BOX / n;
+    const PIECE_FACTOR = 0.9;
+    const BOX_FACTOR = 0.9;
+    const OFFSET = (CW * (1 - PIECE_FACTOR)) / 2;
+    const BOX_OFFSET = (BOX * (1 - BOX_FACTOR)) / 2;
+    const RX = 3 / n + 0.4;
+
+    let getRect = (x: number, y: number, bx: number, by: number, fc: FaceName) => {
+      return `<rect
+  x="${bx * BOX + BOX_OFFSET + x * CW * BOX_FACTOR + OFFSET}"
+  y="${by * BOX + BOX_OFFSET + y * CW * BOX_FACTOR + OFFSET}"
+  width="${CW * PIECE_FACTOR * BOX_FACTOR}"
+  height="${CW * PIECE_FACTOR * BOX_FACTOR}"
+  fill="${STANDARD_PALETTE[FACE_COLOR[fc]]}"
+  rx="${RX}"
+/>`;
     };
+
+    let allPieces = [
+      ["U", 1, 0],
+      ["L", 0, 1],
+      ["F", 1, 1],
+      ["R", 2, 1],
+      ["B", 3, 1],
+      ["D", 1, 2],
+    ]
+      .map(e =>
+        faces[e[0] as FaceName]
+          .map((v, y) =>
+            v.map((fc, x) => getRect(x, y, e[1] as number, e[2] as number, fc)).join("")
+          )
+          .join("")
+      )
+      .join("");
+
+    return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMin">
+      ${allPieces}
+    </svg>`;
   };
-
-  rubik.scramble = function () {
-    if (!rubik.toMove) return;
-
-    const MOVES = a >= 2 ? (a - 2) * 30 + 10 : 0;
-
-    for (let i = 0; i < MOVES; i += 1) {
-      const p = random(pieces) as Piece;
-      const s = random(p.stickers.filter(s => !/^[xd]{1}$/.test(s.color))) as Sticker;
-      const vec = random(s.vecs.filter(v => v.unit().sub(s.getOrientation()).abs() > EPS));
-      const pcs = rubik.toMove(p, s, vec) as ToMoveResult;
-      const cant = 1 + random(3);
-      pcs.pieces.forEach((p: Piece) => p.rotate(CENTER, vec, pcs.ang * cant, true));
-    }
-  };
-
-  rubik.applySequence = function (seq: string[]) {
-    const moves = seq.map(mv => ScrambleParser.parseNNN(mv, { a, b, c })[0]);
-    const res: { u: Vector3D; ang: number; pieces: string[] }[] = [];
-
-    for (let i = 0, maxi = moves.length; i < maxi; i += 1) {
-      let pcs;
-
-      try {
-        pcs = trySingleMove(moves[i]);
-      } catch (e) {
-        console.log("ERROR: ", seq[i], moves[i], e);
-      }
-
-      if (!pcs) {
-        continue;
-      }
-
-      const { u, ang } = pcs;
-
-      res.push({ u, ang, pieces: pcs.pieces.map(p => p.id) });
-
-      pcs.pieces.forEach(p => p.rotate(CENTER, u, ang, true));
-    }
-
-    return res;
-  };
-
-  rubik.toMoveSeq = function (seq: string) {
-    const mv = ScrambleParser.parseNNN(seq, { a, b, c })[0];
-    let pcs;
-
-    try {
-      pcs = trySingleMove(mv);
-    } catch (e) {
-      console.log(`ERROR: <${seq}> <${mv}>`);
-      console.error(e);
-    }
-
-    if (!pcs) {
-      return {
-        ang: 0,
-        animationTime: 0,
-        center: new Vector3D(),
-        dir: new Vector3D(),
-        pieces: [],
-      };
-    }
-
-    const { u, ang } = pcs;
-
-    return { dir: u, ang, pieces: pcs.pieces, animationTime: 0, center: rubik.center };
-  };
-
-  rubik.rotation = {
-    x: PI / 6,
-    y: -PI / 4,
-    z: 0,
-  };
-
-  rubik.faceVectors = [UP, RIGHT, FRONT, DOWN, LEFT, BACK];
-
-  assignColors(rubik, rubik.faceColors, isCube);
 
   return rubik;
 }

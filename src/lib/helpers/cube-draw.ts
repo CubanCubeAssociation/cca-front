@@ -4,12 +4,7 @@ import { projectedView } from "./imageGenerators/projectedView";
 import { birdView } from "./imageGenerators/birdView";
 import { browser } from "$app/environment";
 
-export async function pGenerateCubeBundle(
-  cubes: Puzzle[],
-  width?: number,
-  inCube = false,
-  printable = false
-): Promise<string[]> {
+export function pGenerateCubeBundle(cubes: Puzzle[], width?: number, inCube = false): string[] {
   if (!browser) {
     return cubes.map(() => "");
   }
@@ -23,7 +18,9 @@ export async function pGenerateCubeBundle(
         cube.view === "plan"
           ? planView(cube, W)
           : cube.view === "2d"
-            ? projectedView({ cube, DIM: W, printMode: printable })
+            ? cube.p.getImage
+              ? cube.p.getImage()
+              : projectedView({ cube, DIM: W })
             : birdView(cube, W);
     }
   }
