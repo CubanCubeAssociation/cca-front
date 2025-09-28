@@ -59,7 +59,7 @@ export class Puzzle {
     this.options = options;
     this.type = options.type || "rubik";
     this.mode = options.mode || CubeMode.NORMAL;
-    this.view = options.view || "trans";
+    this.view = options.view || "2d";
     this.headless = !!options.headless;
     this.img = "";
     this.arrows = [];
@@ -82,7 +82,7 @@ export class Puzzle {
     }
 
     if (this.type === "mirror") {
-      this.view = "trans";
+      this.view = "2d";
       this.mode = CubeMode.NORMAL;
     }
 
@@ -112,375 +112,320 @@ export class Puzzle {
       c: a[2],
     };
 
-    this.rotation = this.p.rotation;
-
-    this.adjustColors();
-
-    if (this.options.facelet && (this.type === "rubik" || this.type === "icarry")) {
-      this.applyFacelet(this.options.facelet);
-    }
+    // this.adjustColors();
   }
 
-  private applyFacelet(facelet: string) {
-    const colors = "URFDLB";
-    const fColors = facelet.split("");
-    const vecs = this.p.faceVectors;
-    const cols = this.p.faceColors;
-    const allStickers = this.p.getAllStickers().filter(st => !(st instanceof ImageSticker));
-    const stickers: Sticker[][] = vecs.map(() => []);
-    const getSort = (k1: keyof Vector3D, k2: keyof Vector3D, d1: number, d2: number) => {
-      return (s1: Sticker, s2: Sticker) => {
-        const m1 = s1.getMassCenter();
-        const m2 = s2.getMassCenter();
+  // adjustColors(topColor = "", bottomColor = "") {
+  //   const typeFilter: PuzzleType[] = ["rubik", "square1", "megaminx", "skewb", "pyraminx"];
+  //   const modeFilter: CubeMode[] = [CubeMode.NORMAL, CubeMode.CS, CubeMode.EO, CubeMode.CO];
+  //   const OFF_COLOR = "gray";
 
-        if (m1[k1] != m2[k1]) {
-          return m1[k1] < m2[k1] ? d1 : -d1;
-        }
-        return m1[k2] < m2[k2] ? d2 : -d2;
-      };
-    };
+  //   if (!typeFilter.some(e => e === this.type)) {
+  //     return this;
+  //   }
 
-    for (let i = 0, maxi = allStickers.length; i < maxi; i += 1) {
-      if (cols.indexOf(allStickers[i].color) < 0) {
-        continue;
-      }
+  //   if (this.type === "square1" && !modeFilter.some(m => m === this.mode)) {
+  //     return this;
+  //   }
 
-      const u = allStickers[i].getOrientation();
+  //   return;
+    // const pieces = this.p.pieces;
 
-      for (let j = 0, maxj = vecs.length; j < maxj; j += 1) {
-        if (vecs[j].equals(u)) {
-          stickers[j].push(allStickers[i]);
-          break;
-        }
-      }
-    }
+    // if (
+    //   this.mode === CubeMode.NORMAL ||
+    //   this.mode === CubeMode.ELL ||
+    //   this.mode === CubeMode.ZBLL ||
+    //   this.mode === CubeMode.PLL ||
+    //   (this.mode === CubeMode.L4E && this.type != "pyraminx")
+    // ) {
+    //   for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
+    //     const stickers = pieces[i].stickers;
+    //     for (let j = 0, maxj = stickers.length; j < maxj; j += 1) {
+    //       stickers[j].color = stickers[j].oColor;
+    //     }
+    //   }
+    //   return this;
+    // }
 
-    stickers[0].sort(getSort("z", "x", -1, -1));
-    stickers[1].sort(getSort("y", "z", 1, 1));
-    stickers[2].sort(getSort("y", "x", 1, -1));
-    stickers[3].sort(getSort("z", "x", 1, -1));
-    stickers[4].sort(getSort("y", "z", 1, -1));
-    stickers[5].sort(getSort("y", "x", 1, 1));
+    // const { faceColors, faceVectors } = this.p;
+    // const fVec = (v: Vector3D) =>
+    //   faceVectors.reduce((a, b, p) => (a > -1 || b.sub(v).abs() > EPS ? a : p), -1);
 
-    const sortedStickers = stickers.reduce((acc, e) => {
-      return acc.concat(e);
-    }, []);
+    // const COLORS = faceColors.length;
+    // const ref =
+    //   topColor && faceColors.indexOf(topColor) > -1
+    //     ? topColor
+    //     : bottomColor && faceColors.indexOf(bottomColor) > -1
+    //       ? faceColors[fVec(faceVectors[faceColors.indexOf(bottomColor)].mul(-1))]
+    //       : faceColors[fVec(UP)];
 
-    for (let i = 0, maxi = fColors.length; i < maxi; i += 1) {
-      sortedStickers[i].color = cols[colors.indexOf(fColors[i])];
-    }
-  }
+    // let TOP_COLOR = "";
+    // let BOTTOM_COLOR = "";
 
-  adjustColors(topColor = "", bottomColor = "") {
-    const typeFilter: PuzzleType[] = ["rubik", "square1", "megaminx", "skewb", "pyraminx"];
-    const modeFilter: CubeMode[] = [CubeMode.NORMAL, CubeMode.CS, CubeMode.EO, CubeMode.CO];
-    const OFF_COLOR = "gray";
+    // if (this.type === "pyraminx") {
+    //   BOTTOM_COLOR = bottomColor || "y";
+    // } else {
+    //   TOP_COLOR = ref;
+    //   BOTTOM_COLOR = faceColors[fVec(faceVectors[faceColors.indexOf(TOP_COLOR)].mul(-1))];
+    // }
 
-    if (!typeFilter.some(e => e === this.type)) {
-      return this;
-    }
+    // const pts = this.type === "pyraminx" ? (this.p.raw as Vector3D[]).slice(1) : [];
+    // const u = this.type === "pyraminx" ? Vector3D.cross(pts[0], pts[1], pts[2]).unit() : UP;
+    // const a =
+    //   this.type === "pyraminx"
+    //     ? (this.p.raw[0] as Vector3D).sub(pts[0]).div(this.order.a, true).add(pts[0])
+    //     : UP;
 
-    if (this.type === "square1" && !modeFilter.some(m => m === this.mode)) {
-      return this;
-    }
+    // for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
+    //   const stickers = getOColoredStickers(pieces[i]);
+    //   const stLen = stickers.length;
+    //   const topLayer = pieces[i].contains(TOP_COLOR);
+    //   const bottomLayer = pieces[i].contains(BOTTOM_COLOR);
 
-    const pieces = this.p.pieces;
+    //   switch (this.mode) {
+    //     case CubeMode.OLL: {
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         if (stickers[j].oColor != TOP_COLOR) {
+    //           stickers[j].color = OFF_COLOR;
+    //         } else {
+    //           // stickers[j].color = stickers[j].oColor;
+    //           stickers[j].color = "yellow";
+    //         }
+    //       }
 
-    if (
-      this.mode === CubeMode.NORMAL ||
-      this.mode === CubeMode.ELL ||
-      this.mode === CubeMode.ZBLL ||
-      this.mode === CubeMode.PLL ||
-      (this.mode === CubeMode.L4E && this.type != "pyraminx")
-    ) {
-      for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
-        const stickers = pieces[i].stickers;
-        for (let j = 0, maxj = stickers.length; j < maxj; j += 1) {
-          stickers[j].color = stickers[j].oColor;
-        }
-      }
-      return this;
-    }
+    //       break;
+    //     }
+    //     case CubeMode.DPLL: {
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         if (stickers[j].oColor === TOP_COLOR) {
+    //           stickers[j].color = OFF_COLOR;
+    //         } else {
+    //           stickers[j].color = stickers[j].oColor;
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.F2L: {
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         if (pieces[i].contains(TOP_COLOR)) {
+    //           stickers[j].color = OFF_COLOR;
+    //         } else {
+    //           stickers[j].color = stickers[j].oColor;
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.F3E: {
+    //       const rColor = this.p.faceColors[(this.p.faceColors.indexOf(BOTTOM_COLOR) + 1) % COLORS];
 
-    const { faceColors, faceVectors } = this.p;
-    const fVec = (v: Vector3D) =>
-      faceVectors.reduce((a, b, p) => (a > -1 || b.sub(v).abs() > EPS ? a : p), -1);
+    //       if (
+    //         (stLen === 1 && (pieces[i].contains(TOP_COLOR) || pieces[i].contains(BOTTOM_COLOR))) ||
+    //         (stLen === 2 && pieces[i].contains(BOTTOM_COLOR) && pieces[i].contains(rColor))
+    //       ) {
+    //         stickers.forEach(st => (st.color = st.oColor));
+    //       } else {
+    //         stickers.forEach(st => (st.color = OFF_COLOR));
+    //       }
 
-    const COLORS = faceColors.length;
-    const ref =
-      topColor && faceColors.indexOf(topColor) > -1
-        ? topColor
-        : bottomColor && faceColors.indexOf(bottomColor) > -1
-          ? faceColors[fVec(faceVectors[faceColors.indexOf(bottomColor)].mul(-1))]
-          : faceColors[fVec(UP)];
+    //       break;
+    //     }
+    //     case CubeMode.L4E: {
+    //       for (let i = 0; i < stLen; i += 1) {
+    //         if (stickers[i].direction1(a, u, true) < 0 && !bottomLayer) {
+    //           stickers[i].color = OFF_COLOR;
+    //         } else {
+    //           stickers[i].color = stickers[i].oColor;
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.EDGERF: {
+    //       const rColor = this.p.faceColors[(this.p.faceColors.indexOf(BOTTOM_COLOR) + 1) % COLORS];
+    //       const fColor = this.p.faceColors[(this.p.faceColors.indexOf(BOTTOM_COLOR) + 2) % COLORS];
 
-    let TOP_COLOR = "";
-    let BOTTOM_COLOR = "";
+    //       if (stLen === 2 && pieces[i].contains(fColor) && pieces[i].contains(rColor)) {
+    //         stickers.forEach(st => (st.color = st.oColor));
+    //       } else {
+    //         stickers.forEach(st => (st.color = OFF_COLOR));
+    //       }
 
-    if (this.type === "pyraminx") {
-      BOTTOM_COLOR = bottomColor || "y";
-    } else {
-      TOP_COLOR = ref;
-      BOTTOM_COLOR = faceColors[fVec(faceVectors[faceColors.indexOf(TOP_COLOR)].mul(-1))];
-    }
+    //       break;
+    //     }
+    //     case CubeMode.CMLL: {
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         if (topLayer && stLen === 2) {
+    //           stickers[j].color = OFF_COLOR;
+    //         } else {
+    //           stickers[j].color = stickers[j].oColor;
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.OLLCP: {
+    //       if (topLayer) {
+    //         for (let j = 0; j < stLen; j += 1) {
+    //           if (stLen === 2 && stickers[j].oColor != TOP_COLOR) {
+    //             stickers[j].color = OFF_COLOR;
+    //           } else {
+    //             stickers[j].color = stickers[j].oColor;
+    //           }
+    //         }
+    //       } else {
+    //         for (let j = 0; j < stLen; j += 1) {
+    //           stickers[j].color = OFF_COLOR;
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.COLL: {
+    //       if (topLayer) {
+    //         for (let j = 0; j < stLen; j += 1) {
+    //           if (stLen === 2) {
+    //             let isTop = true;
+    //             const pts = stickers[j].points;
+    //             for (let k = 1, maxk = pts.length; k < maxk; k += 1) {
+    //               if (Math.abs(pts[k].y - pts[0].y) > 1e-5) {
+    //                 isTop = false;
+    //                 break;
+    //               }
+    //             }
 
-    const pts = this.type === "pyraminx" ? (this.p.raw as Vector3D[]).slice(1) : [];
-    const u = this.type === "pyraminx" ? Vector3D.cross(pts[0], pts[1], pts[2]).unit() : UP;
-    const a =
-      this.type === "pyraminx"
-        ? (this.p.raw[0] as Vector3D).sub(pts[0]).div(this.order.a, true).add(pts[0])
-        : UP;
+    //             if (!isTop) {
+    //               stickers[j].color = OFF_COLOR;
+    //             } else {
+    //               stickers[j].color = stickers[j].oColor;
+    //             }
+    //           } else {
+    //             stickers[j].color = stickers[j].oColor;
+    //           }
+    //         }
+    //       } else {
+    //         for (let j = 0; j < stLen; j += 1) {
+    //           stickers[j].color = OFF_COLOR;
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.VLS:
+    //     case CubeMode.WV: {
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         if (pieces[i].contains(TOP_COLOR) && stickers[j].oColor != TOP_COLOR) {
+    //           stickers[j].color = OFF_COLOR;
+    //         } else {
+    //           stickers[j].color = stickers[j].oColor;
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.EOLS: {
+    //       if (pieces[i].contains(TOP_COLOR)) {
+    //         if (stLen === 3) {
+    //           stickers.forEach(st => (st.color = OFF_COLOR));
+    //         } else {
+    //           stickers.forEach(st => (st.color = st.oColor === TOP_COLOR ? st.oColor : OFF_COLOR));
+    //         }
+    //       } else {
+    //         stickers.forEach(st => (st.color = st.oColor));
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.GRAY: {
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         stickers[j].color = OFF_COLOR;
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.CENTERS: {
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         if (stLen != 1) {
+    //           stickers[j].color = OFF_COLOR;
+    //         } else {
+    //           stickers[j].color = stickers[j].oColor;
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.CROSS: {
+    //       const cnd = (pieces[i].contains(BOTTOM_COLOR) && stLen === 2) || stLen === 1;
 
-    for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
-      const stickers = getOColoredStickers(pieces[i]);
-      const stLen = stickers.length;
-      const topLayer = pieces[i].contains(TOP_COLOR);
-      const bottomLayer = pieces[i].contains(BOTTOM_COLOR);
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         stickers[j].color = cnd ? stickers[j].oColor : OFF_COLOR;
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.FL: {
+    //       const cnd = stLen >= 2 && !pieces[i].contains(BOTTOM_COLOR);
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         stickers[j].color = cnd ? OFF_COLOR : stickers[j].oColor;
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.YCROSS: {
+    //       const cnd = pieces[i].contains(TOP_COLOR) && stLen > 2;
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         stickers[j].color = cnd
+    //           ? OFF_COLOR
+    //           : stickers[j].oColor === TOP_COLOR
+    //             ? stickers[j].oColor
+    //             : OFF_COLOR;
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.CYCROSS: {
+    //       const cnd = pieces[i].contains(TOP_COLOR) && stLen > 2;
+    //       for (let j = 0; j < stLen; j += 1) {
+    //         stickers[j].color = cnd ? OFF_COLOR : stickers[j].oColor;
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.CS: {
+    //       for (let i = 0; i < stLen; i += 1) {
+    //         stickers[i].color = "w";
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.EO: {
+    //       for (let i = 0; i < stLen; i += 1) {
+    //         const stref =
+    //           stickers[i]._generator != stickers[i] ? stickers[i]._generator : stickers[i];
+    //         const o = stref.getOrientation();
 
-      switch (this.mode) {
-        case CubeMode.OLL: {
-          for (let j = 0; j < stLen; j += 1) {
-            if (stickers[j].oColor != TOP_COLOR) {
-              stickers[j].color = OFF_COLOR;
-            } else {
-              // stickers[j].color = stickers[j].oColor;
-              stickers[j].color = "yellow";
-            }
-          }
+    //         if (stref.points.length === 3) {
+    //           if (
+    //             (stickers[i].oColor === TOP_COLOR && o.sub(UP).abs() < EPS) ||
+    //             (stickers[i].oColor === BOTTOM_COLOR && o.sub(DOWN).abs() < EPS)
+    //           ) {
+    //             stickers[i].color = "k";
+    //           } else {
+    //             stickers[i].color = "w";
+    //           }
+    //         } else {
+    //           stickers[i].color = "w";
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     case CubeMode.CO: {
+    //       for (let i = 0; i < stLen; i += 1) {
+    //         const stref =
+    //           stickers[i]._generator != stickers[i] ? stickers[i]._generator : stickers[i];
 
-          break;
-        }
-        case CubeMode.DPLL: {
-          for (let j = 0; j < stLen; j += 1) {
-            if (stickers[j].oColor === TOP_COLOR) {
-              stickers[j].color = OFF_COLOR;
-            } else {
-              stickers[j].color = stickers[j].oColor;
-            }
-          }
-          break;
-        }
-        case CubeMode.F2L: {
-          for (let j = 0; j < stLen; j += 1) {
-            if (pieces[i].contains(TOP_COLOR)) {
-              stickers[j].color = OFF_COLOR;
-            } else {
-              stickers[j].color = stickers[j].oColor;
-            }
-          }
-          break;
-        }
-        case CubeMode.F3E: {
-          const rColor = this.p.faceColors[(this.p.faceColors.indexOf(BOTTOM_COLOR) + 1) % COLORS];
+    //         if (stickers[i].oColor === BOTTOM_COLOR && stref.points.length === 4) {
+    //           stickers[i].color = "k";
+    //         } else {
+    //           stickers[i].color = "w";
+    //         }
+    //       }
+    //       break;
+    //     }
+    //     default: {
+    //       break;
+    //     }
+    //   }
+    // }
 
-          if (
-            (stLen === 1 && (pieces[i].contains(TOP_COLOR) || pieces[i].contains(BOTTOM_COLOR))) ||
-            (stLen === 2 && pieces[i].contains(BOTTOM_COLOR) && pieces[i].contains(rColor))
-          ) {
-            stickers.forEach(st => (st.color = st.oColor));
-          } else {
-            stickers.forEach(st => (st.color = OFF_COLOR));
-          }
-
-          break;
-        }
-        case CubeMode.L4E: {
-          for (let i = 0; i < stLen; i += 1) {
-            if (stickers[i].direction1(a, u, true) < 0 && !bottomLayer) {
-              stickers[i].color = OFF_COLOR;
-            } else {
-              stickers[i].color = stickers[i].oColor;
-            }
-          }
-          break;
-        }
-        case CubeMode.EDGERF: {
-          const rColor = this.p.faceColors[(this.p.faceColors.indexOf(BOTTOM_COLOR) + 1) % COLORS];
-          const fColor = this.p.faceColors[(this.p.faceColors.indexOf(BOTTOM_COLOR) + 2) % COLORS];
-
-          if (stLen === 2 && pieces[i].contains(fColor) && pieces[i].contains(rColor)) {
-            stickers.forEach(st => (st.color = st.oColor));
-          } else {
-            stickers.forEach(st => (st.color = OFF_COLOR));
-          }
-
-          break;
-        }
-        case CubeMode.CMLL: {
-          for (let j = 0; j < stLen; j += 1) {
-            if (topLayer && stLen === 2) {
-              stickers[j].color = OFF_COLOR;
-            } else {
-              stickers[j].color = stickers[j].oColor;
-            }
-          }
-          break;
-        }
-        case CubeMode.OLLCP: {
-          if (topLayer) {
-            for (let j = 0; j < stLen; j += 1) {
-              if (stLen === 2 && stickers[j].oColor != TOP_COLOR) {
-                stickers[j].color = OFF_COLOR;
-              } else {
-                stickers[j].color = stickers[j].oColor;
-              }
-            }
-          } else {
-            for (let j = 0; j < stLen; j += 1) {
-              stickers[j].color = OFF_COLOR;
-            }
-          }
-          break;
-        }
-        case CubeMode.COLL: {
-          if (topLayer) {
-            for (let j = 0; j < stLen; j += 1) {
-              if (stLen === 2) {
-                let isTop = true;
-                const pts = stickers[j].points;
-                for (let k = 1, maxk = pts.length; k < maxk; k += 1) {
-                  if (Math.abs(pts[k].y - pts[0].y) > 1e-5) {
-                    isTop = false;
-                    break;
-                  }
-                }
-
-                if (!isTop) {
-                  stickers[j].color = OFF_COLOR;
-                } else {
-                  stickers[j].color = stickers[j].oColor;
-                }
-              } else {
-                stickers[j].color = stickers[j].oColor;
-              }
-            }
-          } else {
-            for (let j = 0; j < stLen; j += 1) {
-              stickers[j].color = OFF_COLOR;
-            }
-          }
-          break;
-        }
-        case CubeMode.VLS:
-        case CubeMode.WV: {
-          for (let j = 0; j < stLen; j += 1) {
-            if (pieces[i].contains(TOP_COLOR) && stickers[j].oColor != TOP_COLOR) {
-              stickers[j].color = OFF_COLOR;
-            } else {
-              stickers[j].color = stickers[j].oColor;
-            }
-          }
-          break;
-        }
-        case CubeMode.EOLS: {
-          if (pieces[i].contains(TOP_COLOR)) {
-            if (stLen === 3) {
-              stickers.forEach(st => (st.color = OFF_COLOR));
-            } else {
-              stickers.forEach(st => (st.color = st.oColor === TOP_COLOR ? st.oColor : OFF_COLOR));
-            }
-          } else {
-            stickers.forEach(st => (st.color = st.oColor));
-          }
-          break;
-        }
-        case CubeMode.GRAY: {
-          for (let j = 0; j < stLen; j += 1) {
-            stickers[j].color = OFF_COLOR;
-          }
-          break;
-        }
-        case CubeMode.CENTERS: {
-          for (let j = 0; j < stLen; j += 1) {
-            if (stLen != 1) {
-              stickers[j].color = OFF_COLOR;
-            } else {
-              stickers[j].color = stickers[j].oColor;
-            }
-          }
-          break;
-        }
-        case CubeMode.CROSS: {
-          const cnd = (pieces[i].contains(BOTTOM_COLOR) && stLen === 2) || stLen === 1;
-
-          for (let j = 0; j < stLen; j += 1) {
-            stickers[j].color = cnd ? stickers[j].oColor : OFF_COLOR;
-          }
-          break;
-        }
-        case CubeMode.FL: {
-          const cnd = stLen >= 2 && !pieces[i].contains(BOTTOM_COLOR);
-          for (let j = 0; j < stLen; j += 1) {
-            stickers[j].color = cnd ? OFF_COLOR : stickers[j].oColor;
-          }
-          break;
-        }
-        case CubeMode.YCROSS: {
-          const cnd = pieces[i].contains(TOP_COLOR) && stLen > 2;
-          for (let j = 0; j < stLen; j += 1) {
-            stickers[j].color = cnd
-              ? OFF_COLOR
-              : stickers[j].oColor === TOP_COLOR
-                ? stickers[j].oColor
-                : OFF_COLOR;
-          }
-          break;
-        }
-        case CubeMode.CYCROSS: {
-          const cnd = pieces[i].contains(TOP_COLOR) && stLen > 2;
-          for (let j = 0; j < stLen; j += 1) {
-            stickers[j].color = cnd ? OFF_COLOR : stickers[j].oColor;
-          }
-          break;
-        }
-        case CubeMode.CS: {
-          for (let i = 0; i < stLen; i += 1) {
-            stickers[i].color = "w";
-          }
-          break;
-        }
-        case CubeMode.EO: {
-          for (let i = 0; i < stLen; i += 1) {
-            const stref =
-              stickers[i]._generator != stickers[i] ? stickers[i]._generator : stickers[i];
-            const o = stref.getOrientation();
-
-            if (stref.points.length === 3) {
-              if (
-                (stickers[i].oColor === TOP_COLOR && o.sub(UP).abs() < EPS) ||
-                (stickers[i].oColor === BOTTOM_COLOR && o.sub(DOWN).abs() < EPS)
-              ) {
-                stickers[i].color = "k";
-              } else {
-                stickers[i].color = "w";
-              }
-            } else {
-              stickers[i].color = "w";
-            }
-          }
-          break;
-        }
-        case CubeMode.CO: {
-          for (let i = 0; i < stLen; i += 1) {
-            const stref =
-              stickers[i]._generator != stickers[i] ? stickers[i]._generator : stickers[i];
-
-            if (stickers[i].oColor === BOTTOM_COLOR && stref.points.length === 4) {
-              stickers[i].color = "k";
-            } else {
-              stickers[i].color = "w";
-            }
-          }
-          break;
-        }
-        default: {
-          break;
-        }
-      }
-    }
-
-    return this;
-  }
+    // return this;
+  // }
 
   static inverse(type: PuzzleType, sequence: string): string {
     let arr: string[] = [];
@@ -591,116 +536,116 @@ export class Puzzle {
     return p;
   }
 
-  toFacelet(): string {
-    if (!(this.type === "rubik" || this.type === "icarry")) {
-      return "";
-    }
+  // toFacelet(): string {
+  //   if (!(this.type === "rubik" || this.type === "icarry")) {
+  //     return "";
+  //   }
 
-    const colors = "URFDLB";
-    const vecs = this.p.faceVectors;
-    const cols = this.p.faceColors;
-    const allStickers = this.p.getAllStickers().filter(st => !(st instanceof ImageSticker));
-    const stickers: Sticker[][] = vecs.map(() => []);
-    const getSort = (k1: keyof Vector3D, k2: keyof Vector3D, d1: number, d2: number) => {
-      return (s1: Sticker, s2: Sticker) => {
-        const m1: any = s1.getMassCenter();
-        const m2: any = s2.getMassCenter();
+  //   const colors = "URFDLB";
+  //   const vecs = this.p.faceVectors;
+  //   const cols = this.p.faceColors;
+  //   const allStickers = this.p.getAllStickers().filter(st => !(st instanceof ImageSticker));
+  //   const stickers: Sticker[][] = vecs.map(() => []);
+  //   const getSort = (k1: keyof Vector3D, k2: keyof Vector3D, d1: number, d2: number) => {
+  //     return (s1: Sticker, s2: Sticker) => {
+  //       const m1: any = s1.getMassCenter();
+  //       const m2: any = s2.getMassCenter();
 
-        if (Math.abs(m1[k1] - m2[k1]) > EPS) {
-          return m1[k1] < m2[k1] ? d1 : -d1;
-        }
-        return m1[k2] < m2[k2] ? d2 : -d2;
-      };
-    };
+  //       if (Math.abs(m1[k1] - m2[k1]) > EPS) {
+  //         return m1[k1] < m2[k1] ? d1 : -d1;
+  //       }
+  //       return m1[k2] < m2[k2] ? d2 : -d2;
+  //     };
+  //   };
 
-    for (let i = 0, maxi = allStickers.length; i < maxi; i += 1) {
-      if (cols.indexOf(allStickers[i].oColor) < 0) {
-        continue;
-      }
+  //   for (let i = 0, maxi = allStickers.length; i < maxi; i += 1) {
+  //     if (cols.indexOf(allStickers[i].oColor) < 0) {
+  //       continue;
+  //     }
 
-      const u = allStickers[i].getOrientation();
+  //     const u = allStickers[i].getOrientation();
 
-      for (let j = 0, maxj = vecs.length; j < maxj; j += 1) {
-        if (vecs[j].equals(u)) {
-          stickers[j].push(allStickers[i]);
-          break;
-        }
-      }
-    }
+  //     for (let j = 0, maxj = vecs.length; j < maxj; j += 1) {
+  //       if (vecs[j].equals(u)) {
+  //         stickers[j].push(allStickers[i]);
+  //         break;
+  //       }
+  //     }
+  //   }
 
-    stickers[0].sort(getSort("z", "x", -1, -1));
-    stickers[1].sort(getSort("y", "z", 1, 1));
-    stickers[2].sort(getSort("y", "x", 1, -1));
-    stickers[3].sort(getSort("z", "x", 1, -1));
-    stickers[4].sort(getSort("y", "z", 1, -1));
-    stickers[5].sort(getSort("y", "x", 1, 1));
+  //   stickers[0].sort(getSort("z", "x", -1, -1));
+  //   stickers[1].sort(getSort("y", "z", 1, 1));
+  //   stickers[2].sort(getSort("y", "x", 1, -1));
+  //   stickers[3].sort(getSort("z", "x", 1, -1));
+  //   stickers[4].sort(getSort("y", "z", 1, -1));
+  //   stickers[5].sort(getSort("y", "x", 1, 1));
 
-    const sortedStickers = stickers.reduce((acc, e) => {
-      return acc.concat(e);
-    }, []);
+  //   const sortedStickers = stickers.reduce((acc, e) => {
+  //     return acc.concat(e);
+  //   }, []);
 
-    const res = [];
+  //   const res = [];
 
-    for (let i = 0, maxi = sortedStickers.length; i < maxi; i += 1) {
-      const st = sortedStickers[i];
+  //   for (let i = 0, maxi = sortedStickers.length; i < maxi; i += 1) {
+  //     const st = sortedStickers[i];
 
-      for (let j = 0, maxj = cols.length; j < maxj; j += 1) {
-        if (st.oColor === cols[j]) {
-          res.push(colors[j]);
-          break;
-        }
-      }
-    }
+  //     for (let j = 0, maxj = cols.length; j < maxj; j += 1) {
+  //       if (st.oColor === cols[j]) {
+  //         res.push(colors[j]);
+  //         break;
+  //       }
+  //     }
+  //   }
 
-    return res.join("");
-  }
+  //   return res.join("");
+  // }
 
   setTips(tips: number[]) {
     this.arrows = tips.map(e => e);
   }
 
-  isComplete(): boolean {
-    const pieces = this.p.pieces;
-    const fv = this.p.faceVectors;
-    const fvLen = fv.length;
-    const colors = [];
+  // isComplete(): boolean {
+  //   const pieces = this.p.pieces;
+  //   const fv = this.p.faceVectors;
+  //   const fvLen = fv.length;
+  //   const colors = [];
 
-    for (let i = 0; i < fvLen; i += 1) {
-      colors.push("-");
-    }
+  //   for (let i = 0; i < fvLen; i += 1) {
+  //     colors.push("-");
+  //   }
 
-    for (let p = 0, maxp = pieces.length; p < maxp; p += 1) {
-      const stickers = pieces[p].stickers;
+  //   for (let p = 0, maxp = pieces.length; p < maxp; p += 1) {
+  //     const stickers = pieces[p].stickers;
 
-      for (let s = 0, maxs = stickers.length; s < maxs; s += 1) {
-        if ("xd".indexOf(stickers[s].oColor) > -1) {
-          continue;
-        }
+  //     for (let s = 0, maxs = stickers.length; s < maxs; s += 1) {
+  //       if ("xd".indexOf(stickers[s].oColor) > -1) {
+  //         continue;
+  //       }
 
-        const v = stickers[s].getOrientation();
-        let ok = false;
+  //       const v = stickers[s].getOrientation();
+  //       let ok = false;
 
-        for (let j = 0; j < fvLen; j += 1) {
-          if (v.sub(fv[j]).abs() < EPS) {
-            if (colors[j] === "-") {
-              colors[j] = stickers[s].oColor;
-            } else if (colors[j] != stickers[s].oColor) {
-              return false;
-            }
+  //       for (let j = 0; j < fvLen; j += 1) {
+  //         if (v.sub(fv[j]).abs() < EPS) {
+  //           if (colors[j] === "-") {
+  //             colors[j] = stickers[s].oColor;
+  //           } else if (colors[j] != stickers[s].oColor) {
+  //             return false;
+  //           }
 
-            ok = true;
-            break;
-          }
-        }
+  //           ok = true;
+  //           break;
+  //         }
+  //       }
 
-        if (!ok) {
-          return false;
-        }
-      }
-    }
+  //       if (!ok) {
+  //         return false;
+  //       }
+  //     }
+  //   }
 
-    return true;
-  }
+  //   return true;
+  // }
 
   move(seq: string) {
     let moves: any[];
@@ -734,7 +679,7 @@ export class Puzzle {
     }
 
     this.p.move(moves);
-    this.adjustColors();
+    // this.adjustColors();
     return this;
   }
 
@@ -751,61 +696,61 @@ export class Puzzle {
     return new Color(this.p.palette[face]).toHex();
   }
 
-  get pieces(): Piece[] {
-    return this.p.pieces;
-  }
+  // get pieces(): Piece[] {
+  //   return this.p.pieces;
+  // }
 
-  getAllStickers() {
-    return this.p.getAllStickers();
-  }
+  // getAllStickers() {
+  //   return this.p.getAllStickers();
+  // }
 
-  clone(newMode?: CubeMode): Puzzle {
-    const res = new Puzzle({
-      type: this.type,
-      mode: typeof newMode != "undefined" ? newMode : this.mode,
-      view: this.view,
-      order: [this.order.a, this.order.b, this.order.c],
-      tips: this.arrows,
-      headless: this.options.headless,
-      rounded: this.options.rounded,
-      sequence: this.options.sequence,
-    });
+  // clone(newMode?: CubeMode): Puzzle {
+  //   const res = new Puzzle({
+  //     type: this.type,
+  //     mode: typeof newMode != "undefined" ? newMode : this.mode,
+  //     view: this.view,
+  //     order: [this.order.a, this.order.b, this.order.c],
+  //     tips: this.arrows,
+  //     headless: this.options.headless,
+  //     rounded: this.options.rounded,
+  //     sequence: this.options.sequence,
+  //   });
 
-    res.p.pieces.length = 0;
+  //   res.p.pieces.length = 0;
 
-    const pieces = this.p.pieces;
+  //   const pieces = this.p.pieces;
 
-    for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
-      res.p.pieces.push(pieces[i].clone());
-    }
-    res.p.center = this.p.center.clone();
-    res.p.dims = (this.p.dims || []).map(e => e);
-    res.p.rotation = Object.assign({}, this.p.rotation);
-    res.rotation = Object.assign({}, this.rotation);
+  //   for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
+  //     res.p.pieces.push(pieces[i].clone());
+  //   }
+  //   res.p.center = this.p.center.clone();
+  //   res.p.dims = (this.p.dims || []).map(e => e);
+  //   res.p.rotation = Object.assign({}, this.p.rotation);
+  //   res.rotation = Object.assign({}, this.rotation);
 
-    return res;
-  }
+  //   return res;
+  // }
 
-  moveFromMouse(pc: Piece, st: Sticker, pt: any, v: any) {
-    return this.p.toMove ? this.p.toMove(pc, st, pt, v) : [];
-  }
+  // moveFromMouse(pc: Piece, st: Sticker, pt: any, v: any) {
+  //   return this.p.toMove ? this.p.toMove(pc, st, pt, v) : [];
+  // }
 
-  computeBoundingBox(): Vector3D[] {
-    const bbs = this.pieces.map(s => s.computeBoundingBox());
-    const box = bbs.reduce(
-      (ac, p) => {
-        return [
-          Math.min(ac[0], p[0].x),
-          Math.min(ac[1], p[0].y),
-          Math.min(ac[2], p[0].z),
-          Math.max(ac[3], p[1].x),
-          Math.max(ac[4], p[1].y),
-          Math.max(ac[5], p[1].z),
-        ];
-      },
-      [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]
-    );
+  // computeBoundingBox(): Vector3D[] {
+  //   const bbs = this.pieces.map(s => s.computeBoundingBox());
+  //   const box = bbs.reduce(
+  //     (ac, p) => {
+  //       return [
+  //         Math.min(ac[0], p[0].x),
+  //         Math.min(ac[1], p[0].y),
+  //         Math.min(ac[2], p[0].z),
+  //         Math.max(ac[3], p[1].x),
+  //         Math.max(ac[4], p[1].y),
+  //         Math.max(ac[5], p[1].z),
+  //       ];
+  //     },
+  //     [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]
+  //   );
 
-    return [new Vector3D(box[0], box[1], box[2]), new Vector3D(box[3], box[4], box[5])];
-  }
+  //   return [new Vector3D(box[0], box[1], box[2]), new Vector3D(box[3], box[4], box[5])];
+  // }
 }

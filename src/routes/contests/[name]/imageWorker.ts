@@ -16,15 +16,15 @@ self.onmessage = event => {
 
   let images: string[][] = [];
 
-  pGenerateCubeBundle(puzzles).then(imgs => {
-    for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
-      let scrs = cats[i].scrambles.length;
-      images.push([]);
-      for (let j = 0, maxj = scrs; j < maxj; j += 1) {
-        images[i].push(imgs.shift() || "");
-      }
-    }
+  let imgs = pGenerateCubeBundle(puzzles);
 
-    self.postMessage(images);
-  });
+  for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
+    let scrs = cats[i].scrambles.length;
+    images.push([]);
+    for (let j = 0, maxj = scrs; j < maxj; j += 1) {
+      images[i].push(imgs.shift() || "");
+    }
+  }
+
+  self.postMessage(images);
 };

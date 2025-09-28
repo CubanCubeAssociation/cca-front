@@ -1,4 +1,7 @@
 <script lang="ts">
+  // import { Puzzle } from "@classes/puzzle/puzzle";
+  // import PuzzleImage from "@components/PuzzleImage.svelte";
+  // import { pGenerateCubeBundle } from "@helpers/cube-draw";
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import { SITEMAP } from "@helpers/routing";
   import type { Scrambler } from "@interfaces";
@@ -10,6 +13,13 @@
     { icon: "444wca", name: "4x4" },
     { icon: "pyrso", name: "Pyraminx" },
   ];
+  // console.time("puzzle");
+  // const puzzle = $state(
+  //   Puzzle.fromSequence(`U' R' B L' U B R' L l r b u`, { type: "pyraminx", rounded: true })
+  // );
+  // console.timeEnd("puzzle");
+
+  // let img = $state(pGenerateCubeBundle([puzzle])[0]);
 </script>
 
 <main id="hero" class="card">
@@ -24,6 +34,8 @@
   <a href={SITEMAP.cca}>
     <button class="btn btn-info mt-4">Saber más <ChevronRightIcon size="1rem" /> </button>
   </a>
+
+  <!-- <PuzzleImage src={img} /> -->
 </main>
 
 <section id="popular" class="card">

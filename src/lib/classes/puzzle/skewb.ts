@@ -1,204 +1,226 @@
 import { RIGHT, LEFT, DOWN, FRONT } from "./../vector3d";
 import { Vector3D, CENTER, BACK, UP } from "../../classes/vector3d";
-import type { PuzzleInterface, ToMoveResult } from "@interfaces";
-import { EPS, STANDARD_PALETTE } from "@constants";
+import type { PuzzleInterface } from "@interfaces";
+import { STANDARD_PALETTE } from "@constants";
 import { Piece } from "./Piece";
 import { Sticker } from "./Sticker";
-import { assignColors, getAllStickers, random } from "./puzzleUtils";
-import { ScrambleParser } from "@classes/scramble-parser";
+import { assignColors, roundStickerCorners } from "./puzzleUtils";
+import type { BezierSticker } from "./BezierSticker";
+import type { BezierCurve } from "./BezierCurve";
 
 export function SKEWB(): PuzzleInterface {
   const skewb: PuzzleInterface = {
     pieces: [],
     palette: STANDARD_PALETTE,
-    rotation: {},
-    center: new Vector3D(0, 0, 0),
     faceVectors: [],
-    getAllStickers: () => [],
-    faceColors: ["w", "r", "g", "y", "o", "b"],
     move: () => true,
     roundParams: {},
   };
 
-  skewb.getAllStickers = getAllStickers.bind(skewb);
-
   const PI = Math.PI;
   const PI_2 = PI / 2;
   const PI_3 = PI / 3;
+  const pieces = skewb.pieces || [];
 
-  const center = new Piece([
-    new Sticker([UP.add(BACK), UP.add(LEFT), UP.add(FRONT), UP.add(RIGHT)]),
-  ]);
-
-  center.stickers[0].vecs = [
-    UP.add(BACK).add(LEFT).unit(),
-    UP.add(BACK).add(RIGHT).unit(),
-    UP.add(FRONT).add(LEFT).unit(),
-    UP.add(FRONT).add(RIGHT).unit(),
-  ];
-
-  const cornerSticker = new Sticker([UP.add(RIGHT), UP.add(FRONT), UP.add(FRONT).add(RIGHT)]);
-
-  const anchor = UP.add(FRONT).add(RIGHT);
-
-  const corner = new Piece([
-    cornerSticker,
-    cornerSticker.rotate(anchor, UP, PI_2).rotate(anchor, RIGHT, PI_2),
-    cornerSticker.rotate(anchor, DOWN, PI_2).rotate(anchor, BACK, PI_2),
-  ]);
-
-  corner.stickers.forEach(s => {
-    s.vecs = [
-      UP.add(RIGHT).add(BACK).unit(),
-      DOWN.add(RIGHT).add(FRONT).unit(),
-      UP.add(LEFT).add(FRONT).unit(),
-    ];
-  });
-
-  for (let i = 0; i < 4; i += 1) {
-    skewb.pieces.push(center.rotate(CENTER, RIGHT, i * PI_2));
-  }
-  skewb.pieces.push(center.rotate(CENTER, BACK, PI_2));
-  skewb.pieces.push(center.rotate(CENTER, FRONT, PI_2));
-
-  for (let i = 0; i <= 1; i += 1) {
-    for (let j = 0; j < 4; j += 1) {
-      skewb.pieces.push(corner.rotate(CENTER, RIGHT, i * PI_2).rotate(CENTER, UP, j * PI_2));
-    }
-  }
-
-  const MOVE_MAP = "FURLB";
-
-  const pieces = skewb.pieces;
-
-  const planes = [
-    [FRONT.add(LEFT), FRONT.add(UP), RIGHT.add(UP)], // F
-    [RIGHT.add(UP), FRONT.add(UP), FRONT.add(LEFT)], // U
-    [BACK.add(UP), RIGHT.add(FRONT), RIGHT.add(UP)], // R
-    [RIGHT.add(FRONT), LEFT.add(UP), UP.add(FRONT)], // L
-    [LEFT.add(UP), RIGHT.add(BACK), BACK.add(UP)], // B
-    [LEFT.add(UP), BACK.add(UP), RIGHT.add(BACK)], // f
-    [FRONT.add(RIGHT), FRONT.add(UP), LEFT.add(UP)], // r
-    [RIGHT.add(UP), FRONT.add(RIGHT), FRONT.add(DOWN)], // l
-    [RIGHT.add(UP), FRONT.add(UP), FRONT.add(LEFT)], // b
-
-    [BACK, UP, FRONT].map(e => e.add(RIGHT.mul(2))), // x
-    [RIGHT, BACK, LEFT].map(e => e.add(UP.mul(2))), // y
-    [RIGHT, UP, LEFT].map(e => e.add(FRONT.mul(2))), // z
-  ];
-
-  const trySingleMove = (mv: any): { pieces: Piece[]; u: Vector3D; ang: number } | null => {
-    const moveId = mv[0];
-    let turns = mv[1];
-    const pts1 = planes[moveId];
-
-    if (moveId >= planes.length - 3) {
-      turns = (-turns * 3) / 4;
-    }
-
-    const u = Vector3D.cross(pts1[0], pts1[1], pts1[2]).unit();
-
-    const mu = u.mul(-1);
-    const ang = -2 * PI_3 * turns;
-
-    const pcs = [];
-
-    for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
-      const d = pieces[i].direction1(pts1[0], u);
-      if (d === 0) {
-        console.log("Invalid move. Piece intersection detected.", MOVE_MAP[moveId], turns, mv);
-        console.log("Piece: ", i, pieces[i], pts1);
-        return null;
-      }
-
-      if (d < 0) {
-        pcs.push(pieces[i]);
-      }
-    }
-
-    return {
-      pieces: pcs,
-      u: mu,
-      ang,
-    };
+  type FaceName = "U" | "R" | "F" | "D" | "L" | "B";
+  type FaceColor = keyof typeof STANDARD_PALETTE;
+  type Strip = { get(): FaceName[]; set(vals: FaceName[]): void };
+  type Selector = (f: Record<FaceName, FaceName[][]>, k: number) => Strip;
+  const FACE_COLOR: Record<FaceName, FaceColor> = {
+    U: "white",
+    R: "red",
+    F: "green",
+    D: "yellow",
+    L: "orange",
+    B: "blue",
   };
 
+  const faces: Record<FaceName, FaceName[]> = {
+    U: ["U", "U", "U", "U", "U"], // C1, C2, C3, C4 (clockwise), CENTER
+    R: ["R", "R", "R", "R", "R"],
+    F: ["F", "F", "F", "F", "F"],
+    D: ["D", "D", "D", "D", "D"],
+    L: ["L", "L", "L", "L", "L"],
+    B: ["B", "B", "B", "B", "B"],
+  };
+
+  function update(
+    NU: FaceName[],
+    NR: FaceName[],
+    NF: FaceName[],
+    ND: FaceName[],
+    NL: FaceName[],
+    NB: FaceName[]
+  ) {
+    faces.U = NU;
+    faces.R = NR;
+    faces.F = NF;
+    faces.D = ND;
+    faces.L = NL;
+    faces.B = NB;
+  }
+
+  function pick(arr: FaceName[], indexes: number[]): FaceName[] {
+    return indexes.map(n => arr[n]);
+  }
+
+  const cycles: Record<string, (dir: number) => void> = {
+    R: (dir: number) => {
+      let times = ((dir % 3) + 3) % 3;
+      for (let i = 0; i < times; i += 1) {
+        let NU = [faces.U[0], faces.F[2], ...pick(faces.U, [2, 3, 4])];
+        let NR = [faces.R[0], ...faces.D.slice(1)];
+        let NF = faces.F.map((v, p) => (p === 2 ? faces.L[3] : v));
+        let ND = [faces.D[0], ...pick(faces.B, [2, 3, 0, 4])];
+        let NL = faces.L.map((v, p) => (p === 3 ? faces.U[1] : v));
+        let NB = pick(faces.R, [3, 0, 1, 2, 4]).map((v, p) => (p === 1 ? faces.B[1] : v));
+        update(NU, NR, NF, ND, NL, NB);
+      }
+    },
+
+    L: (dir: number) => {
+      let times = ((dir % 3) + 3) % 3;
+      for (let i = 0; i < times; i += 1) {
+        let NU = faces.U.map((v, p) => (p === 3 ? faces.B[2] : v));
+        let NR = faces.R.map((v, p) => (p === 3 ? faces.U[3] : v));
+        let NF = pick(faces.L, [3, 1, 1, 2, 4]).map((v, p) => (p === 1 ? faces.F[1] : v));
+        let ND = pick(faces.F, [3, 0, 1, 2, 4]).map((v, p) => (p === 2 ? faces.D[2] : v));
+        let NL = pick(faces.D, [0, 3, 0, 1, 4]).map((v, p) => (p === 0 ? faces.L[0] : v));
+        let NB = faces.B.map((v, p) => (p === 2 ? faces.R[3] : v));
+        update(NU, NR, NF, ND, NL, NB);
+      }
+    },
+
+    U: (dir: number) => {
+      let times = ((dir % 3) + 3) % 3;
+      for (let i = 0; i < times; i += 1) {
+        let NU = pick(faces.B, [1, 2, 0, 0, 4]).map((v, p) => (p === 2 ? faces.U[2] : v));
+        let NR = faces.R.map((v, p) => (p === 1 ? faces.D[3] : v));
+        let NF = faces.F.map((v, p) => (p === 0 ? faces.R[1] : v));
+        let ND = faces.D.map((v, p) => (p === 3 ? faces.F[0] : v));
+        let NL = faces.U.map((v, p) => (p === 2 ? faces.L[2] : v));
+        let NB = pick(faces.L, [3, 0, 1, 0, 4]).map((v, p) => (p === 3 ? faces.B[3] : v));
+        update(NU, NR, NF, ND, NL, NB);
+      }
+    },
+
+    B: (dir: number) => {
+      let times = ((dir % 3) + 3) % 3;
+      for (let i = 0; i < times; i += 1) {
+        let NU = faces.U.map((v, p) => (p === 0 ? faces.R[2] : v));
+        let NR = faces.R.map((v, p) => (p === 2 ? faces.F[3] : v));
+        let NF = faces.F.map((v, p) => (p === 3 ? faces.U[0] : v));
+        let ND = faces.L.map((v, p) => (p === 1 ? faces.D[1] : v));
+        let NL = pick(faces.B, [3, 0, 1, 2, 4]).map((v, p) => (p === 1 ? faces.L[1] : v));
+        let NB = pick(faces.D, [0, 2, 3, 0, 4]).map((v, p) => (p === 0 ? faces.B[0] : v));
+        update(NU, NR, NF, ND, NL, NB);
+      }
+    },
+  };
+
+  const moveMap = "FURLBfrlbxyz";
   skewb.move = function (moves: any[]) {
-    for (let m = 0, maxm = moves.length; m < maxm; m += 1) {
-      const mv = moves[m];
-      const pcs = trySingleMove(mv);
-
-      if (!pcs) {
-        return false;
-      }
-
-      const { u, ang } = pcs;
-      pcs.pieces.forEach(p => p.rotate(CENTER, u, ang, true));
-    }
-
-    return true;
+    moves.forEach(mv => {
+      cycles[moveMap[mv[0]]](mv[1]);
+    });
   };
 
-  skewb.toMove = function (piece: Piece, sticker: Sticker, dir: Vector3D) {
-    const mc = sticker.updateMassCenter();
-    const toMovePieces = pieces.filter(p => p.direction1(mc, dir) >= 0);
-    return {
-      pieces: toMovePieces,
-      ang: 2 * PI_3,
+  skewb.getImage = () => {
+    const BOX = 100;
+    const W = BOX * 4;
+    const H = BOX * 3;
+    const BOX_FACTOR = 0.9;
+    const BOX_OFFSET = (BOX * (1 - BOX_FACTOR)) / 2;
+
+    let getRoundedPath = (path: number[][]): string => {
+      let st = new Sticker(path.map(p => new Vector3D(p[0], p[1], 0)));
+      let pts = (roundStickerCorners(st, 0.2, 1, 10, true) as BezierSticker).parts;
+      let res: string[] = [];
+
+      for (let j = 0, maxj = pts.length; j < maxj; j += 1) {
+        if (pts[j] instanceof Vector3D) {
+          const pt = pts[j] as Vector3D;
+
+          if (j === 0) {
+            res.push(`M ${pt.x} ${pt.y}`);
+          } else {
+            res.push(`L ${pt.x} ${pt.y}`);
+          }
+        } else {
+          const bz = pts[j] as BezierCurve;
+          const pts1 = bz.anchors;
+
+          if (j === 0) {
+            res.push(`M ${pts1[0].x} ${pts1[0].y}`);
+          } else {
+            res.push(`L ${pts1[0].x} ${pts1[0].y}`);
+          }
+
+          if (pts1.length === 3) {
+            res.push(`Q ${pts1[1].x} ${pts1[1].y} ${pts1[2].x} ${pts1[2].y}`);
+            // ctx.quadraticCurveTo(pts1[1].x, pts1[1].y, pts1[2].x, pts1[2].y);
+          } else {
+            // ctx.bezierCurveTo(pts1[1].x, pts1[1].y, pts1[2].x, pts1[2].y, pts1[3].x, pts1[3].y);
+          }
+        }
+      }
+
+      res.push("Z");
+
+      return res.join(" ");
     };
-  };
 
-  skewb.scramble = function () {
-    if (!skewb.toMove) return;
+    let drawFace = (bx: number, by: number, fn: FaceName[]) => {
+      let rx = bx * BOX + BOX_OFFSET;
+      let ry = by * BOX + BOX_OFFSET;
+      let BX = BOX * BOX_FACTOR;
+      let BX2 = BX / 2;
+      let cols = fn.map(c => STANDARD_PALETTE[FACE_COLOR[c]]);
 
-    const MOVES = 30;
+      return `
+      <path stroke="black" stroke-width="2" fill="${cols[0]}" d="${getRoundedPath([
+        [rx, ry],
+        [rx, ry + BX2],
+        [rx + BX2, ry],
+      ])}" />
+      <path stroke="black" stroke-width="2" fill="${cols[1]}" d="${getRoundedPath([
+        [rx + BX2, ry],
+        [rx + BX, ry + BX2],
+        [rx + BX, ry],
+      ])}" />
+      <path stroke="black" stroke-width="2" fill="${cols[2]}" d="${getRoundedPath([
+        [rx + BX, ry + BX2],
+        [rx + BX2, ry + BX],
+        [rx + BX, ry + BX],
+      ])}" />
+      <path stroke="black" stroke-width="2" fill="${cols[3]}" d="${getRoundedPath([
+        [rx + BX2, ry + BX],
+        [rx, ry + BX2],
+        [rx, ry + BX],
+      ])}" />
+      <path stroke="black" stroke-width="2" fill="${cols[4]}" d="${getRoundedPath([
+        [rx + BX2, ry],
+        [rx + BX, ry + BX2],
+        [rx + BX2, ry + BX],
+        [rx, ry + BX2],
+      ])}" />
+      `;
+    };
 
-    for (let i = 0; i < MOVES; i += 1) {
-      const p = random(pieces) as Piece;
-      const s = random(p.stickers.filter(s => !/^[xd]{1}$/.test(s.color))) as Sticker;
-      const vec = random(s.vecs.filter(v => v.unit().sub(s.getOrientation()).abs() > EPS));
-      const pcs = skewb.toMove(p, s, vec) as ToMoveResult;
-      const cant = 1 + random(2);
-      pcs.pieces.forEach((p: Piece) => p.rotate(CENTER, vec, pcs.ang * cant, true));
-    }
-  };
-
-  skewb.applySequence = function (seq: string[]) {
-    const moves = seq.map(mv => ScrambleParser.parseSkewb(mv)[0]);
-    const res: { u: Vector3D; ang: number; pieces: string[] }[] = [];
-
-    for (let i = 0, maxi = moves.length; i < maxi; i += 1) {
-      let pcs;
-
-      try {
-        pcs = trySingleMove(moves[i]);
-      } catch (e) {
-        console.log("ERROR: ", seq[i], moves[i], e);
-      }
-
-      if (!pcs) {
-        continue;
-      }
-
-      const { u, ang } = pcs;
-
-      res.push({ u, ang, pieces: pcs.pieces.map(p => p.id) });
-
-      pcs.pieces.forEach(p => p.rotate(CENTER, u, ang, true));
-    }
-
-    return res;
-  };
-
-  skewb.rotation = {
-    x: Math.PI / 6,
-    y: -Math.PI / 4,
-    z: 0,
+    return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <svg xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMin">
+      ${drawFace(1, 0, faces.U)}
+      ${drawFace(0, 1, faces.L)}
+      ${drawFace(1, 1, faces.F)}
+      ${drawFace(2, 1, faces.R)}
+      ${drawFace(3, 1, faces.B)}
+      ${drawFace(1, 2, faces.D)}
+    </svg>`;
   };
 
   skewb.faceVectors = [UP, RIGHT, FRONT, DOWN, LEFT, BACK];
 
-  assignColors(skewb, skewb.faceColors);
+  assignColors(skewb, ["w", "r", "g", "y", "o", "b"]);
 
   return skewb;
 }

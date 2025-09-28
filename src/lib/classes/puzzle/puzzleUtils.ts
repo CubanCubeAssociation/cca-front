@@ -13,8 +13,8 @@ import type { Piece } from "./Piece";
 export function assignColors(p: PuzzleInterface, cols?: string[], isCube = false) {
   const colors = cols || ["y", "o", "g", "w", "r", "b"];
 
-  const stickers: Sticker[] = p.getAllStickers();
-  const pieces = p.pieces;
+  const pieces = p.pieces || [];
+  const stickers: Sticker[] = getAllStickers(pieces);
 
   // Adjust -1, 0 and 1 values for better precision
   for (let i = 0, maxi = stickers.length; i < maxi; i += 1) {
@@ -70,7 +70,7 @@ export function assignColors(p: PuzzleInterface, cols?: string[], isCube = false
       }
     }
 
-    if (!ok) {
+    if (!ok && p.faceVectors) {
       if (dirs[0] > 0) {
         for (let j = 0, maxj = Math.min(colors.length, p.faceVectors.length); j < maxj; j += 1) {
           if (u.sub(p.faceVectors[j]).abs() < EPS) {
@@ -87,9 +87,8 @@ export function assignColors(p: PuzzleInterface, cols?: string[], isCube = false
   }
 }
 
-export function getAllStickers(this: PuzzleInterface): Sticker[] | BezierSticker[] {
+export function getAllStickers(pieces: Piece[]): Sticker[] | BezierSticker[] {
   const res = [];
-  const pieces = this.pieces;
 
   for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
     const stickers = pieces[i].stickers;
@@ -241,7 +240,7 @@ export function roundCorners({ p, rd, scale, ppc, fn, justScale, calcPath }: Rou
   const CHECK = fn || ((s: Sticker) => !BANNED_CLASSES.some(cl => s instanceof cl));
 
   p.isRounded = true;
-  const pieces = p.pieces;
+  const pieces = p.pieces || [];
 
   for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
     const pc = pieces[i];
@@ -279,7 +278,7 @@ export function roundCorners({ p, rd, scale, ppc, fn, justScale, calcPath }: Rou
 }
 
 export function assignVectors(p: PuzzleInterface) {
-  const pieces = p.pieces;
+  const pieces = p.pieces || [];
 
   for (let i = 0, maxi = pieces.length; i < maxi; i += 1) {
     const stickers = pieces[i].stickers;

@@ -1,6 +1,6 @@
 import type { Sticker } from "@classes/puzzle/Sticker";
 import type { Puzzle } from "@classes/puzzle/puzzle";
-import { roundCorners, roundStickerCorners } from "@classes/puzzle/puzzleUtils";
+import { getAllStickers, roundCorners, roundStickerCorners } from "@classes/puzzle/puzzleUtils";
 import { BACK, CENTER, DOWN, FRONT, LEFT, RIGHT, UP, Vector3D } from "@classes/vector3d";
 import { CubeMode, EPS } from "@constants";
 import type { PuzzleType } from "@interfaces";
@@ -68,10 +68,16 @@ function getRoundedSQ1Sticker(
 interface PROJECTED_VIEW_ARGS {
   cube: Puzzle;
   DIM: number;
+  format?: "raster" | "svg";
   printMode?: boolean;
 }
 
-export function projectedView({ cube, DIM, printMode = false }: PROJECTED_VIEW_ARGS): string {
+export function projectedView({
+  cube,
+  DIM,
+  format = "svg",
+  printMode = false,
+}: PROJECTED_VIEW_ARGS): string {
   let W = (DIM * 4) / 2;
   let H = (DIM * 3) / 2;
   const FACTOR = 2.1;
@@ -126,14 +132,14 @@ export function projectedView({ cube, DIM, printMode = false }: PROJECTED_VIEW_A
     colorFilter = ["d"];
   }
 
-  const stickers = cube.getAllStickers().filter(s => {
+  const stickers = getAllStickers(cube.p.pieces || []).filter(s => {
     if (cube.type === "clock") return !(s instanceof FaceSticker);
     return colorFilter.indexOf(s.color) === -1;
   });
 
   const sideStk: { [name: string]: Sticker[] } = {};
 
-  let faceVectors = cube.p.faceVectors;
+  let faceVectors = cube.p.faceVectors || [];
   let faceName = ["U", "R", "F", "D", "L", "B"];
   let fcTr: any[] = [
     // rotate([0], [1], [2]).add([3].mul([4]))
@@ -374,7 +380,7 @@ export function projectedView({ cube, DIM, printMode = false }: PROJECTED_VIEW_A
     // Get points of the bottom center
     const downPts: Vector3D[] =
       cube.type === "megaminx"
-        ? cube.p.pieces.filter(p => {
+        ? (cube.p.pieces || []).filter(p => {
             if (p.stickers.length < 2) return false;
             if (p.stickers.some(st => st.name === "center")) {
               const st = p.stickers.filter(st => st.name === "center")[0];
@@ -444,10 +450,10 @@ export function projectedView({ cube, DIM, printMode = false }: PROJECTED_VIEW_A
     const LY = H * 0.457;
     const fontWeight = W * 0.05;
 
-    const upVector = cube.p.faceVectors[0];
-    const frontVector = cube.p.faceVectors[3];
+    const upVector = faceVectors[0];
+    const frontVector = faceVectors[3];
 
-    const cc = cube.p.getAllStickers().filter(st => st.name === "center-colored");
+    const cc = getAllStickers(cube.p.pieces || []).filter(st => st.name === "center-colored");
     const hToArr = (s: string) =>
       s
         .slice(1)

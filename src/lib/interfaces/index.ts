@@ -467,27 +467,14 @@ export interface PiecesToMove {
 }
 
 export interface PuzzleInterface {
-  pieces: Piece[];
   palette: any;
-  rotation: {
-    x?: number;
-    y?: number;
-    z?: number;
-  };
-  center: Vector3D;
-  faceVectors: Vector3D[];
-  faceColors: string[];
-  getAllStickers: () => Sticker[] | BezierSticker[];
   move: (m: any) => any;
+  getImage?: () => string;
   roundParams: Omit<RoundCornersParams, "p">;
   isRounded?: boolean;
-  dims?: number[];
+  faceVectors?: Vector3D[];
+  pieces?: Piece[];
   raw?: any;
-  scramble?: () => any;
-  toMove?: (p: Piece, s: Sticker, dir: Vector3D, pinCode?: any) => ToMoveResult | ToMoveResult[];
-  applySequence?: (...args: any[]) => (SequenceResult | SequenceResult[])[];
-  toMoveSeq?: (move: string) => Required<ToMoveResult> | Required<ToMoveResult>[];
-  vectorsFromCamera?: AnyCallback;
 }
 
 export interface VectorLike3D {
@@ -496,7 +483,7 @@ export interface VectorLike3D {
   z: number;
 }
 
-export declare type CubeView = "plan" | "trans" | "2d" | "bird";
+export declare type CubeView = "plan" | "2d" | "bird";
 
 export interface PuzzleOptions {
   type: PuzzleType;

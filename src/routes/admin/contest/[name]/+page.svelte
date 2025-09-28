@@ -373,17 +373,17 @@
       }
     }
 
-    pGenerateCubeBundle(puzzles).then(imgs => {
-      images.length = 0;
+    let imgs = pGenerateCubeBundle(puzzles);
 
-      for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
-        let scrs = cats[i].scrambles.length;
-        images.push([]);
-        for (let j = 0, maxj = scrs; j < maxj; j += 1) {
-          images[i].push(imgs.shift() || "");
-        }
+    images.length = 0;
+
+    for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
+      let scrs = cats[i].scrambles.length;
+      images.push([]);
+      for (let j = 0, maxj = scrs; j < maxj; j += 1) {
+        images[i].push(imgs.shift() || "");
       }
-    });
+    }
   }
 
   function getContestData() {
@@ -451,9 +451,8 @@
     let opt = options.get(contest.categories[p1].category.scrambler) || { type: "rubik" };
 
     if (!Array.isArray(opt)) {
-      pGenerateCubeBundle([Puzzle.fromSequence(scr, opt)]).then(res => {
-        images[p1][p2] = res[0];
-      });
+      let res = pGenerateCubeBundle([Puzzle.fromSequence(scr, opt)]);
+      images[p1][p2] = res[0];
     }
   }
 

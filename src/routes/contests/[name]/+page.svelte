@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { onMount } from "svelte";
   import moment from "moment";
   import {
     PERMISSIONS,
     STATUS_ORDER,
     type CONTEST,
-    type CONTEST_CATEGORY,
     type CONTEST_STATUS,
     type FORMAT,
     type ROUND,
@@ -47,9 +46,6 @@
   import Modal from "@components/Modal.svelte";
   import { twMerge } from "tailwind-merge";
   import { NotificationService } from "@stores/notification.service";
-  import { Puzzle } from "@classes/puzzle/puzzle";
-  import { options } from "@constants";
-  import { pGenerateCubeBundle } from "@helpers/cube-draw";
   import PuzzleImage from "@components/PuzzleImage.svelte";
   import IMAGE_WORKER_URL from "./imageWorker?url";
 
