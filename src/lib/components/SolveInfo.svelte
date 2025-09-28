@@ -172,24 +172,26 @@
     </button>
   {/if}
 
-  <button
-    class="btn btn-secondary btn-soft"
-    onclick={preventDefault(() => {
-      let opts = options.get(round.category.scrambler) || { type: "rubik", order: 3 };
-      let opt = Array.isArray(opts) ? opts[0] : opts;
+  {#if solve.reconstruction}
+    <button
+      class="btn btn-secondary btn-soft"
+      onclick={preventDefault(() => {
+        let opts = options.get(round.category.scrambler) || { type: "rubik", order: 3 };
+        let opt = Array.isArray(opts) ? opts[0] : opts;
 
-      open(
-        `https://cubicdb.netlify.app/reconstructions?puzzle=${opt.type}&order=${
-          opt.order || -1
-        }&scramble=${encodeURI((scramble || "").replace(/ /g, "_"))}&reconstruction=${encodeURI(
-          solve.reconstruction.replace(/ /g, "_")
-        )}`,
-        "_blank"
-      );
-    })}
-  >
-    <ExternalLink size="1.2rem" /> Ver en CubicDB
-  </button>
+        open(
+          `https://cubicdb.netlify.app/reconstructions?puzzle=${opt.type}&order=${
+            opt.order || -1
+          }&scramble=${encodeURI((scramble || "").replace(/ /g, "_"))}&reconstruction=${encodeURI(
+            solve.reconstruction.replace(/ /g, "_")
+          )}`,
+          "_blank"
+        );
+      })}
+    >
+      <ExternalLink size="1.2rem" /> Ver en CubicDB
+    </button>
+  {/if}
 
   {#if allowEdit}
     <button class="btn btn-primary" onclick={preventDefault(saveReconstruction)}>
