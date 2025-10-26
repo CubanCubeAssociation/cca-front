@@ -1,4 +1,4 @@
-import type { CATEGORY, PROVINCE, PuzzleOptions, ROLE } from "../interfaces";
+import type { CATEGORY, PROVINCE, PuzzleType, ROLE, Scrambler } from "../interfaces";
 
 export const CCA_ICON = "/cca_logo.svg";
 
@@ -21,7 +21,7 @@ export const ICONS: Partial<CATEGORY>[] = [
   },
   {
     name: "3x3x3 MBLD",
-    scrambler: "333mbf",
+    scrambler: "r3ni",
   },
   {
     name: "3x3x3 OH",
@@ -449,181 +449,42 @@ export function strToHex(color: string): number {
   return (nums[0] << 16) | (nums[1] << 8) | nums[2];
 }
 
-// SCRAMBLER OPTIONS
-export const R222 = [
-  "222so",
-  "222o",
-  "2223",
-  "2226",
-  "222eg",
-  "222eg0",
-  "222eg1",
-  "222eg2",
-  "222nb",
-  "222tcp",
-  "222tcn",
-  "222lsall",
-];
-export const R333 = [
-  "333",
-  "333ni",
-  "333fm",
-  "333oh",
-  "333o",
-  "edges",
-  "corners",
-  "ll",
-  "zbll",
-  "cll",
-  "ell",
-  "lse",
-  "lsemu",
-  "cmll",
-  "f2l",
-  "lsll2",
-  "2gll",
-  "zbls",
-  "zzll",
-  "oll",
-  "pll",
-  "eoline",
-  "easyc",
-  "333ft",
-  "333custom",
-  "2gen",
-  "2genl",
-  "roux",
-  "3gen_F",
-  "3gen_L",
-  "RrU",
-  "half",
-  "lsll",
-  "coll",
-  "eols",
-  "wvls",
-  "vls",
-  "easyxc",
-  "sbrx",
-  "mt3qb",
-  "mteole",
-  "mttdr",
-  "mt6cp",
-  "mtcdrll",
-  "mtl5ep",
-  "ttll",
-];
-export const R444 = ["444wca", "444bld", "444m", "444", "444yj", "4edge", "RrUu"];
-export const R555 = ["555wca", "555bld", "555", "5edge"];
-export const R666 = ["666wca", "666si", "666p", "666s", "6edge"];
-export const R777 = ["777wca", "777si", "777p", "777s", "7edge"];
-export const PYRA = ["pyrso", "pyro", "pyrm", "pyrl4e", "pyr4c", "pyrnb"];
-export const SKWB = ["skbso", "skbo", "skb", "skbnb"];
-export const SQR1 = ["sqrs", "sqrcsp", "sq1h", "sq1t"];
-export const CLCK = ["clkwca", "clk", "clkwca", "clko", "clkc", "clke"];
-export const MEGA = ["mgmp", "mgmc", "mgmo", "minx2g", "mlsll", "mgmll", "mgmpll"];
-export const KILO = ["klmso", "klmp"];
-export const GIGA = ["giga"];
-export const MISC = [
-  ["r3", "r3ni"],
-  "r234w",
-  "r2345w",
-  "r23456w",
-  "r234567w",
-  "r234",
-  "r2345",
-  "r23456",
-  "r234567",
-  "sq2",
-  "bic",
-  ["gearso", "gearo", "gear"],
-  ["redim", "redi"],
-  ["ivy", "ivyo", "ivyso"],
-  ["prcp", "prco"],
-  ["heli"],
-  ["888"],
-  ["999"],
-  ["101010"],
-  ["111111"],
-  ["mpyr"],
-  ["223"],
-  ["233"],
-  ["334"],
-  ["336"],
-  ["ssq1t"],
-  ["fto"],
-  ["133"],
-  ["sfl"],
-];
+export const ORDER_MAP: Record<Scrambler, number> = {
+  "222so": 2,
+  "333": 3,
+  "333fm": 3,
+  "333ni": 3,
+  r3ni: 3,
+  "333oh": 3,
+  "444bld": 4,
+  "444wca": 4,
+  "555wca": 5,
+  "555bld": 5,
+  "666wca": 6,
+  "777wca": 7,
+  clkwca: -1,
+  mgmp: 3,
+  pyrso: 3,
+  skbso: -1,
+  sqrs: -1,
+};
 
-const OPTS: PuzzleOptions[] = [
-  { type: "rubik", order: [2] },
-  { type: "rubik", order: [3] },
-  { type: "rubik", order: [4] },
-  { type: "rubik", order: [5] },
-  { type: "rubik", order: [6] },
-  { type: "rubik", order: [7] },
-  { type: "pyraminx", order: [3] },
-  { type: "skewb" },
-  { type: "square1" },
-  { type: "clock" },
-  { type: "megaminx", order: [3] },
-  { type: "megaminx", order: [2] },
-  { type: "megaminx", order: [5] },
-];
-
-const OPTS_MISC: PuzzleOptions[][] = [
-  [{ type: "rubik", order: [3] }],
-  [2, 3, 4].map(n => ({ type: "rubik", order: [n] })),
-  [2, 3, 4, 5].map(n => ({ type: "rubik", order: [n] })),
-  [2, 3, 4, 5, 6].map(n => ({ type: "rubik", order: [n] })),
-  [2, 3, 4, 5, 6, 7].map(n => ({ type: "rubik", order: [n] })),
-  [2, 3, 4].map(n => ({ type: "rubik", order: [n] })),
-  [2, 3, 4, 5].map(n => ({ type: "rubik", order: [n] })),
-  [2, 3, 4, 5, 6].map(n => ({ type: "rubik", order: [n] })),
-  [2, 3, 4, 5, 6, 7].map(n => ({ type: "rubik", order: [n] })),
-  [{ type: "square2" }],
-  [{ type: "bicube" }],
-  [{ type: "gear" }],
-  [{ type: "redi" }],
-  [{ type: "ivy" }],
-  [{ type: "pyraminxCrystal" }],
-  [{ type: "helicopter" }],
-  [{ type: "rubik", order: [8] }],
-  [{ type: "rubik", order: [9] }],
-  [{ type: "rubik", order: [10] }],
-  [{ type: "rubik", order: [11] }],
-  [{ type: "pyraminx", order: [4] }],
-  [{ type: "rubik", order: [2, 2, 3] }],
-  [{ type: "rubik", order: [3, 3, 2] }],
-  [{ type: "rubik", order: [3, 3, 4] }],
-  [{ type: "rubik", order: [3, 3, 6] }],
-  [{ type: "supersquare1" }],
-  [{ type: "fto" }],
-  [{ type: "rubik", order: [3, 3, 1] }],
-  [{ type: "rubik", order: [3, 1, 3] }],
-];
-
-const MODES = [R222, R333, R444, R555, R666, R777, PYRA, SKWB, SQR1, CLCK, MEGA, KILO, GIGA];
-
-export const options: Map<string, PuzzleOptions | PuzzleOptions[]> = new Map<
-  string,
-  PuzzleOptions | PuzzleOptions[]
->();
-
-for (let i = 0, maxi = MODES.length; i < maxi; i += 1) {
-  OPTS[i].view = "2d";
-
-  for (let j = 0, maxj = MODES[i].length; j < maxj; j += 1) {
-    options.set(MODES[i][j], OPTS[i]);
-  }
-}
-
-for (let i = 0, maxi = MISC.length; i < maxi; i += 1) {
-  OPTS_MISC[i].forEach(opt => (opt.view = "2d"));
-
-  if (typeof MISC[i] === "string") {
-    options.set(MISC[i] as string, OPTS_MISC[i]);
-  } else {
-    (MISC[i] as string[]).forEach(m => options.set(m, OPTS_MISC[i]));
-  }
-}
+export const TYPE_MAP: Record<Scrambler, PuzzleType> = {
+  "222so": "rubik",
+  "333": "rubik",
+  "333fm": "rubik",
+  "333ni": "rubik",
+  r3ni: "rubik",
+  "333oh": "rubik",
+  "444bld": "rubik",
+  "444wca": "rubik",
+  "555wca": "rubik",
+  "555bld": "rubik",
+  "666wca": "rubik",
+  "777wca": "rubik",
+  clkwca: "clock",
+  mgmp: "megaminx",
+  pyrso: "pyraminx",
+  skbso: "skewb",
+  sqrs: "square1",
+};

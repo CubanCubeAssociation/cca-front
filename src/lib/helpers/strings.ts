@@ -336,3 +336,34 @@ export function randomCSSId() {
 export function copyToClipboard(s: string) {
   return navigator.clipboard.writeText(s);
 }
+
+export function getShortName(name: string, level: 1 | 2 = 1) {
+  let parts: string[] = (name || "").trim().split(" ");
+  let res: string[][] = [[]];
+
+  for (let i = 0, maxi = parts.length; i < maxi; i += 1) {
+    res[res.length - 1].push(parts[i]);
+
+    if (parts[i][0] === parts[i][0].toUpperCase()) {
+      res.push([]);
+    }
+  }
+
+  res.pop();
+
+  if (level === 2) {
+    return [
+      ...res[0],
+      res
+        .slice(1)
+        .map(r => r[r.length - 1][0])
+        .join("."),
+    ].join(" ");
+  }
+
+  if (res.length < 3) {
+    return res.reduce((acc, e) => [...acc, ...e], []).join(" ");
+  }
+
+  return [...res[0], ...res[res.length - 2], ...res[res.length - 1]].join(" ");
+}

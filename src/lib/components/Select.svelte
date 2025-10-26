@@ -10,24 +10,41 @@
   import { tick } from "svelte";
   import { twMerge } from "tailwind-merge";
 
-  let cl = "";
-  export { cl as class };
-  export let type: "color" | "select" = "select";
-  export let placeholder: string = "";
-  export let value: any;
-  export let items: readonly any[];
-  export let onChange: (item: any, pos: number, arr: readonly any[]) => any = (item: any) => item;
-  export let label: (item: any, pos: number) => string = (item: any) => (item || "").toString();
-  export let transform: (item: any, pos?: number, arr?: readonly any[]) => any = (item: any) =>
-    item.value;
-  export let hasIcon: null | ((v: any) => any) = null;
-  export let disabled: (item: any, pos: number, arr?: readonly any[]) => boolean = () => false;
-  export const placement: Side | Placement = "bottom";
-  export const useFixed = false;
-  export let iconComponent: any = WcaCategory;
-  export let iconKey = "icon";
-  export let iconSize: string | null = "1.2rem";
-  export let preferIcon = false;
+  interface SelectProps {
+    type?: "color" | "select";
+    placeholder?: string;
+    value?: any;
+    items?: readonly any[];
+    onChange?: (item: any, pos: number, arr: readonly any[]) => any;
+    label?: (item: any, pos: number) => string;
+    transform?: (item: any, pos?: number, arr?: readonly any[]) => any;
+    hasIcon?: null | ((v: any) => any);
+    disabled?: (item: any, pos: number, arr?: readonly any[]) => boolean;
+    placement?: Side;
+    iconComponent?: any;
+    iconKey?: string;
+    iconSize?: string | null;
+    preferIcon?: boolean;
+    class?: string;
+  }
+
+  let {
+    class: cl,
+    type = "select",
+    placeholder = "",
+    value = $bindable(),
+    items = [],
+    onChange = item => item,
+    label = item => (item || "").toString(),
+    transform = (item: any) => item.value,
+    hasIcon = null,
+    disabled = () => false,
+    placement = "bottom",
+    iconComponent = WcaCategory,
+    iconKey = "icon",
+    iconSize = "1.2rem",
+    preferIcon = false,
+  }: SelectProps = $props();
 
   const selectID = "s" + weakRandomUUID().replace(/-/g, "");
 
@@ -148,11 +165,14 @@
 
 <svelte:window on:keydown|capture={handleKeydown} onclickcapture={handleCaptureClick} />
 
-<details class="dropdown" bind:this={dropdown} data-dropdown={selectID}>
+<details
+  class={twMerge("dropdown", `dropdown-${placement}`)}
+  bind:this={dropdown}
+  data-dropdown={selectID}
+>
   <summary
     class={twMerge("btn border border-base-content/20 !rounded-lg gap-1 h-9 py-1 px-2 ", cl)}
     onclick={handleClick}
-    {...$$restProps}
   >
     {#if items.some((a, p, i) => transform(a, p, i) === value)}
       {@const item = items.reduce(
@@ -161,16 +181,12 @@
       )}
 
       {#if hasIcon && iconComponent}
+        {@const Icon = iconComponent}
         {@const iconProps = Object.assign(iconSize ? { size: iconSize } : {}, {
           [iconKey]: hasIcon(item[0]),
         })}
 
-        <svelte:component
-          this={iconComponent}
-          {...iconProps}
-          class="pointer-events-none"
-          noFallback
-        />
+        <Icon {...iconProps} class="pointer-events-none" noFallback />
       {/if}
 
       {#if !(hasIcon && iconComponent && preferIcon)}
@@ -193,7 +209,7 @@
   <ul
     id={selectID}
     bind:this={list}
-    class="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm
+    class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm
       max-h-80 overflow-x-hidden overflow-y-auto grid"
   >
     {#each items as item, pos}
@@ -218,10 +234,11 @@
           })}
         >
           {#if hasIcon && iconComponent}
+            {@const Icon = iconComponent}
             {@const iconProps = Object.assign(iconSize ? { size: iconSize } : {}, {
               [iconKey]: hasIcon(item),
             })}
-            <svelte:component this={iconComponent} {...iconProps} noFallback />
+            <Icon {...iconProps} noFallback />
           {/if}
 
           {#if label(item, pos).trim()}

@@ -10,10 +10,9 @@
   import { DOMAIN } from "@helpers/API";
   import Solve from "./Solve.svelte";
   import { preventDefault } from "@helpers/object";
-  import { pGenerateCubeBundle } from "@helpers/cube-draw";
-  import { Puzzle } from "@classes/puzzle/puzzle";
-  import { options } from "@constants";
   import PuzzleImage from "./PuzzleImage.svelte";
+  import { genImages } from "cubicdb-module";
+  import { ORDER_MAP, TYPE_MAP } from "@constants";
 
   interface SolveInfoProps {
     round: ROUND;
@@ -62,13 +61,7 @@
   }
 
   async function getImage(s: string) {
-    let op = options.get(round.category.scrambler);
-
-    if (!Array.isArray(op)) {
-      return pGenerateCubeBundle([Puzzle.fromSequence(s, op || { type: "rubik" })]);
-    }
-
-    return [""];
+    return genImages([{ scramble: s, type: round.category.scrambler }]);
   }
 
   $effect(() => (reconstruction = solve.reconstruction) as any);
@@ -176,12 +169,12 @@
     <button
       class="btn btn-secondary btn-soft"
       onclick={preventDefault(() => {
-        let opts = options.get(round.category.scrambler) || { type: "rubik", order: 3 };
-        let opt = Array.isArray(opts) ? opts[0] : opts;
+        let order = ORDER_MAP[round.category.scrambler];
+        let type = TYPE_MAP[round.category.scrambler];
 
         open(
-          `https://cubicdb.netlify.app/reconstructions?puzzle=${opt.type}&order=${
-            opt.order || -1
+          `https://cubicdb.netlify.app/reconstructions?puzzle=${type}&order=${
+            order
           }&scramble=${encodeURI((scramble || "").replace(/ /g, "_"))}&reconstruction=${encodeURI(
             solve.reconstruction.replace(/ /g, "_")
           )}`,

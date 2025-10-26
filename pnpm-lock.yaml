@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      cubicdb-module:
+        specifier: ^1.0.6
+        version: 1.0.6
       echarts:
         specifier: 5.5.0
         version: 5.5.0
@@ -996,6 +999,9 @@ packages:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
     engines: {node: '>=4'}
     hasBin: true
+
+  cubicdb-module@1.0.6:
+    resolution: {integrity: sha512-wptxN6E2CK+Nt/8+Lg3tlud0sFVc2gRDgJ7Z42keikJYo0pIXrRzq/tmRoPrs71mam02OHpcVqEY+FwqD8u8EQ==}
 
   daisyui@5.0.20:
     resolution: {integrity: sha512-dR9WSFsWG5bHuwTnlcuh/MZFROaddxB+BFxB06EgDy7gU5M7eY/RsY1g/DwCMwgnqS7dEsjxNd/x+WgC3N+TDQ==}
@@ -2745,6 +2751,8 @@ snapshots:
       which: 2.0.2
 
   cssesc@3.0.0: {}
+
+  cubicdb-module@1.0.6: {}
 
   daisyui@5.0.20: {}
 

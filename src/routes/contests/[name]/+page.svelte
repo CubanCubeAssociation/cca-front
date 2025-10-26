@@ -47,9 +47,7 @@
   import { twMerge } from "tailwind-merge";
   import { NotificationService } from "@stores/notification.service";
   import PuzzleImage from "@components/PuzzleImage.svelte";
-  import { Puzzle } from "@classes/puzzle/puzzle";
-  import { options } from "@constants";
-  import { pGenerateCubeBundle } from "@helpers/cube-draw";
+  import { genImages } from "cubicdb-module";
 
   const size = "1.4rem";
   const spanClass = "flex items-center gap-1 text-green-200!";
@@ -104,26 +102,13 @@
 
   function generateImages() {
     let cats = contest.categories;
-    const puzzles: Puzzle[] = [];
-
-    for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
-      const op = options.get(cats[i].category.scrambler || "333") || { type: "rubik" };
-      if (!Array.isArray(op)) {
-        op.rounded = true;
-        puzzles.push(...cats[i].scrambles.map((scr: any) => Puzzle.fromSequence(scr, op)));
-      }
-    }
 
     images.length = 0;
 
-    const imgs = pGenerateCubeBundle(puzzles);
-
     for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
-      const scrs = cats[i].scrambles.length;
-      images.push([]);
-      for (let j = 0, maxj = scrs; j < maxj; j += 1) {
-        images[i].push(imgs.shift() || "");
-      }
+      let ct = cats[i];
+      let scr = ct.scrambles;
+      images.push(genImages(scr.map(s => ({ scramble: s, type: ct.category.scrambler }))));
     }
   }
 

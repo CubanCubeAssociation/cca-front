@@ -1,5 +1,3 @@
-import type { Piece } from "@classes/puzzle/Piece";
-import type { Sticker } from "@classes/puzzle/Sticker";
 import type { Vector3D } from "@classes/vector3d";
 import type { CubeMode } from "@constants";
 
@@ -112,7 +110,7 @@ export type Scrambler =
   | "333"
   | "333fm"
   | "333ni"
-  | "333mbf"
+  | "r3ni"
   | "333oh"
   | "444bld"
   | "444wca"
@@ -256,7 +254,7 @@ export interface PROVINCE {
 }
 
 export type Alignment = "start" | "end";
-export type Side = "top" | "right" | "bottom" | "left";
+export type Side = "top" | "right" | "bottom" | "left" | "start" | "end";
 export type AlignedPlacement = `${Side}-${Alignment}`;
 export type Placement = Side | AlignedPlacement;
 
@@ -427,24 +425,6 @@ export interface IPuzzleOrder {
   c: number;
 }
 
-export interface RoundCornersParams {
-  p: PuzzleInterface;
-  rd?: number | ((...args: any[]) => any);
-  scale?: number;
-  ppc?: number;
-  fn?: (st: Sticker) => boolean;
-  justScale?: boolean;
-  calcPath?: boolean;
-}
-
-export interface ToMoveResult {
-  pieces: Piece[];
-  ang: number;
-  center?: Vector3D;
-  dir?: Vector3D;
-  animationTime?: number;
-}
-
 export type EasingFunction = "ease" | "linear" | "easeIn" | "fastEasing" | "easeOut" | "easeInOut";
 
 export interface SequenceResult {
@@ -456,25 +436,6 @@ export interface SequenceResult {
 }
 
 export type AnyCallback = (...args: any[]) => any;
-
-export interface PiecesToMove {
-  pieces: Piece[];
-  u: Vector3D;
-  ang: number;
-  center?: Vector3D;
-  easing?: EasingFunction;
-}
-
-export interface PuzzleInterface {
-  palette: any;
-  move: (m: any) => any;
-  getImage?: () => string;
-  roundParams: Omit<RoundCornersParams, "p">;
-  isRounded?: boolean;
-  faceVectors?: Vector3D[];
-  pieces?: Piece[];
-  raw?: any;
-}
 
 export interface VectorLike3D {
   x: number;

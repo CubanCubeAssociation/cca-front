@@ -2,6 +2,7 @@
   import { ShieldIcon, ShieldUserIcon } from "lucide-svelte";
   import Avatar from "./Avatar.svelte";
   import { SITEMAP } from "@helpers/routing";
+  import { getShortName } from "@helpers/strings";
 
   interface IUserFieldProps {
     user: any;
@@ -27,24 +28,7 @@
     if (fullName) {
       displayName = user.name;
     } else {
-      let parts: string[] = (user.name || "").trim().split(" ");
-      let res: string[][] = [[]];
-
-      for (let i = 0, maxi = parts.length; i < maxi; i += 1) {
-        res[res.length - 1].push(parts[i]);
-
-        if (parts[i][0] === parts[i][0].toUpperCase()) {
-          res.push([]);
-        }
-      }
-
-      res.pop();
-
-      if (res.length < 3) {
-        displayName = res.reduce((acc, e) => [...acc, ...e], []).join(" ");
-      } else {
-        displayName = [...res[0], ...res[res.length - 2], ...res[res.length - 1]].join(" ");
-      }
+      displayName = getShortName(user.name);
     }
   });
 </script>

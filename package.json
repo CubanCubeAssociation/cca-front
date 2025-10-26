@@ -1,6 +1,6 @@
 {
   "name": "cca-front-svk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
@@ -48,6 +48,7 @@
     "vitest": "2.0.4"
   },
   "dependencies": {
+    "cubicdb-module": "^1.0.6",
     "echarts": "5.5.0",
     "ky": "0.33.3",
     "lucide-svelte": "0.537.0",

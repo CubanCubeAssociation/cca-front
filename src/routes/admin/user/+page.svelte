@@ -62,6 +62,7 @@
   let pg = new Paginator([], 10);
 
   function addUser() {
+    console.log(SITEMAP.admin.user + "/new");
     goto(SITEMAP.admin.user + "/new");
   }
 

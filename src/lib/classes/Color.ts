@@ -244,13 +244,4 @@ export class Color {
   toArray(): number[] {
     return this.color.map(e => e);
   }
-
-  static GREEN = new Color(63, 197, 69); // "rgb(63, 197, 69)";
-  static RED = new Color(229, 57, 53); // "rgb(229,57,53)";
-  static BLUE = new Color(25, 118, 210); // "rgb(25,118,210)";
-  static ORANGE = new Color(225, 167, 38); // "rgb(255,167,38)";
-  static YELLOW = new Color(255, 235, 59); // "rgb(255,235,59)";
-  static WHITE = new Color(230, 230, 230); // "rgb(230, 230, 230)";
-  static BLACK = new Color(0, 0, 0); // "rgb(0, 0, 0)";
-  static GRAY = new Color(80, 80, 80); // "rgb(80, 80, 80)";
 }

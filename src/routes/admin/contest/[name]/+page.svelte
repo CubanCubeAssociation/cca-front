@@ -23,7 +23,7 @@
     updateContest,
   } from "@helpers/API";
 
-  import { getIndicatorColor, getStatus, randomUUID } from "@helpers/strings";
+  import { getIndicatorColor, getShortName, getStatus, randomUUID } from "@helpers/strings";
   import {
     clone,
     createEmptyContest,
@@ -65,18 +65,14 @@
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import UserField from "@components/UserField.svelte";
   import Modal from "@components/Modal.svelte";
-  import { sTimer } from "@helpers/timer";
+  import { sTimer, stringToMillis } from "@helpers/timer";
   import { page } from "$app/state";
   import ResultView from "@components/ResultView.svelte";
   import { twMerge } from "tailwind-merge";
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import { SITEMAP } from "@helpers/routing";
   import PuzzleImage from "@components/PuzzleImage.svelte";
-  import { Puzzle } from "@classes/puzzle/puzzle";
-  import { options } from "@constants";
-  import { pGenerateCubeBundle } from "@helpers/cube-draw";
-  import { setSeed } from "$lib/cstimer/lib/mathlib";
-  import { getScramble } from "$lib/cstimer/scramble";
+  import { getScrambles, genImages, setSeed } from "cubicdb-module";
 
   let name = $state("");
   const notification = NotificationService.getInstance();
@@ -278,6 +274,9 @@
 
         if (contestants.length === 0) continue;
         round = createEmptyRound();
+        round.category = categories[j].category;
+        round.round = r;
+        round.contestant = contestants[0].user;
         addResult = true;
         return;
       }
@@ -301,6 +300,8 @@
   }
 
   function getContestants(catId: string, roundNum: number): CONTESTANT[] {
+    if (catId === "") return [];
+
     const limit = getRoundLimits(
       contest.categories.filter(ct => ct.category.id === catId)[0].rounds
     )[roundNum - 1];
@@ -349,6 +350,8 @@
       rnds = [...contest.rounds, clone(round)];
     }
 
+    console.log(rnds);
+
     updateRoundInfo(rnds, contest.categories);
     addResult = false;
   }
@@ -362,26 +365,13 @@
 
   function generateImages() {
     let cats = contest.categories;
-    let puzzles: Puzzle[] = [];
-
-    for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
-      let op = options.get(cats[i].category.scrambler || "333") || { type: "rubik" };
-      if (!Array.isArray(op)) {
-        op.rounded = true;
-        puzzles.push(...cats[i].scrambles.map(scr => Puzzle.fromSequence(scr, op)));
-      }
-    }
-
-    let imgs = pGenerateCubeBundle(puzzles);
 
     images.length = 0;
 
     for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
-      let scrs = cats[i].scrambles.length;
-      images.push([]);
-      for (let j = 0, maxj = scrs; j < maxj; j += 1) {
-        images[i].push(imgs.shift() || "");
-      }
+      let ct = cats[i];
+      let scr = ct.scrambles;
+      images.push(genImages(scr.map(s => ({ scramble: s, type: ct.category.scrambler }))));
     }
   }
 
@@ -447,28 +437,34 @@
 
   function updateSingleImage(p1: number, p2: number) {
     let scr = contest.categories[p1].scrambles[p2];
-    let opt = options.get(contest.categories[p1].category.scrambler) || { type: "rubik" };
-
-    if (!Array.isArray(opt)) {
-      let res = pGenerateCubeBundle([Puzzle.fromSequence(scr, opt)]);
-      images[p1][p2] = res[0];
-    }
+    images[p1][p2] = genImages([
+      { scramble: scr, type: contest.categories[p1].category.scrambler },
+    ])[0];
   }
 
-  async function genScrambles() {
+  function genScrambles() {
     setSeed(contest.gen, contest.seed);
+
     const cats = contest.categories;
+
+    images.length = 0;
 
     for (let i = 0, maxi = cats.length; i < maxi; i += 1) {
       const cct = cats[i];
       const ct = cct.category;
-
       cct.scrambles.length = 0;
-
+      let imgs: string[] = [];
       for (let j = 0, maxj = cct.amount * cct.rounds; j < maxj; j += 1) {
-        cct.scrambles.push(getScramble(ct.scrambler, ct.length || 0, -1));
+        let scr = getScrambles([
+          { scrambler: ct.scrambler, length: ct.length || 0, prob: -1, image: true },
+        ]);
+        cct.scrambles.push(...scr.map(s => s.scramble));
+        imgs.push(...scr.reduce((acc, s) => [...acc, ...(s.image || [])], [] as string[]));
       }
+      images.push(imgs);
     }
+
+    console.log($state.snapshot(images));
 
     notification.addNotification({
       header: "Mezclas generadas",
@@ -807,6 +803,7 @@
                     {#each contest.contestants as c, p (c.user.username)}
                       <tr>
                         <td>
+                          {p + 1}
                           <input
                             bind:checked={checked[p]}
                             type="checkbox"
@@ -1089,13 +1086,32 @@
         {round.contestant.name}
       </button>
     {:else}
+      {@const availableCategories = contest.categories.filter(ct =>
+        getRounds(ct.category).some(r => getContestants(ct.category.id, r).length > 0)
+      )}
+
       <Select
         bind:value={round.category}
-        items={contest.categories}
+        items={availableCategories}
         hasIcon={ct => ct.category.scrambler}
         transform={ct => ct.category}
         label={ct => ct.category.name}
-        onChange={() => (round.round = 1)}
+        onChange={() => {
+          let availableRounds = getRounds(round.category).map(r =>
+            getContestants(round.category.id, r)
+          );
+
+          for (let i = 0, maxi = availableRounds.length; i < maxi; i++) {
+            let ar = availableRounds[i];
+            if (ar.length > 0) {
+              round.round = i + 1;
+              round.contestant = ar[0].user;
+              return;
+            }
+          }
+
+          round.round = 1;
+        }}
       />
 
       <Select
@@ -1106,11 +1122,13 @@
       />
 
       {#if getContestants(round.category.id, round.round).length > 0}
+        {@const availableContestants = getContestants(round.category.id, round.round)}
         <Select
           bind:value={round.contestant}
-          items={getContestants(round.category.id, round.round)}
+          items={availableContestants}
           transform={cnt => cnt.user}
-          label={cnt => cnt.user.name}
+          label={cnt => getShortName(cnt.user.name, 2)}
+          placement="end"
         />
       {/if}
     {/if}
@@ -1135,6 +1153,10 @@
                   type="text"
                   bind:value={s.time}
                   class={twMerge("input w-[4rem]", getInputColor(s))}
+                  oninput={() => {
+                    let v = stringToMillis(s.time);
+                    s.timeMillis = v === Infinity ? s.time : v.toString();
+                  }}
                 />
                 {sTimer(s, true, true)}
               </div>

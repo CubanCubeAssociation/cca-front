@@ -1,4 +1,3 @@
-import type { BezierCurve } from "@classes/puzzle/BezierCurve";
 import { BACK, CENTER, DOWN, FRONT, LEFT, RIGHT, UP, Vector3D } from "@classes/vector3d";
 import { EPS } from "@constants";
 
@@ -21,11 +20,11 @@ export function isFinite(n: number): boolean {
 }
 
 export function rotateBundle(
-  points: (Vector3D | BezierCurve)[],
+  points: Vector3D[],
   O: Vector3D,
   u: Vector3D,
   ang: number
-): (Vector3D | BezierCurve)[] {
+): Vector3D[] {
   return points.map(p => p.rotate(O, u, ang));
 }
 
