@@ -1,26 +1,43 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+  import { get } from "svelte/store";
   import { userStore } from "@stores/user";
   import { browser } from "$app/environment";
   import { getOwnUser, redirectToLogin } from "@helpers/API";
 
-  const debug = true;
+  const debug = false;
 
-  (async () => {
+  let loading = true;
+
+  onMount(async () => {
     if (!browser) return;
-    if (!$userStore) {
-      if (debug) console.log("Trying to get user");
 
-      if (await getOwnUser()) {
-        return;
-      }
+    const currentUser = get(userStore);
 
-      if (debug) console.log("Redirecting");
+    if (debug) console.log("Checking user...", currentUser);
 
+    if (currentUser) {
+      loading = false;
+      return;
+    }
+
+    const user = await getOwnUser();
+
+    if (user) {
+      if (debug) console.log("User fetched:", user);
+      userStore.set(user);
+      loading = false;
+    } else {
+      if (debug) console.log("Redirecting to login");
       redirectToLogin();
     }
-  })();
+  });
 </script>
 
-{#if $userStore}
+{#if loading}
+  <div class="flex justify-center items-center h-screen">
+    <p>Cargando...</p>
+  </div>
+{:else if $userStore}
   <slot />
 {/if}

@@ -71,17 +71,17 @@ function removeID(obj: any) {
   return res;
 }
 
-export function fromModel(obj: any, model: MODEL) {
+export function fromModel(obj: any, model: MODEL, otherConstrains?: string[]) {
   const REFS: { [k: string]: string[] } = {
     CATEGORY: [],
     USER: [],
     CONTEST: ["contestants:contestant", "rounds:round", "categories:category"],
     round: ["$category", "$contestant"],
     contestant: ["$user", "categories"],
-    category: ["$category"],
+    category: ["$category", "-amount"],
   };
 
-  const RMODEL = REFS[model];
+  const RMODEL = [...REFS[model], ...(otherConstrains || [])];
 
   const res: any = {};
   const entries = Object.entries(obj);
@@ -89,7 +89,8 @@ export function fromModel(obj: any, model: MODEL) {
   for (let i = 0, maxi = entries.length; i < maxi; i += 1) {
     const { 0: k, 1: v } = entries[i] as any;
 
-    const md = RMODEL.find(md => isModel(md, k));
+    if (RMODEL.includes("-" + k)) continue;
+    const md = RMODEL.find(rm => isModel(rm, k));
 
     if (md) {
       const p = md.startsWith("$") ? md.slice(1) : md.split(":");
@@ -169,7 +170,7 @@ export function createEmptyCategory(scr?: Scrambler): CATEGORY {
   };
 }
 
-export function createEmptyUser(): USER {
+export function createEmptyUser(u?: Partial<USER>): USER {
   return {
     id: "",
     name: "",
@@ -187,6 +188,7 @@ export function createEmptyUser(): USER {
     elo: 0,
     sor: Infinity,
     permissions: [],
+    ...u,
   };
 }
 
@@ -221,7 +223,7 @@ export function createEmptyRound(): ROUND {
   };
 }
 
-export function createEmptyContest(): CONTEST {
+export function createEmptyContest(cnt?: Partial<CONTEST>): CONTEST {
   return {
     categories: [],
     contestants: [],
@@ -237,6 +239,7 @@ export function createEmptyContest(): CONTEST {
     visible: false,
     seed: "",
     gen: 0,
+    ...cnt,
   };
 }
 

@@ -25,6 +25,7 @@
   import { NotificationService } from "@stores/notification.service";
   import type { USER } from "@interfaces";
   import { SITEMAP } from "@helpers/routing";
+  import { catchAPIError } from "@helpers/error";
 
   const WIDTH = 200;
   const HEIGHT = WIDTH;
@@ -33,7 +34,18 @@
   let id = $state("");
   let loading = $state(false);
   let error = $state(false);
-  let user = $state(createEmptyUser());
+  let user = $state(
+    createEmptyUser({
+      name: "Isaac Vega Rodríguez",
+      email: "isaacvega19961@gmail.com",
+      password: "Caballo25.",
+      ci: "96011822908",
+      sex: "M",
+      username: "2212VEGA01",
+      province: "Ciego de Ávila",
+      municipality: "Ciego de Ávila",
+    })
+  );
 
   let municipios: string[] = $state([]);
   let showModal = $state(false);
@@ -80,11 +92,11 @@
     if (id != "new") {
       updateUser(user)
         .then(u => handleUserChange(u, "Actualizado"))
-        .catch(err => console.log("ERROR: ", err));
+        .catch(catchAPIError);
     } else {
       createUser(user)
         .then(u => handleUserChange(u, "Creado"))
-        .catch(err => console.log("ERROR: ", err));
+        .catch(catchAPIError);
     }
   }
 
@@ -427,7 +439,7 @@
             label={e => e.nombre}
             bind:value={user.province}
             onChange={updateMunicipalities}
-            placement="right-start"
+            placement="right"
           />
         </fieldset>
 
@@ -438,7 +450,7 @@
             transform={e => e}
             label={e => e}
             bind:value={user.municipality}
-            placement="right-start"
+            placement="right"
           />
         </fieldset>
 
@@ -449,7 +461,7 @@
             transform={e => e.value}
             label={e => e.name}
             bind:value={user.role}
-            placement="right-start"
+            placement="right"
           />
         </fieldset>
 

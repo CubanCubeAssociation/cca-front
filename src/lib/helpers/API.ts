@@ -106,7 +106,12 @@ export function clearSessionStores() {
 
 export function redirectToLogin() {
   clearSessionStores();
-  goto(encodeURI(`${SITEMAP.login}?returnTo=${getReturnURL(page.url)}`));
+  let sp = new URLSearchParams({
+    returnTo: getReturnURL(page.url),
+  });
+
+  console.log(`Going to: <${`${SITEMAP.login}?${sp.toString()}`}>`);
+  goto(`${SITEMAP.login}?${sp.toString()}`, { replaceState: true });
 }
 
 export function redirectOnUnauthorized(err: { response: Response }) {

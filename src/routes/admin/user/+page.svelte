@@ -136,7 +136,7 @@
 
         <SearchUser multiple={false} user={handleSearch} type="dropdown" />
 
-        <button class="btn btn-accent" onclick={updateAllProfiles}>Actualizar perfiles</button>
+        <!-- <button class="btn btn-accent" onclick={updateAllProfiles}>Actualizar perfiles</button> -->
       </div>
 
       {#if users.length > 0}
