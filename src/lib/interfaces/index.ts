@@ -226,6 +226,7 @@ export interface RANKING {
   };
   contest: string;
   time: number;
+  tag: TAG;
 }
 
 export interface PAGINATION_RESULT {

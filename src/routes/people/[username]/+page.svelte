@@ -609,11 +609,18 @@
 
                 <tbody>
                   {#each userRanks as rank}
+                    {@const categoryLink = `${SITEMAP.ranking}?category=${rank.category?.name || "3x3x3"}`}
                     <tr>
                       <td>
                         <div class="flex items-center">
-                          <WcaCategory icon={rank.category.scrambler} size="1.5rem" />
-                          {rank.category?.name}
+                          <a href={categoryLink} class="flex items-center flex-wrap hover:text-primary">
+                            <WcaCategory
+                              icon={rank.category.scrambler}
+                              size="1.5rem"
+                              class="cursor-pointer"
+                            />
+                            {rank.category?.name}
+                          </a>
                         </div>
                       </td>
                       <td class={rank.single.rank === 1 ? " text-red-500!" : ""}>

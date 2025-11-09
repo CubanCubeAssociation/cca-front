@@ -11,12 +11,12 @@
   import { UsersIcon } from "lucide-svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import Select from "@components/Select.svelte";
-  import { PROVINCIAS } from "@constants";
+  import { PAGINATOR_LEN, PROVINCIAS } from "@constants";
 
   const provinces = $state([{ id: "0", nombre: "Todas las Provincias" }, ...PROVINCIAS]);
   let error = $state(false);
   let loading = $state(false);
-  let pg = $state(new Paginator([], 10));
+  let pg = $state(new Paginator([], PAGINATOR_LEN));
   let users = $state([] as USER[]);
   let sortBy = $state([
     { label: "Por nombre", key: "name" },

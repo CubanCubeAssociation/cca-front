@@ -13,6 +13,7 @@
   import WcaCategory from "@components/wca/WCACategory.svelte";
   import Indicator from "@components/Indicator.svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
+  import { PAGINATOR_LEN } from "@constants";
 
   const DEFAULT_RESULT = {
     limit: 0,
@@ -24,7 +25,7 @@
 
   let loading = $state(false);
   let error = $state(false);
-  let pg = $state(new Paginator([], 10));
+  let pg = $state(new Paginator([], PAGINATOR_LEN));
   let contestResults: CONTEST_RESULT = $state(DEFAULT_RESULT);
 
   function refreshContestData() {

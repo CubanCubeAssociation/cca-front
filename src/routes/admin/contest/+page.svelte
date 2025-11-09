@@ -15,12 +15,13 @@
   import Indicator from "@components/Indicator.svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import { SITEMAP } from "@helpers/routing";
+  import { PAGINATOR_LEN } from "@constants";
 
   const notification = NotificationService.getInstance();
   const ADD = "Añadir competencia";
 
   let contests: CONTEST[] = $state([]);
-  let pg = $state(new Paginator([], 10));
+  let pg = $state(new Paginator([], PAGINATOR_LEN));
   let loading = $state(false);
   let error = $state(false);
 

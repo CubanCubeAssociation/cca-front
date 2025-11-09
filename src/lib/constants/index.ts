@@ -488,3 +488,5 @@ export const TYPE_MAP: Record<Scrambler, PuzzleType> = {
   skbso: "skewb",
   sqrs: "square1",
 };
+
+export const PAGINATOR_LEN = 15;

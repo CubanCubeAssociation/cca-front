@@ -337,98 +337,100 @@
         </ul>
       </div>
 
-      <input type="radio" name="contestTab" class="tab text-primary" aria-label="Competidores" />
-      <div class="tab-content border-base-300 bg-base-100 pt-4">
-        <div class="actions flex gap-2 flex-wrap justify-center my-2">
-          {#if canInscribe}
-            <button
-              class="btn btn-primary relative"
-              onclick={() => {
-                showInscriptionModal = true;
-                isModifying = false;
-                selectedUser = $userStore?.id || "";
-              }}
-            >
-              <UserPlusIcon size="1.2rem" /> Inscribirme
-              {#if inscribeLoading}
-                <div class="w-full h-full bg-primary absolute rounded-md grid p-1">
-                  <span class="loading loading-spinner loading-lg mx-auto mb-4"></span>
-                </div>
-              {/if}
-            </button>
-          {/if}
+      {#if contest.contestants.length > 0}
+        <input type="radio" name="contestTab" class="tab text-primary" aria-label="Competidores" />
+        <div class="tab-content border-base-300 bg-base-100 pt-4">
+          <div class="actions flex gap-2 flex-wrap justify-center my-2">
+            {#if canInscribe}
+              <button
+                class="btn btn-primary relative"
+                onclick={() => {
+                  showInscriptionModal = true;
+                  isModifying = false;
+                  selectedUser = $userStore?.id || "";
+                }}
+              >
+                <UserPlusIcon size="1.2rem" /> Inscribirme
+                {#if inscribeLoading}
+                  <div class="w-full h-full bg-primary absolute rounded-md grid p-1">
+                    <span class="loading loading-spinner loading-lg mx-auto mb-4"></span>
+                  </div>
+                {/if}
+              </button>
+            {/if}
 
-          {#if canUnsubscribe}
-            <button
-              class="btn btn-warning relative"
-              onclick={() => (showRemoveContestUserModal = true)}
-            >
-              <UserMinusIcon size="1.2rem" /> Darme de baja
+            {#if canUnsubscribe}
+              <button
+                class="btn btn-warning relative"
+                onclick={() => (showRemoveContestUserModal = true)}
+              >
+                <UserMinusIcon size="1.2rem" /> Darme de baja
 
-              {#if unsubscribeLoading}
-                <div class="w-full h-full bg-warning absolute rounded-md grid p-1">
-                  <span class="loading loading-spinner loading-lg mx-auto mb-4"></span>
-                </div>
-              {/if}
-            </button>
-          {/if}
-        </div>
+                {#if unsubscribeLoading}
+                  <div class="w-full h-full bg-warning absolute rounded-md grid p-1">
+                    <span class="loading loading-spinner loading-lg mx-auto mb-4"></span>
+                  </div>
+                {/if}
+              </button>
+            {/if}
+          </div>
 
-        <div
-          class="overflow-x-auto w-full rounded-lg border border-base-content/10
+          <div
+            class="overflow-x-auto w-full rounded-lg border border-base-content/10
           max-h-[30rem] overflow-y-auto
         "
-        >
-          <table class="table table-zebra">
-            <thead>
-              <tr>
-                <th class="max-md:pr-0 max-md:pl-2">#</th>
-                <th class="max-md:px-2">Nombre</th>
-                <th class="min-w-[10rem]">Categorías</th>
-                {#if $userStore && contest.contestants.some(ct => ct.user.id === $userStore.id)}
-                  <th></th>
-                {/if}
-              </tr>
-            </thead>
-
-            <tbody>
-              {#each contest.contestants as c, p (c.user.username)}
+          >
+            <table class="table table-zebra">
+              <thead>
                 <tr>
-                  <td class="max-md:pr-0 max-md:pl-2">{p + 1}</td>
-                  <td class="max-md:px-2"><UserField user={c.user} link /></td>
-                  <td>
-                    <div class="w-full flex flex-wrap gap-2">
-                      {#each c.categories as ct}
-                        <div class="tooltip" data-tip={ct.name}>
-                          <WcaCategory icon={ct.scrambler} size="1.2rem" />
-                        </div>
-                      {/each}
-                    </div>
-                  </td>
-
-                  {#if contest.status === "inscription" && ($userStore?.id === c.user.id || canModifyCategories)}
-                    <td class="w-[2rem]">
-                      <button
-                        onclick={() => {
-                          selectedCategories = contest.categories.map(ct =>
-                            c.categories.some(ct1 => ct1.id === ct.category.id)
-                          );
-                          isModifying = true;
-                          showInscriptionModal = true;
-                          selectedUser = c.user.id;
-                        }}
-                        class="btn btn-primary p-2 btn-soft"
-                      >
-                        <PencilIcon size="1rem" /> Editar
-                      </button>
-                    </td>
+                  <th class="max-md:pr-0 max-md:pl-2">#</th>
+                  <th class="max-md:px-2">Nombre</th>
+                  <th class="min-w-[10rem]">Categorías</th>
+                  {#if $userStore && contest.contestants.some(ct => ct.user.id === $userStore.id)}
+                    <th></th>
                   {/if}
                 </tr>
-              {/each}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {#each contest.contestants as c, p (c.user.username)}
+                  <tr>
+                    <td class="max-md:pr-0 max-md:pl-2">{p + 1}</td>
+                    <td class="max-md:px-2"><UserField user={c.user} link /></td>
+                    <td>
+                      <div class="w-full flex flex-wrap gap-2">
+                        {#each c.categories as ct}
+                          <div class="tooltip" data-tip={ct.name}>
+                            <WcaCategory icon={ct.scrambler} size="1.2rem" />
+                          </div>
+                        {/each}
+                      </div>
+                    </td>
+
+                    {#if contest.status === "inscription" && ($userStore?.id === c.user.id || canModifyCategories)}
+                      <td class="w-[2rem]">
+                        <button
+                          onclick={() => {
+                            selectedCategories = contest.categories.map(ct =>
+                              c.categories.some(ct1 => ct1.id === ct.category.id)
+                            );
+                            isModifying = true;
+                            showInscriptionModal = true;
+                            selectedUser = c.user.id;
+                          }}
+                          class="btn btn-primary p-2 btn-soft"
+                        >
+                          <PencilIcon size="1rem" /> Editar
+                        </button>
+                      </td>
+                    {/if}
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      {/if}
 
       {#if (contest.status === "finished" || canSeeScrambles) && contest.categories.reduce((acc, e) => acc + e.scrambles.length, 0) > 0}
         <input type="radio" name="contestTab" class="tab text-primary" aria-label="Mezclas" />

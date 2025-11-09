@@ -15,7 +15,8 @@
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
-  import { PROVINCIAS } from "@constants";
+  import { PAGINATOR_LEN, PROVINCIAS } from "@constants";
+  import Solve from "@components/Solve.svelte";
 
   const debug = false;
   const provinces = $state([{ id: "0", nombre: "Todas las Provincias" }, ...PROVINCIAS]);
@@ -32,7 +33,7 @@
 
   let loading = $state(false);
   let error = $state(false);
-  let pg = $state(new Paginator([], 20));
+  let pg = $state(new Paginator([], PAGINATOR_LEN));
   let categories: CATEGORY[] = $state([]);
   let category: CATEGORY | null = $state(null);
   let type: "Single" | "Media" = $state("Single");
@@ -254,14 +255,11 @@
                     })}
                     target="_blank"
                   >
-                    <span
-                      class={twMerge(
-                        "flex items-center justify-between gap-2",
-                        type === "Single" ? "text-green-400" : "text-purple-400"
-                      )}
-                    >
-                      {r.time ? timer(r.time, true, true) : "DNF"}
-                    </span>
+                    <Solve
+                      time={r.time}
+                      tag={r.tag}
+                      class={type === "Single" ? "text-green-400" : "text-purple-400"}
+                    />
                   </a>
                 </td>
                 <td>

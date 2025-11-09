@@ -14,6 +14,7 @@
   import { PlusIcon, UsersIcon } from "lucide-svelte";
   import LoadingLayout from "@components/LoadingLayout.svelte";
   import { SITEMAP } from "@helpers/routing";
+  import { PAGINATOR_LEN } from "@constants";
 
   const notification = NotificationService.getInstance();
   const HEADER = "Usuarios";
@@ -59,7 +60,7 @@
       show: true,
     },
   ];
-  let pg = new Paginator([], 10);
+  let pg = new Paginator([], PAGINATOR_LEN);
 
   function addUser() {
     console.log(SITEMAP.admin.user + "/new");

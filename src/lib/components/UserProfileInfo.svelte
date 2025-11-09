@@ -95,7 +95,7 @@
           label={e => e.nombre}
           bind:value={tempUser.province}
           onChange={updateMunicipalities}
-          placement="right-start"
+          placement="right"
           class="w-full"
         />
       </fieldset>
@@ -107,7 +107,7 @@
           transform={e => e}
           label={e => e}
           bind:value={tempUser.municipality}
-          placement="right-start"
+          placement="right"
           class="w-full"
         />
       </fieldset>
